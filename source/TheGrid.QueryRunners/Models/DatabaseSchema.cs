@@ -1,0 +1,15 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace TheGrid.QueryRunners.Models
+{
+    public class DatabaseSchema
+    {
+        public string DatabaseName { get; set; } = string.Empty;
+
+        public IReadOnlyCollection<DatabaseObject>? DatabaseObjects { get; set; }
+    }
+}

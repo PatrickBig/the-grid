@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>f842def4-b7a6-4f02-b454-b2a2cd44f846</UserSecretsId>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Asp.Versioning.Http" Version="6.4.0" />
+    <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="6.4.0" />
+    <PackageReference Include="Mapster" Version="7.3.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+	<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.4">
+		<PrivateAssets>all</PrivateAssets>
+		<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	</PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TheGrid.Postgres\TheGrid.Postgres.csproj" />
+    <ProjectReference Include="..\TheGrid.Services\TheGrid.Services.csproj" />
+    <ProjectReference Include="..\TheGrid.Shared\TheGrid.Shared.csproj" />
+  </ItemGroup>
+
+</Project>
