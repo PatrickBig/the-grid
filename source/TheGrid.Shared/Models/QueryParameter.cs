@@ -4,10 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TheGrid.QueryRunners
+namespace TheGrid.Shared.Models
 {
-    public interface IQueryRunner
+    public class QueryParameter
     {
-        public Task<QueryResults> RunQueryAsync();
+        public string Name { get; set; }
+
+
     }
 }
