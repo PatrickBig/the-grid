@@ -1,4 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿// <copyright file="CreateOrganizationRequest.cs" company="BiglerNet">
+// Copyright (c) BiglerNet. All rights reserved.
+// </copyright>
+
+using System.ComponentModel.DataAnnotations;
 
 namespace TheGrid.Shared.Models
 {
@@ -7,6 +11,7 @@ namespace TheGrid.Shared.Models
     /// </summary>
     public class CreateOrganizationRequest
     {
+#pragma warning disable SA1629 // Documentation text should end with a period
         /// <summary>
         /// The short name / slug of the organization.
         /// </summary>
@@ -15,6 +20,7 @@ namespace TheGrid.Shared.Models
         /// </remarks>
         /// <example>default</example>
         [Required]
+#pragma warning restore SA1629 // Documentation text should end with a period
         [StringLength(20, MinimumLength = 3)]
         [RegularExpression("^[a-z]{1}[a-z0-9\\-]+$", ErrorMessage = "Must contain only lowercase a-z, numbers, and hyphens (-). Must start with a letter.")]
         public string Slug { get; set; } = string.Empty;

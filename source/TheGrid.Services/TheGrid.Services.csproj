@@ -7,16 +7,14 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.3" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.3">
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
-		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.3" />
+		<PackageReference Include="LazyCache.AspNetCore" Version="2.4.0" />
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\TheGrid.Data\TheGrid.Data.csproj" />
 		<ProjectReference Include="..\TheGrid.Models\TheGrid.Models.csproj" />
+		<ProjectReference Include="..\TheGrid.Postgres\TheGrid.Postgres.csproj" />
+		<ProjectReference Include="..\TheGrid.QueryRunners\TheGrid.QueryRunners.csproj" />
 	</ItemGroup>
 
 </Project>

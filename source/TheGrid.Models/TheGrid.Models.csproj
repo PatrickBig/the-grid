@@ -13,4 +13,8 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\TheGrid.Shared\TheGrid.Shared.csproj" />
+  </ItemGroup>
+
 </Project>

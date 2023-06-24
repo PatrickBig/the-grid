@@ -1,11 +1,18 @@
-﻿using TheGrid.Models;
+﻿// <copyright file="Organization.cs" company="BiglerNet">
+// Copyright (c) BiglerNet. All rights reserved.
+// </copyright>
+
+using TheGrid.Models;
 
 namespace TheGrid.QueryRunners.Models
 {
+    /// <summary>
+    /// Top level resource object.
+    /// </summary>
     public class Organization
     {
         /// <summary>
-        /// The unique ID of the data source.
+        /// The unique ID of the organization.
         /// </summary>
         public int Id { get; set; }
 

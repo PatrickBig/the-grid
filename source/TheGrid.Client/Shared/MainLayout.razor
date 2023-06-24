@@ -1,0 +1,21 @@
+﻿@inherits LayoutComponentBase
+<CascadingValue Value="_userOrganization">
+    <Layout>
+        <LayoutHeader>
+            <TopNavigationBar />
+        </LayoutHeader>
+
+        <LayoutContent Padding="Padding.Is4.OnX">
+            @Body
+        </LayoutContent>
+    </Layout>
+</CascadingValue>
+
+@code {
+    private UserOrganization _userOrganization = new()
+    {
+        Name = "My Organization",
+        OrganizationId = 1,
+        Slug = "default",
+    };
+}

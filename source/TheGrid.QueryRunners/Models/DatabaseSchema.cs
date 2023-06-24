@@ -1,15 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// <copyright file="DatabaseSchema.cs" company="BiglerNet">
+// Copyright (c) BiglerNet. All rights reserved.
+// </copyright>
 
 namespace TheGrid.QueryRunners.Models
 {
+    /// <summary>
+    /// Database schema.
+    /// </summary>
     public class DatabaseSchema
     {
+        /// <summary>
+        /// Name of the database.
+        /// </summary>
         public string DatabaseName { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Collection of the database objects in the target database.
+        /// </summary>
         public IReadOnlyCollection<DatabaseObject>? DatabaseObjects { get; set; }
     }
 }

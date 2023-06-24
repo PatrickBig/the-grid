@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Blazorise.Animate" Version="1.2.3" />
+    <PackageReference Include="Blazorise.Bootstrap5" Version="1.2.3" />
+    <PackageReference Include="Blazorise.Charts" Version="1.2.3" />
+    <PackageReference Include="Blazorise.Components" Version="1.2.3" />
+    <PackageReference Include="Blazorise.DataGrid" Version="1.2.3" />
+    <PackageReference Include="Blazorise.Icons.FontAwesome" Version="1.2.3" />
+    <PackageReference Include="Blazorise.LoadingIndicator" Version="1.2.3" />
+    <PackageReference Include="Blazorise.Snackbar" Version="1.2.3" />
+    <PackageReference Include="Blazorise.SpinKit" Version="1.2.3" />
+    <PackageReference Include="Blazorise.TreeView" Version="1.2.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.15" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.15" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="2.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TheGrid.Shared\TheGrid.Shared.csproj" />
+  </ItemGroup>
+
+</Project>

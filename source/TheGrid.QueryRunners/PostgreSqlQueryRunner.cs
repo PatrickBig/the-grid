@@ -1,23 +1,77 @@
-﻿using Npgsql;
+﻿// <copyright file="PostgreSqlQueryRunner.cs" company="BiglerNet">
+// Copyright (c) BiglerNet. All rights reserved.
+// </copyright>
+
+using Npgsql;
+using System.ComponentModel.DataAnnotations;
+using TheGrid.QueryRunners.Attributes;
 using TheGrid.QueryRunners.Models;
+using TheGrid.Shared.Models;
 
 namespace TheGrid.QueryRunners
 {
+    /// <summary>
+    /// Executes PostgreSQL queries.
+    /// </summary>
+    [Display(Name = "PostgreSQL")]
+    [QueryRunnerParameter(RelationalDatabaseProperties.ConnectionString, QueryRunnerParameterType.SingleLineText, Required = true, HelpText = "Standard [PostgreSQL connection string](https://www.connectionstrings.com/postgresql/).")]
+    [QueryRunnerParameter(RelationalDatabaseProperties.DatabaseName, QueryRunnerParameterType.SingleLineText, Required = true)]
+    [QueryRunnerParameter("Username", QueryRunnerParameterType.SingleLineText, Required = true)]
+    [QueryRunnerParameter("Password", QueryRunnerParameterType.ProtectedText, Required = true)]
     public class PostgreSqlQueryRunner : QueryRunnerBase, ISchemaDiscovery
     {
-        public PostgreSqlQueryRunner(ConnectionConfiguration configuration)
-            : base(configuration)
+        private const string _username = "Username";
+        private const string _password = "Password";
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PostgreSqlQueryRunner"/> class.
+        /// </summary>
+        /// <param name="runnerParameters">Properties used to initate the connection to the PostgreSQL database.</param>
+        public PostgreSqlQueryRunner(Dictionary<string, string> runnerParameters)
+            : base(runnerParameters)
         {
         }
 
-        public override string Name => "PostgreSQL";
-
-        public override async Task<QueryResults> RunQueryAsync(string query, Dictionary<string, object>? parameters, CancellationToken cancellationToken = default)
+        /// <inheritdoc/>
+        public async Task<DatabaseSchema> GetSchemaAsync(CancellationToken cancellationToken = default)
         {
-            await using var connection = GetConnection();
+            await using var connection = GetConnection(RunnerParameters);
             await connection.OpenAsync(cancellationToken);
 
-            var results = new QueryResults();
+            var results = new DatabaseSchema();
+
+            // List all the tables
+            var tables = new List<DatabaseObject>();
+
+            await using var command = new NpgsqlCommand("SELECT schemaname, tablename FROM pg_catalog.pg_tables WHERE schemaname NOT IN ('pg_catalog', 'information_schema')", connection);
+
+            await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+
+            // Iterate over the results
+            while (await reader.ReadAsync(cancellationToken))
+            {
+                var schemaName = reader.GetString(0);
+                var tableName = reader.GetString(1);
+                var obj = new DatabaseObject
+                {
+                    Name = schemaName + "." + tableName,
+                };
+
+                tables.Add(obj);
+            }
+
+            results.DatabaseObjects = tables;
+
+            return results;
+        }
+
+        /// <inheritdoc/>
+        public override async Task<QueryResult> RunQueryAsync(string query, Dictionary<string, object>? queryParameters, CancellationToken cancellationToken = default)
+        {
+            await using var connection = GetConnection(RunnerParameters);
+            await connection.OpenAsync(cancellationToken);
+
+            var results = new QueryResult();
             bool firstReadDone = false;
 
             var rows = new List<Dictionary<string, object>>();
@@ -25,9 +79,9 @@ namespace TheGrid.QueryRunners
             // Run the query
             await using (var command = new NpgsqlCommand(query, connection))
             {
-                if (parameters != null && parameters.Any())
+                if (queryParameters != null && queryParameters.Any())
                 {
-                    foreach (var parameter in parameters)
+                    foreach (var parameter in queryParameters)
                     {
                         command.Parameters.AddWithValue(parameter.Key, parameter.Value);
                     }
@@ -60,51 +114,6 @@ namespace TheGrid.QueryRunners
             return results;
         }
 
-        public override Task TestConnectionAsync(CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<DatabaseSchema> GetSchemaAsync(CancellationToken cancellationToken = default)
-        {
-            await using var connection = GetConnection();
-            await connection.OpenAsync(cancellationToken);
-
-            var results = new DatabaseSchema();
-
-            // List all the tables
-            var tables = new List<DatabaseObject>();
-
-            await using var command = new NpgsqlCommand("select schemaname, tablename from pg_catalog.pg_tables", connection);
-
-            await using var reader = await command.ExecuteReaderAsync(cancellationToken);
-
-            // Iterate over the results
-            while (await reader.ReadAsync(cancellationToken))
-            {
-                var schemaName = reader.GetString(0);
-                var tableName = reader.GetString(1);
-                var obj = new DatabaseObject
-                {
-                    Name = schemaName + "." + tableName,
-                };
-
-                tables.Add(obj);
-            }
-
-            results.DatabaseObjects = tables;
-
-            return results;
-        }
-
-        public override AboutQueryRunner GetConnectionProperties()
-        {
-            return new AboutQueryRunner
-            {
-                Name = "Postgresql"
-            };
-        }
-
         private static IEnumerable<string> GetColumns(NpgsqlDataReader reader)
         {
             var columns = new List<string>();
@@ -118,25 +127,25 @@ namespace TheGrid.QueryRunners
             return columns;
         }
 
-        private NpgsqlConnection GetConnection()
+        private static NpgsqlConnection GetConnection(Dictionary<string, string> properties)
         {
             // Attempt to build a connection based on the information
-            var builder = new NpgsqlConnectionStringBuilder(Configuration.ConnectionString);
+            var builder = new NpgsqlConnectionStringBuilder(properties[RelationalDatabaseProperties.ConnectionString]);
 
             // If there is a username or password, try using those to update the settings.
-            if (Configuration.Properties.TryGetValue("Password", out string? password))
+            if (properties.TryGetValue(_password, out string? password))
             {
                 builder.Password = password;
             }
 
-            if (Configuration.Properties.TryGetValue("Username", out string? username))
+            if (properties.TryGetValue(_username, out string? username))
             {
                 builder.Username = username;
             }
 
-            if (Configuration.Properties.TryGetValue("Database", out string? database))
+            if (properties.TryGetValue(RelationalDatabaseProperties.DatabaseName, out string? databaseName))
             {
-                builder.Database = database;
+                builder.Database = databaseName;
             }
 
             return new NpgsqlConnection(builder.ConnectionString);

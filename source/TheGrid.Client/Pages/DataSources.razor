@@ -1,0 +1,39 @@
+﻿@page "/DataSources"
+@using TheGrid.Shared.Models;
+
+<Card>
+    <CardHeader>
+        <CardTitle>Data Sources</CardTitle>
+    </CardHeader>
+    <CardBody>
+        <DataGrid 
+            TItem="DataSourceListItem"
+            Data="_dataSources"
+            TotalItems="_totalItems"
+            Narrow
+            Striped
+            Responsive>
+            <DataGridColumns>
+                <DataGridColumn Field="@nameof(DataSourceListItem.Name)" Caption="Name" />
+                <DataGridColumn Field="@nameof(DataSourceListItem.QueryRunnerId)" Caption="Runner" />
+            </DataGridColumns>
+        </DataGrid>
+    </CardBody>
+</Card>
+
+@code {
+    private IEnumerable<DataSourceListItem> _dataSources;
+    private int? _totalItems;
+
+    [CascadingParameter]
+    private UserOrganization UserOrganization { get; set; }
+
+    [Inject]
+    private HttpClient HttpClient { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var response = await HttpClient.GetAsync("/api/v1/DataSources?organization=" + UserOrganization.Slug);
+        _dataSources = await response.Content.ReadFromJsonAsync<IEnumerable<DataSourceListItem>>();
+    }
+}

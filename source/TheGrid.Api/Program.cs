@@ -1,12 +1,20 @@
+// <copyright file="Program.cs" company="BiglerNet">
+// Copyright (c) BiglerNet. All rights reserved.
+// </copyright>
+
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using System.Text.Json.Serialization;
+using TheGrid.Api;
 using TheGrid.Services;
+
+MappingConfiguration.Setup();
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+builder.WebHost.ConfigureKestrel(options => options.AddServerHeader = false);
 
+// Add services to the container.
 builder.Services.AddApiVersioning(o =>
 {
     o.ReportApiVersions = true;
@@ -17,16 +25,17 @@ builder.Services.AddApiVersioning(o =>
     o.SubstituteApiVersionInUrl = true;
 });
 
-
-
-builder.Services.AddControllers().AddJsonOptions(options =>
+builder.Services.AddControllers(o =>
+{
+    o.SuppressAsyncSuffixInActionNames = false;
+}).AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     options.JsonSerializerOptions.AllowTrailingCommas = true;
     options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
     options.JsonSerializerOptions.PropertyNamingPolicy = null;
 });
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -36,24 +45,20 @@ builder.Services.AddSwaggerGen(options =>
     var sharedDocumentationXml = $"TheGrid.Shared.xml";
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, sharedDocumentationXml));
 });
-builder.Services.AddDbContext<TheGridContext>(options =>
-{
-    var connectionString = builder.Configuration.GetConnectionString("Default");
-    if (builder.Configuration.GetValue<string>("DatabaseProvider") == "Postgres")
-    {
-        options.UseNpgsql(connectionString);
-    }
-    else
-    {
-        throw new NotSupportedException("An unsupported database provider was specified.");
-    }
-});
+builder.Services.AddTheGridDbContext(builder.Configuration);
+
+builder.Services.AddTransient<QueryRunnerDiscoveryService>();
+builder.Services.AddTransient<IQueryExecutor, QueryExecutor>();
+builder.Services.AddLazyCache();
 
 var app = builder.Build();
+
+app.UseStaticFiles();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    app.UseWebAssemblyDebugging();
     app.UseSwagger();
     app.UseSwaggerUI(o =>
     {
@@ -65,13 +70,21 @@ if (app.Environment.IsDevelopment())
             var name = description.GroupName.ToUpperInvariant();
             o.SwaggerEndpoint(url, name);
         }
+
+        o.InjectStylesheet("swagger.css");
     });
 }
+
+app.UseForwardedHeaders();
+app.UseStaticFiles();
+app.UseRouting();
+app.UseBlazorFrameworkFiles();
 
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapFallbackToFile("index.html");
 
 app.Run();

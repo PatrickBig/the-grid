@@ -1,20 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// <copyright file="IQueryRunner.cs" company="BiglerNet">
+// Copyright (c) BiglerNet. All rights reserved.
+// </copyright>
+
 using TheGrid.QueryRunners.Models;
+using TheGrid.Shared.Models;
 
 namespace TheGrid.QueryRunners
 {
+    /// <summary>
+    /// Can run a query.
+    /// </summary>
     public interface IQueryRunner
     {
-        public string Name { get; }
-
-        public Task<QueryResults> RunQueryAsync(string query, Dictionary<string, object> parameters, CancellationToken cancellationToken = default);
-
-        public Task TestConnectionAsync(CancellationToken cancellationToken = default);
-
-        public AboutQueryRunner GetConnectionProperties();
+        /// <summary>
+        /// Runs a query using the runner properties.
+        /// </summary>
+        /// <param name="query">Query to be executed.</param>
+        /// <param name="queryParameters">Parameters to pass to the query.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Results from the execution of the query.</returns>
+        public Task<QueryResult> RunQueryAsync(string query, Dictionary<string, object>? queryParameters, CancellationToken cancellationToken = default);
     }
 }
