@@ -1,0 +1,37 @@
+﻿@page "/Queries"
+
+<DataGrid TItem="QueryListItem"
+    Data="_items"
+    TotalItems="_totalItems"
+    ReadData="OnReadDataAsync"
+    Narrow
+    Striped
+    Sortable
+    Filterable>
+    <DataGridColumns>
+        <DataGridColumn Field="@(nameof(QueryListItem.Name))" Caption="Name" />
+        <DataGridColumn Field="@(nameof(QueryListItem.Description))" Caption="Description" Sortable="false" Filterable="false" />
+        <DataGridColumn Field="@(nameof(QueryListItem.ResultState))" Caption="State">
+            <FilterTemplate>
+                <Select TValue="QueryResultState?" SelectedValue="@(context.SearchValue as QueryResultState?)" SelectedValueChanged="@(e => context.TriggerFilterChange(e))">
+                    <SelectItem Value="((QueryResultState?)null)"></SelectItem>
+                    <SelectItem Value="QueryResultState.None">None</SelectItem>
+                    <SelectItem Value="QueryResultState.InProgress">In Progress</SelectItem>
+                    <SelectItem Value="QueryResultState.Complete">Complete</SelectItem>
+                    <SelectItem Value="QueryResultState.Error">Error</SelectItem>
+                </Select>
+            </FilterTemplate>
+        </DataGridColumn>
+        <DataGridDateColumn Field="@(nameof(QueryListItem.ResultsRefreshed))" Caption="Last Refresh">
+            <FilterTemplate>
+                <DateEdit TValue="DateTime?" Date="@(context.SearchValue as DateTime?)" DateChanged="@(e => context.TriggerFilterChange(e))" />
+            </FilterTemplate>
+        </DataGridDateColumn>
+        <DataGridColumn Field="@(nameof(QueryListItem.Tags))" Caption="Tags">
+            <DisplayTemplate>
+                <TagsDisplay Tags="@context?.Tags" />
+            </DisplayTemplate>
+        </DataGridColumn>
+    </DataGridColumns>
+</DataGrid>
+

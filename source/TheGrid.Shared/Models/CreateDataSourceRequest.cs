@@ -1,4 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿// <copyright file="CreateDataSourceRequest.cs" company="BiglerNet">
+// Copyright (c) BiglerNet. All rights reserved.
+// </copyright>
+
+using System.ComponentModel.DataAnnotations;
 
 namespace TheGrid.Shared.Models
 {
@@ -7,24 +11,14 @@ namespace TheGrid.Shared.Models
     /// </summary>
     public class CreateDataSourceRequest
     {
+#pragma warning disable SA1629 // Documentation text should end with a period
         /// <summary>
-        /// The name of the connection string.
+        /// Name of the data source.
         /// </summary>
+        /// <example>My Connection</example>
         [Required]
         [StringLength(100)]
         public string Name { get; set; } = string.Empty;
-
-        /// <summary>
-        /// The connection string used by the query runner to execute.
-        /// </summary>
-        /// <remarks>
-        /// This value is encrypted in the database when stored.
-        /// Most query runners support storing the password and username in <see cref="Properties"/>.
-        /// If your query runner supports this functionality it is recommended to not include a user/pass in the connection string.
-        /// </remarks>
-        [Required]
-        [StringLength(300)]
-        public string ConnectionString { get; set; } = string.Empty;
 
         /// <summary>
         /// The ID of the organization the data source is being created for.
@@ -36,11 +30,21 @@ namespace TheGrid.Shared.Models
         public int OrganizationId { get; set; }
 
         /// <summary>
-        /// Extra properties passed to the query runner. This often contains username, password, etc.
+        /// ID of the query runner used to execute queries. This must be a valid runner ID.
+        /// </summary>
+        /// <example>TheGrid.QueryRunners.PostgreSqlQueryRunner</example>
+        [Required]
+        [StringLength(250)]
+        public string QueryRunnerId { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Extra properties passed to the query runner used to connect. This often contains connection strings, username, password, etc.
         /// </summary>
         /// <remarks>
         /// This value is encrypted in the database when stored.
         /// </remarks>
-        public Dictionary<string, string> Properties { get; set; } = new();
+        /// <example>{ "Connection String": "Host=localhost;Port=5432;", "Database Name": "TestDb", "Username": "testuser", "Password": "mypassword123" }</example>
+        public Dictionary<string, string> ExecutorParameters { get; set; } = new();
+#pragma warning restore SA1629 // Documentation text should end with a period
     }
 }

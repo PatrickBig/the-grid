@@ -1,0 +1,13 @@
+﻿@foreach (var tag in Tags)
+{
+    <Badge Color="Color.Info" Margin="Margin.Is1.OnX.FromEnd">@tag</Badge>
+}
+
+@code {
+    [Parameter]
+    [EditorRequired]
+    public IEnumerable<string> Tags { get; set; } = Enumerable.Empty<string>();
+
+    [Parameter]
+    public int? MaxTagsToDisplay { get; set; }
+}

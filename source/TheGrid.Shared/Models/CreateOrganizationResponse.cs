@@ -1,4 +1,8 @@
-﻿namespace TheGrid.Shared.Models
+﻿// <copyright file="CreateOrganizationResponse.cs" company="BiglerNet">
+// Copyright (c) BiglerNet. All rights reserved.
+// </copyright>
+
+namespace TheGrid.Shared.Models
 {
     /// <summary>
     /// Response message after creating a new organization.

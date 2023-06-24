@@ -1,29 +1,37 @@
+// <copyright file="PostgreSqlQueryRunnerTests.cs" company="BiglerNet">
+// Copyright (c) BiglerNet. All rights reserved.
+// </copyright>
+
 using Npgsql;
-using TheGrid.QueryRunners.Models;
 using Xunit.Abstractions;
 
 namespace TheGrid.QueryRunners.Integration.Tests
 {
+    /// <summary>
+    /// Tests for the <see cref="PostgreSqlQueryRunner"/>.
+    /// </summary>
     public class PostgreSqlQueryRunnerTests : IDisposable
     {
+        private static readonly string _connectionString = "Host=localhost;Username=postgres;Password=test;Database=test";
         private readonly ITestOutputHelper _output;
-        private static string _connectionString = "Host=localhost;Username=postgres;Password=test;Database=test";
-        private string _testTableName;
         private readonly NpgsqlConnection _connection;
-        private readonly Random _random = new Random();
+        private readonly Random _random = new();
+        private readonly string _testTableName;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PostgreSqlQueryRunnerTests"/> class.
+        /// </summary>
+        /// <param name="output">Test output helper.</param>
         public PostgreSqlQueryRunnerTests(ITestOutputHelper output)
         {
-            this._output = output;
+            _output = output;
 
             // Create test tables
             _connection = new NpgsqlConnection(_connectionString);
-            
+
             _connection.Open();
 
             _testTableName = "test_table_" + _random.Next(0, 10000).ToString();
-
-
 
             var command = new NpgsqlCommand(GetCreateTestTableQuery(_testTableName), _connection);
 
@@ -33,45 +41,24 @@ namespace TheGrid.QueryRunners.Integration.Tests
             CreateTestRows(10);
         }
 
-        private static string GetCreateTestTableQuery(string tableName)
-        {
-            return "create table " + tableName + " (" +
-                "id SERIAL PRIMARY KEY, " +
-                "char_field CHAR(4)," +
-                "varchar_field VARCHAR(20)," +
-                "bool_field BOOL," +
-                "timestamp_field TIMESTAMP," +
-                "date_field DATE" +
-                ");";
-        }
-
-        private void CreateTestRows(int numberOfRows = 10)
-        {
-            for (int i = 0; i < numberOfRows; i++)
-            {
-                var statement = "insert into " + _testTableName + " (char_field, varchar_field, bool_field, timestamp_field, date_field ) VALUES (" +
-                    $"'{_random.Next(1000, 9999)}'," +
-                    $"'test_{_random.Next(0, 999999)}'," +
-                    $"{Convert.ToBoolean(_random.Next(0, 1))}," +
-                    "CURRENT_TIMESTAMP," +
-                    $"'2022-{_random.Next(1, 12)}-{_random.Next(1, 28)}')";
-                var command = new NpgsqlCommand(statement, _connection);
-
-                command.ExecuteNonQuery();
-            }
-        }
-
+        /// <inheritdoc/>
         public void Dispose()
         {
-            if (_connection != null )
+            if (_connection != null)
             {
                 var dropTableCommand = new NpgsqlCommand("drop table " + _testTableName, _connection);
                 dropTableCommand.ExecuteNonQuery();
                 _connection.Close();
                 _connection.Dispose();
             }
+
+            GC.SuppressFinalize(this);
         }
 
+        /// <summary>
+        /// Tests that the result set has column information available.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
         public async Task RunQueryAsync_Has_Columns_Test()
         {
@@ -93,6 +80,10 @@ namespace TheGrid.QueryRunners.Integration.Tests
             }
         }
 
+        /// <summary>
+        /// Tests that a query can return rows.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
         public async Task RunQueryAsync_Has_Rows_Test()
         {
@@ -114,6 +105,10 @@ namespace TheGrid.QueryRunners.Integration.Tests
             }
         }
 
+        /// <summary>
+        /// Tests the ability to run a query with parameters.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
         public async Task RunQueryAsync_Params_Test()
         {
@@ -142,6 +137,10 @@ namespace TheGrid.QueryRunners.Integration.Tests
             }
         }
 
+        /// <summary>
+        /// Tests the ability to discover schema using the query runner.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
         public async Task DiscoverSchema_Test()
         {
@@ -159,16 +158,32 @@ namespace TheGrid.QueryRunners.Integration.Tests
                     _output.WriteLine("Table: " + obj.Name);
                 }
             }
-
         }
 
-        private static ConnectionConfiguration GetConnectionConfiguration()
+        private static string GetCreateTestTableQuery(string tableName)
         {
-            return new ConnectionConfiguration
-            {
-                ConnectionString = "Host=localhost",
-                Properties = new Dictionary<string, string>
+            return "create table " + tableName + " (" +
+                "id SERIAL PRIMARY KEY, " +
+                "char_field CHAR(4)," +
+                "varchar_field VARCHAR(20)," +
+                "bool_field BOOL," +
+                "timestamp_field TIMESTAMP," +
+                "date_field DATE" +
+                ");";
+        }
+
+        private static Dictionary<string, string> GetConnectionConfiguration()
+        {
+            return new Dictionary<string, string>
                 {
+                    {
+                        RelationalDatabaseProperties.ConnectionString,
+                        "Host=localhost"
+                    },
+                    {
+                        RelationalDatabaseProperties.DatabaseName,
+                        "test"
+                    },
                     {
                         "Username",
                         "postgres"
@@ -177,12 +192,23 @@ namespace TheGrid.QueryRunners.Integration.Tests
                         "Password",
                         "test"
                     },
-                    {
-                        "Database",
-                        "test"
-                    },
-                }
-            };
+                };
+        }
+
+        private void CreateTestRows(int numberOfRows = 10)
+        {
+            for (int i = 0; i < numberOfRows; i++)
+            {
+                var statement = "insert into " + _testTableName + " (char_field, varchar_field, bool_field, timestamp_field, date_field ) VALUES (" +
+                    $"'{_random.Next(1000, 9999)}'," +
+                    $"'test_{_random.Next(0, 999999)}'," +
+                    $"{Convert.ToBoolean(_random.Next(0, 1))}," +
+                    "CURRENT_TIMESTAMP," +
+                    $"'{DateTime.Today.Year}-{_random.Next(1, 12)}-{_random.Next(1, 28)}')";
+                var command = new NpgsqlCommand(statement, _connection);
+
+                command.ExecuteNonQuery();
+            }
         }
     }
 }

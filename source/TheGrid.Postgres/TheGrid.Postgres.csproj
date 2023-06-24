@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TheGrid.Services\TheGrid.Services.csproj" />
+    <ProjectReference Include="..\TheGrid.Data\TheGrid.Data.csproj" />
   </ItemGroup>
 
 </Project>
