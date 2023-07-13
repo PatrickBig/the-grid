@@ -70,11 +70,43 @@ namespace TheGrid.Api.Controllers
         /// <param name="queryId"></param>
         /// <param name="cancellation"></param>
         /// <returns></returns>
-        /// <exception cref="NotImplementedException"></exception>
         [HttpGet("{queryId:int}")]
-        public async Task<ActionResult> GetQueryAsync([FromRoute][Required][Range(1, int.MaxValue)] int queryId, CancellationToken cancellation = default)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult> GetQueryAsync([FromRoute][Required][Range(1, int.MaxValue)] int queryId, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var item = await _db.Queries.Select(q => new GetQueryResponse
+            {
+                Command = q.Command,
+                DataSourceId = q.DataSourceId,
+                DataSourceName = q.DataSource.Name ?? string.Empty,
+                Name = q.Name,
+                Description = q.Description,
+                Id = q.Id,
+                LastErrorMessage = q.LastErrorMessage,
+                Parameters = q.Parameters,
+                ResultsRefreshed = q.ResultsRefreshed,
+                ResultState = q.ResultState,
+                Tags = q.Tags,
+            })
+                .SingleOrDefaultAsync(q => q.Id == queryId, cancellationToken);
+
+            return Ok(item);
+        }
+
+        [HttpPut("{queryId:int}")]
+        public async Task<ActionResult> UpdateQueryAsync([FromRoute][Required][Range(1, int.MaxValue)] int queryId, [FromBody] UpdateQueryRequest request, CancellationToken cancellationToken = default)
+        {
+            var originalQuery = await _db.Queries.SingleAsync(q => q.Id == queryId, cancellationToken);
+
+            originalQuery.Command = request.Command;
+            originalQuery.Name = request.Name;
+            originalQuery.Description = request.Description;
+            originalQuery.Parameters = request.Parameters;
+            originalQuery.DataSourceId = request.DataSourceId;
+
+            await _db.SaveChangesAsync(cancellationToken);
+
+            return Ok();
         }
 
         /// <summary>

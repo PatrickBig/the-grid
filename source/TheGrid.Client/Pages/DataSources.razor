@@ -1,35 +1,30 @@
 ﻿@page "/DataSources"
 @using TheGrid.Shared.Models;
 
-<Card>
-    <CardHeader>
-        <CardTitle>Data Sources</CardTitle>
-    </CardHeader>
-    <CardBody>
-        <DataGrid 
-            TItem="DataSourceListItem"
-            Data="_dataSources"
-            TotalItems="_totalItems"
-            Narrow
-            Striped
-            Responsive>
-            <DataGridColumns>
-                <DataGridColumn Field="@nameof(DataSourceListItem.Name)" Caption="Name" />
-                <DataGridColumn Field="@nameof(DataSourceListItem.QueryRunnerId)" Caption="Runner" />
-            </DataGridColumns>
-        </DataGrid>
-    </CardBody>
-</Card>
+<PageTitle>Data Sources</PageTitle>
+
+<RadzenText TextStyle="TextStyle.DisplayH2">Data Sources</RadzenText>
+
+<RadzenDataGrid
+    Data="_dataSources"
+    Count="_totalItems"
+    TItem="DataSourceListItem"
+    AllowSorting>
+    <Columns>
+        <RadzenDataGridColumn TItem="DataSourceListItem" Property="@nameof(DataSourceListItem.Name)" Title="Name" />
+        <RadzenDataGridColumn TItem="DataSourceListItem" Property="@nameof(DataSourceListItem.QueryRunnerId)" Title="Runner" />
+    </Columns>
+</RadzenDataGrid>
 
 @code {
-    private IEnumerable<DataSourceListItem> _dataSources;
-    private int? _totalItems;
+    private IEnumerable<DataSourceListItem> _dataSources = Enumerable.Empty<DataSourceListItem>();
+    private int _totalItems;
 
     [CascadingParameter]
     private UserOrganization UserOrganization { get; set; }
 
     [Inject]
-    private HttpClient HttpClient { get; set; }
+    private HttpClient HttpClient { get; set; } = null!;
 
     protected override async Task OnInitializedAsync()
     {

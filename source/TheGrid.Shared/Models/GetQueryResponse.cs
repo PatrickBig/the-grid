@@ -1,29 +1,15 @@
-﻿// <copyright file="Query.cs" company="BiglerNet">
-// Copyright (c) BiglerNet. All rights reserved.
-// </copyright>
-
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using TheGrid.Shared;
+using System.Linq;
+using System.Text;
+using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 using TheGrid.Shared.Attributes;
-using TheGrid.Shared.Models;
 
-namespace TheGrid.Models
+namespace TheGrid.Shared.Models
 {
-    //public enum QueryResultState
-    //{
-    //    None,
-
-    //    InProgress,
-
-    //    Complete,
-
-    //    Error,
-    //}
-
-    /// <summary>
-    /// Represents a query that can be executed by a runner.
-    /// </summary>
-    public class Query : ITags
+    public class GetQueryResponse
     {
         /// <summary>
         /// Unique ID for the query.
@@ -37,9 +23,9 @@ namespace TheGrid.Models
         public int DataSourceId { get; set; }
 
         /// <summary>
-        /// Navigation property to the <see cref="DataSource"/> that owns this query.
+        /// Name of the data source.
         /// </summary>
-        public DataSource? DataSource { get; set; }
+        public string DataSourceName { get; set; } = null!;
 
         /// <summary>
         /// Name of the query.
@@ -76,10 +62,11 @@ namespace TheGrid.Models
         public DateTime? ResultsRefreshed { get; set; }
 
         /// <summary>
-        /// Columns 
+        /// Columns
         /// </summary>
-        public Dictionary<string, QueryResultColumn>? Columns { get; set; }
+        //public Dictionary<string, QueryResultColumn>? Columns { get; set; }
 
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public QueryResultState ResultState { get; set; } = QueryResultState.None;
 
         public string? LastErrorMessage { get; set; }

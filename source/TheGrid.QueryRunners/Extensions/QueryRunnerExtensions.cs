@@ -5,6 +5,7 @@
 using Mapster;
 using TheGrid.QueryRunners.Attributes;
 using TheGrid.QueryRunners.Models;
+using TheGrid.Shared.Models;
 
 namespace TheGrid.QueryRunners.Extensions
 {

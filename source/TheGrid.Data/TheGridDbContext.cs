@@ -1,10 +1,11 @@
-﻿// <copyright file="TheGridContext.cs" company="BiglerNet">
+﻿// <copyright file="TheGridDbContext.cs" company="BiglerNet">
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
 using Microsoft.EntityFrameworkCore;
 using TheGrid.Models;
 using TheGrid.QueryRunners.Models;
+using TheGrid.Shared.Models;
 
 namespace TheGrid.Data
 {
@@ -42,6 +43,11 @@ namespace TheGrid.Data
         /// </summary>
         public DbSet<QueryResultRow> QueryResultRows { get; set; }
 
+        /// <summary>
+        /// Query runners.
+        /// </summary>
+        public DbSet<QueryRunner> QueryRunners { get; set; }
+
         /// <inheritdoc/>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -58,6 +64,9 @@ namespace TheGrid.Data
                 .HasColumnType("jsonb");
 
             modelBuilder.Entity<QueryResultRow>().HasIndex(q => q.QueryId);
+
+            modelBuilder.Entity<QueryRunner>().Property(r => r.Parameters)
+                .HasColumnType("jsonb");
 
             base.OnModelCreating(modelBuilder);
         }

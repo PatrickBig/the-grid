@@ -4,6 +4,7 @@
 
 using System.ComponentModel.DataAnnotations;
 using TheGrid.QueryRunners.Models;
+using TheGrid.Shared.Models;
 
 namespace TheGrid.Models
 {
@@ -41,6 +42,11 @@ namespace TheGrid.Models
         [Required]
         [StringLength(250)]
         public string QueryRunnerId { get; set; } = string.Empty;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public QueryRunner? QueryRunner { get; set; }
 
         /// <summary>
         /// Extra properties passed to the query runner used to connect. This often contains connection strings, username, password, etc.

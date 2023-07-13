@@ -1,7 +1,9 @@
-﻿@foreach (var tag in Tags)
-{
-    <Badge Color="Color.Info" Margin="Margin.Is1.OnX.FromEnd">@tag</Badge>
-}
+﻿<RadzenStack Orientation="Orientation.Horizontal" Wrap="FlexWrap.Wrap" JustifyContent="JustifyContent.Start" Gap="0.25rem">
+    @foreach (var tag in Tags)
+    {
+        <RadzenBadge BadgeStyle="BadgeStyle.Info" Style="text-transform: none;" Text="@tag" />
+    }
+</RadzenStack>
 
 @code {
     [Parameter]

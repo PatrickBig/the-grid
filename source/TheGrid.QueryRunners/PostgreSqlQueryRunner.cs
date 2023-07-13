@@ -13,7 +13,7 @@ namespace TheGrid.QueryRunners
     /// <summary>
     /// Executes PostgreSQL queries.
     /// </summary>
-    [Display(Name = "PostgreSQL")]
+    [QueryRunner("PostgreSQL", EditorLanguage = EditorLanguage.PgSql)]
     [QueryRunnerParameter(RelationalDatabaseProperties.ConnectionString, QueryRunnerParameterType.SingleLineText, Required = true, HelpText = "Standard [PostgreSQL connection string](https://www.connectionstrings.com/postgresql/).")]
     [QueryRunnerParameter(RelationalDatabaseProperties.DatabaseName, QueryRunnerParameterType.SingleLineText, Required = true)]
     [QueryRunnerParameter("Username", QueryRunnerParameterType.SingleLineText, Required = true)]
@@ -33,9 +33,13 @@ namespace TheGrid.QueryRunners
         }
 
         /// <inheritdoc/>
+        protected override EditorLanguage EditorLanguage => EditorLanguage.PgSql;
+
+        /// <inheritdoc/>
         public async Task<DatabaseSchema> GetSchemaAsync(CancellationToken cancellationToken = default)
         {
             await using var connection = GetConnection(RunnerParameters);
+
             await connection.OpenAsync(cancellationToken);
 
             var results = new DatabaseSchema();
@@ -69,6 +73,7 @@ namespace TheGrid.QueryRunners
         public override async Task<QueryResult> RunQueryAsync(string query, Dictionary<string, object>? queryParameters, CancellationToken cancellationToken = default)
         {
             await using var connection = GetConnection(RunnerParameters);
+
             await connection.OpenAsync(cancellationToken);
 
             var results = new QueryResult();

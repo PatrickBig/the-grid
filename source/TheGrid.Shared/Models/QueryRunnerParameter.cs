@@ -4,7 +4,7 @@
 
 using System.ComponentModel.DataAnnotations;
 
-namespace TheGrid.QueryRunners.Models
+namespace TheGrid.Shared.Models
 {
     /// <summary>
     /// Property types for <see cref="QueryRunnerParameter"/>.

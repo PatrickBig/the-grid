@@ -1,7 +1,34 @@
 ﻿@page "/Queries/{queryId:int}"
-@page "/Queries2"
 
-@code {
-    [Parameter]
-    public int QueryId { get; set; }
+@if (_updateRequest != null)
+{
+	<EditForm Model="@_updateRequest" OnValidSubmit="ValidSubmitAsync" OnInvalidSubmit="InvalidSubmitAsync">
+		<DataAnnotationsValidator />
+		<ValidationSummary />
+		<RadzenRow>
+			<RadzenColumn Size="3">
+				<RadzenFormField Text="Name" class="w-100">
+					<RadzenTextBox @bind-Value="@_updateRequest.Name" Name="Name"/>
+					@*<RadzenRequiredValidator Component="Name" Text="Name is required" Popup />
+					<RadzenLengthValidator Component="Name" Max="50" Min="3" Popup />*@
+				</RadzenFormField>
+			</RadzenColumn>
+			<RadzenColumn Size="9">
+				<RadzenFormField Text="Description" class="w-100">
+					<RadzenTextBox @bind-Value="@_updateRequest.Description" Name="Description"/>
+					@*<RadzenLengthValidator Component="Description" Max="500" Popup />*@
+				</RadzenFormField>
+			</RadzenColumn>
+		</RadzenRow>
+		<RadzenRow>
+			<RadzenColumn Size="12" Style="padding-top: 4px; padding-bottom: 4px">
+				<StandaloneCodeEditor Id="query-editor" ConstructionOptions="EditorConstructionOptions" @ref="_editor" CssClass="query-editor w-100 h-100" OnDidInit="EditorInitialized" />
+			</RadzenColumn>
+		</RadzenRow>
+		<RadzenRow>
+			<RadzenColumn Size="12">
+				<RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit">Save</RadzenButton>
+			</RadzenColumn>
+		</RadzenRow>
+	</EditForm>
 }

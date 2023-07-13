@@ -8,6 +8,9 @@
     "orderingRules": {
       "usingDirectivesPlacement": "outsideNamespace",
       "systemUsingDirectivesFirst": false
+    },
+    "indentation": {
+      "useTabs": false
     }
   }
 }
