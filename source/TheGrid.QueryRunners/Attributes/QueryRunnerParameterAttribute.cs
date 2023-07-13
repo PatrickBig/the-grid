@@ -2,7 +2,7 @@
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
-using TheGrid.QueryRunners.Models;
+using TheGrid.Shared.Models;
 
 namespace TheGrid.QueryRunners.Attributes
 {

@@ -2,13 +2,14 @@
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
-using LazyCache;
 using Mapster;
-using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System.Reflection;
+using TheGrid.Data;
 using TheGrid.QueryRunners;
 using TheGrid.QueryRunners.Attributes;
-using TheGrid.QueryRunners.Models;
+using TheGrid.Shared.Models;
 
 namespace TheGrid.Services
 {
@@ -17,63 +18,75 @@ namespace TheGrid.Services
     /// </summary>
     public class QueryRunnerDiscoveryService
     {
-        private readonly IAppCache _appCache;
+        private readonly TheGridDbContext _db;
+        private readonly ILogger<QueryRunnerDiscoveryService> _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="QueryRunnerDiscoveryService"/> class.
         /// </summary>
-        /// <param name="appCache">Application cache.</param>
-        public QueryRunnerDiscoveryService(IAppCache appCache)
+        /// <param name="db">Database context.</param>
+        /// <param name="logger">Logger instance.</param>
+        public QueryRunnerDiscoveryService(TheGridDbContext db, ILogger<QueryRunnerDiscoveryService> logger)
         {
-            _appCache = appCache;
+            _db = db;
+            _logger = logger;
         }
 
         /// <summary>
-        /// Gets all enabled query runners in the system.
+        /// Discovers all query runners and updates them in the database.
         /// </summary>
-        /// <returns>Query runners.</returns>
-        public IEnumerable<AboutQueryRunner> GetQueryRunners()
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public async Task RefreshQueryRunnersAsync()
         {
-            var runners = () => DiscoverQueryRunners();
+            var runners = DiscoverQueryRunners();
 
-            return _appCache.GetOrAdd($"{nameof(QueryRunnerDiscoveryService)}-{nameof(GetQueryRunners)}", runners);
+            // Disable all runners
+            await _db.QueryRunners.ExecuteUpdateAsync(s => s.SetProperty(r => r.Disabled, true));
+
+            foreach (var runner in runners)
+            {
+                if (await _db.QueryRunners.Where(r => r.Id == runner.Id).AnyAsync())
+                {
+                    _db.QueryRunners.Update(runner);
+                }
+                else
+                {
+                    // Insert
+                    await _db.QueryRunners.AddAsync(runner);
+                }
+            }
+
+            await _db.SaveChangesAsync();
         }
 
-        private static IEnumerable<AboutQueryRunner> DiscoverQueryRunners()
+        private static IEnumerable<QueryRunner> DiscoverQueryRunners()
         {
             var queryRunners = GetQueryRunnerTypes();
 
             foreach (var runner in queryRunners)
             {
-                var details = new AboutQueryRunner
+                var details = new QueryRunner
                 {
                     Id = runner.FullName ?? throw new NullReferenceException("Unable to determine type."),
                 };
+
+                var queryRunnerInformation = runner.GetCustomAttribute<QueryRunnerAttribute>(false);
+
+                if (queryRunnerInformation == null)
+                {
+                    details.Name = runner.Name;
+                }
+                else
+                {
+                    details.Name = queryRunnerInformation.Name;
+                    details.EditorLanguage = queryRunnerInformation.EditorLanguage;
+                }
 
                 var parameters = runner.GetCustomAttributes<QueryRunnerParameterAttribute>(true);
 
                 foreach (QueryRunnerParameterAttribute attribute in parameters.Cast<QueryRunnerParameterAttribute>())
                 {
                     details.Parameters.Add(attribute.Adapt<QueryRunnerParameter>());
-                }
-
-                // Get the display propery if available to set the name.
-                var displayAttribute = runner.GetCustomAttribute<DisplayAttribute>(true);
-
-                if (displayAttribute == null || string.IsNullOrEmpty(displayAttribute.Name))
-                {
-                    // Use the class name and removing the suffix.
-                    var className = runner.GetType().Name;
-                    if (className.EndsWith("QueryRunner"))
-                    {
-                        className = className.Substring(0, className.Length - "QueryRunner".Length);
-                    }
-
-                    details.Name = className;
-                }
-                else
-                {
-                    details.Name = displayAttribute.Name;
                 }
 
                 var runnerInterfaces = runner.GetInterfaces();

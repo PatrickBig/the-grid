@@ -55,7 +55,7 @@ namespace TheGrid.Api.Controllers
                 return ValidationProblem(ModelState);
             }
 
-            if (!_queryRunnerDiscoveryService.GetQueryRunners().Any(d => d.Id == request.QueryRunnerId))
+            if (!(await _db.QueryRunners.AnyAsync(d => d.Id == request.QueryRunnerId, cancellationToken: cancellationToken)))
             {
                 ModelState.AddModelError(nameof(request.QueryRunnerId), "Invalid query runner ID specified.");
                 return ValidationProblem(ModelState);

@@ -2,8 +2,8 @@
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
-using Blazorise.DataGrid;
 using Microsoft.AspNetCore.Components;
+using Radzen;
 using System.Net.Http.Json;
 using TheGrid.Client.Extensions;
 using TheGrid.Shared.Models;
@@ -16,7 +16,7 @@ namespace TheGrid.Client.Pages
     public partial class Queries
     {
         private IEnumerable<QueryListItem>? _items;
-        private int? _totalItems;
+        private int _totalItems;
 
         [Inject]
         private HttpClient HttpClient { get; set; } = null!;
@@ -24,9 +24,9 @@ namespace TheGrid.Client.Pages
         [CascadingParameter]
         private UserOrganization UserOrganization { get; set; } = null!;
 
-        private async Task OnReadDataAsync(DataGridReadDataEventArgs<QueryListItem> e)
+        private async Task OnLoadDataAsync(LoadDataArgs e)
         {
-            var response = await HttpClient.GetAsync(e.GetQueryUrl("/api/v1/Queries", new() { { "slug", UserOrganization.Slug } })); // $"/api/v1/Queries?slug={UserOrganization.Slug}&skip={e.GetSkip()}&take={e.PageSize}"); ;
+            var response = await HttpClient.GetAsync(e.GetQueryUrl("/api/v1/Queries", new() { { "slug", UserOrganization.Slug } }));
 
             var data = await response.Content.ReadFromJsonAsync<PaginatedResult<QueryListItem>>();
 

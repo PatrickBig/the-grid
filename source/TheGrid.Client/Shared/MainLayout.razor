@@ -1,17 +1,28 @@
 ﻿@inherits LayoutComponentBase
 <CascadingValue Value="_userOrganization">
-    <Layout>
-        <LayoutHeader>
-            <TopNavigationBar />
-        </LayoutHeader>
-
-        <LayoutContent Padding="Padding.Is4.OnX">
+    <RadzenLayout>
+        <RadzenHeader>
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
+                <RadzenSidebarToggle Click="@(() => _sidebarExpanded = !_sidebarExpanded)" />
+                <RadzenLabel Text="Header" Style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis;" />
+            </RadzenStack>
+        </RadzenHeader>
+        <RadzenSidebar @bind-Expanded="@_sidebarExpanded" Style="display: flex; flex-direction: column;">
+            <LeftNavigationPanel />
+        </RadzenSidebar>
+        <RadzenBody>
             @Body
-        </LayoutContent>
-    </Layout>
+        </RadzenBody>
+    </RadzenLayout>
 </CascadingValue>
 
+<RadzenDialog />
+<RadzenNotification />
+<RadzenContextMenu />
+<RadzenTooltip />
+
 @code {
+    bool _sidebarExpanded = true;
     private UserOrganization _userOrganization = new()
     {
         Name = "My Organization",

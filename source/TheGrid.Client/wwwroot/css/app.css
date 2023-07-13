@@ -27,3 +27,8 @@
     .blazor-error-boundary::after {
         content: "An error has occurred."
     }
+
+.query-editor {
+    min-height: 400px;
+    height: 100%;
+}

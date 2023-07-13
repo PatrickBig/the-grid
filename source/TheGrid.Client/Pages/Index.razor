@@ -5,17 +5,3 @@
 <h1>Hello, world!</h1>
 
 Welcome to your new app.
-
-<EditForm Model=codeContent>
-    <AceEditor @bind-Value=codeContent />
-    <Button Clicked="ReportValue" Color="Color.Primary">Report Value</Button>
-</EditForm>
-
-@code {
-    private string codeContent = "function test() {\n    console.log(\"hello\");\n}";
-
-    private void ReportValue()
-    {
-        Console.WriteLine(codeContent);
-    }
-}

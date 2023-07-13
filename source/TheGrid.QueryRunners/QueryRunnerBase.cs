@@ -3,7 +3,6 @@
 // </copyright>
 
 using TheGrid.QueryRunners.Extensions;
-using TheGrid.QueryRunners.Models;
 using TheGrid.Shared.Models;
 
 namespace TheGrid.QueryRunners
@@ -28,6 +27,11 @@ namespace TheGrid.QueryRunners
         /// Parameters used by the query runner to execute queries. Typically contains connection string information.
         /// </summary>
         protected Dictionary<string, string> RunnerParameters { get; set; }
+
+        /// <summary>
+        /// Language used by the query editor.
+        /// </summary>
+        protected abstract EditorLanguage EditorLanguage { get; }
 
         /// <inheritdoc/>
         public abstract Task<QueryResult> RunQueryAsync(string query, Dictionary<string, object>? queryParameters, CancellationToken cancellationToken = default);
