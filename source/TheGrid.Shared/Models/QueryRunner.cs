@@ -48,12 +48,17 @@ namespace TheGrid.Shared.Models
         /// </summary>
         public string? EditorLanguage { get; set; }
 
+#pragma warning disable SA1629 // Documentation text should end with a period
         /// <summary>
         /// Filename of the icon to be used in the front end when rendering the data source. Absolute path for the icon should be /images/runner-icons/<see cref="RunnerIcon"/>.
         /// </summary>
-        /// <example>
+        /// <remarks>
         /// If <see cref="RunnerIcon"/> is set to postgresql.png the actual path of the icon will be /images/runner-icons/postgresql.png.
+        /// </remarks>
+        /// <example>
+        /// postgresql.png
         /// </example>
         public string RunnerIcon { get; set; } = "unknown.png";
+#pragma warning restore SA1629 // Documentation text should end with a period
     }
 }

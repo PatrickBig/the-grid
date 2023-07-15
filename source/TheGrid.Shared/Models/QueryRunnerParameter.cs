@@ -3,6 +3,7 @@
 // </copyright>
 
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace TheGrid.Shared.Models
 {
@@ -61,6 +62,7 @@ namespace TheGrid.Shared.Models
         /// <summary>
         /// Type of control used to render the output.
         /// </summary>
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public QueryRunnerParameterType Type { get; set; }
 
         /// <summary>

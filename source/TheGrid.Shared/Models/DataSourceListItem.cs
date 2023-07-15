@@ -21,15 +21,27 @@ namespace TheGrid.Shared.Models
         /// <summary>
         /// Name of the data source.
         /// </summary>
-        [Required]
-        [StringLength(100)]
         public string Name { get; set; } = string.Empty;
 
         /// <summary>
         /// Unique ID of the runner used to execute queries for the data source.
         /// </summary>
-        [Required]
-        [StringLength(250)]
         public string QueryRunnerId { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Name of the query runner.
+        /// </summary>
+        public string QueryRunnerName { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Filename of the icon to be used in the front end when rendering the data source. Absolute path for the icon should be /images/runner-icons/<see cref="QueryRunnerIcon"/>.
+        /// </summary>
+        /// <remarks>
+        /// If <see cref="QueryRunnerIcon"/> is set to postgresql.png the actual path of the icon will be /images/runner-icons/postgresql.png.
+        /// </remarks>
+        /// <example>
+        /// postgresql.png
+        /// </example>
+        public string QueryRunnerIcon { get; set; } = "unknown.png";
     }
 }

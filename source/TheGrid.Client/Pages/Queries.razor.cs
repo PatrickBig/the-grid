@@ -26,7 +26,7 @@ namespace TheGrid.Client.Pages
 
         private async Task OnLoadDataAsync(LoadDataArgs e)
         {
-            var response = await HttpClient.GetAsync(e.GetQueryUrl("/api/v1/Queries", new() { { "slug", UserOrganization.Slug } }));
+            var response = await HttpClient.GetAsync(e.GetQueryUrl("/api/v1/Queries", new() { { "organization", UserOrganization.Slug } }));
 
             var data = await response.Content.ReadFromJsonAsync<PaginatedResult<QueryListItem>>();
 

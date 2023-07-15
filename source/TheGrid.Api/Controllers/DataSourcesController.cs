@@ -6,6 +6,7 @@ using Asp.Versioning;
 using Mapster;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.Net.Mime;
 using System.Runtime.CompilerServices;
 using TheGrid.Data;
@@ -55,11 +56,11 @@ namespace TheGrid.Api.Controllers
                 return ValidationProblem(ModelState);
             }
 
-            if (!(await _db.QueryRunners.AnyAsync(d => d.Id == request.QueryRunnerId, cancellationToken: cancellationToken)))
-            {
-                ModelState.AddModelError(nameof(request.QueryRunnerId), "Invalid query runner ID specified.");
-                return ValidationProblem(ModelState);
-            }
+            //if (!(await _db.QueryRunners.AnyAsync(d => d.Id == request.QueryRunnerId, cancellationToken: cancellationToken)))
+            //{
+            //    ModelState.AddModelError(nameof(request.QueryRunnerId), "Invalid query runner ID specified.");
+            //    return ValidationProblem(ModelState);
+            //}
 
             var dataSource = request.Adapt<DataSource>();
 
@@ -92,27 +93,43 @@ namespace TheGrid.Api.Controllers
         /// Gets a list of data sources for the given organization.
         /// </summary>
         /// <param name="organization">The ID of the organization to fetch data sources for.</param>
+        /// <param name="skip" default="0">Number of records to skip for a paginated request.</param>
+        /// <param name="take" default="25">Number of records to take for a single request.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>A list of data sources in the system.</returns>
         [HttpGet]
-        public async IAsyncEnumerable<DataSourceListItem> GetListAsync([FromQuery] string organization, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        [ProducesResponseType(typeof(PaginatedResult<DataSourceListItem>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult> GetListAsync(
+            [FromQuery] string organization,
+            [FromQuery] int skip = 0,
+            [FromQuery][Range(1, 200)] int take = 25,
+            CancellationToken cancellationToken = default)
         {
-            var dataSources = _db.DataSources
-                .Where(d => d.Organization != null && d.Organization.Slug == organization)
+            var baseQuery = _db.DataSources
+                .Include(d => d.QueryRunner)
+                .Where(d => d.Organization != null && d.Organization.Slug == organization && d.QueryRunner != null)
                 .OrderBy(d => d.Name)
                 .Select(d => new DataSourceListItem
                 {
                     Id = d.Id,
                     Name = d.Name,
                     QueryRunnerId = d.QueryRunnerId,
-                })
-                .AsAsyncEnumerable();
+                    QueryRunnerIcon = d.QueryRunner.RunnerIcon,
+                    QueryRunnerName = d.QueryRunner.Name,
+                });
 
-            await foreach (var dataSource in dataSources)
+            var resultQuery = baseQuery
+                .Skip(skip)
+                .Take(take);
+
+            var result = new PaginatedResult<DataSourceListItem>
             {
-                cancellationToken.ThrowIfCancellationRequested();
-                yield return dataSource;
-            }
+                Items = await resultQuery.ToListAsync(cancellationToken),
+                TotalItems = await resultQuery.CountAsync(cancellationToken),
+            };
+
+            return Ok(result);
         }
     }
 }

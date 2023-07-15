@@ -5,6 +5,10 @@
         <RadzenPanelMenuItem Text="API" Icon="api" Path="/Help/ApiDocumentation" />
     </RadzenPanelMenuItem>
 </RadzenPanelMenu>
-<div class="rz-p-4">
-    Sidebar
-</div>
+
+
+
+@code {
+    [CascadingParameter]
+    public UserOrganization UserOrganization { get; set; } = null!;
+}

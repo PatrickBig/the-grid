@@ -44,7 +44,7 @@ namespace TheGrid.Shared.Models
         /// This value is encrypted in the database when stored.
         /// </remarks>
         /// <example>{ "Connection String": "Host=localhost;Port=5432;", "Database Name": "TestDb", "Username": "testuser", "Password": "mypassword123" }</example>
-        public Dictionary<string, string> ExecutorParameters { get; set; } = new();
+        public Dictionary<string, string?> ExecutorParameters { get; set; } = new();
 #pragma warning restore SA1629 // Documentation text should end with a period
     }
 }
