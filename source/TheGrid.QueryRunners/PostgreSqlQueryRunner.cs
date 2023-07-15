@@ -3,7 +3,6 @@
 // </copyright>
 
 using Npgsql;
-using System.ComponentModel.DataAnnotations;
 using TheGrid.QueryRunners.Attributes;
 using TheGrid.QueryRunners.Models;
 using TheGrid.Shared.Models;
@@ -13,7 +12,7 @@ namespace TheGrid.QueryRunners
     /// <summary>
     /// Executes PostgreSQL queries.
     /// </summary>
-    [QueryRunner("PostgreSQL", EditorLanguage = EditorLanguage.PgSql)]
+    [QueryRunner("PostgreSQL", EditorLanguage = EditorLanguage.PgSql, IconFileName = "postgresql.png")]
     [QueryRunnerParameter(RelationalDatabaseProperties.ConnectionString, QueryRunnerParameterType.SingleLineText, Required = true, HelpText = "Standard [PostgreSQL connection string](https://www.connectionstrings.com/postgresql/).")]
     [QueryRunnerParameter(RelationalDatabaseProperties.DatabaseName, QueryRunnerParameterType.SingleLineText, Required = true)]
     [QueryRunnerParameter("Username", QueryRunnerParameterType.SingleLineText, Required = true)]

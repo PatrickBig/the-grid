@@ -2,10 +2,28 @@
 <CascadingValue Value="_userOrganization">
     <RadzenLayout>
         <RadzenHeader>
-            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
-                <RadzenSidebarToggle Click="@(() => _sidebarExpanded = !_sidebarExpanded)" />
-                <RadzenLabel Text="Header" Style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis;" />
-            </RadzenStack>
+            <RadzenRow AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Start" Gap="0px">
+                <RadzenColumn Size="5">
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
+                        <RadzenSidebarToggle Click="@(() => _sidebarExpanded = !_sidebarExpanded)" />
+                        <RadzenLabel Text="The Grid" Style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis;" />
+                    </RadzenStack>
+                </RadzenColumn>
+                <RadzenColumn Size="7">
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                        <RadzenProfileMenu>
+                            <Template>
+                                <RadzenGravatar Email="user@example.com" />
+                            </Template>
+                            <ChildContent>
+                                <RadzenProfileMenuItem Text="Settings" />
+                                <RadzenProfileMenuItem Text="@_userOrganization.Name" />
+                            </ChildContent>
+                        </RadzenProfileMenu>
+                    </RadzenStack>
+                </RadzenColumn>
+            </RadzenRow>
+            
         </RadzenHeader>
         <RadzenSidebar @bind-Expanded="@_sidebarExpanded" Style="display: flex; flex-direction: column;">
             <LeftNavigationPanel />

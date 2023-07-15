@@ -112,7 +112,7 @@ namespace TheGrid.Api.Controllers
         /// <summary>
         /// List queries available for a given organization.
         /// </summary>
-        /// <param name="slug">Organization to get a list of queries from.</param>
+        /// <param name="organization">Organization to get a list of queries from.</param>
         /// <param name="skip" default="0">Number of records to skip for a paginated request.</param>
         /// <param name="take" default="25">Number of records to take for a single request.</param>
         /// <param name="cancellationToken">Cancelltion token.</param>
@@ -121,13 +121,13 @@ namespace TheGrid.Api.Controllers
         [ProducesResponseType(typeof(PaginatedResult<QueryListItem>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> GetListAsync(
-            [FromQuery][Required] string slug,
-            [FromQuery][Range(0, int.MaxValue)] int skip = 0,
+            [FromQuery][Required] string organization,
+            [FromQuery] int skip = 0,
             [FromQuery][Range(1, 200)] int take = 25,
             CancellationToken cancellationToken = default)
         {
             var baseQuery = _db.Queries
-                .Where(q => q.DataSource != null && q.DataSource.Organization != null && q.DataSource.Organization.Slug == slug)
+                .Where(q => q.DataSource != null && q.DataSource.Organization != null && q.DataSource.Organization.Slug == organization)
                 .Select(q => new QueryListItem
                 {
                     Id = q.Id,

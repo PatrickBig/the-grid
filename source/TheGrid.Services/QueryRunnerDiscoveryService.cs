@@ -80,6 +80,7 @@ namespace TheGrid.Services
                 {
                     details.Name = queryRunnerInformation.Name;
                     details.EditorLanguage = queryRunnerInformation.EditorLanguage;
+                    details.RunnerIcon = queryRunnerInformation.IconFileName ?? "unknown.png";
                 }
 
                 var parameters = runner.GetCustomAttributes<QueryRunnerParameterAttribute>(true);

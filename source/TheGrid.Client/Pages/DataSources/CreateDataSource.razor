@@ -1,0 +1,40 @@
+﻿@page "/DataSources/Create"
+@using System.ComponentModel.DataAnnotations;
+
+<RadzenTemplateForm TItem="CreateDataSourceRequest" Data="_input" Submit="CreateDataSourceAsync">
+    <RadzenRow Gap="2rem">
+        <RadzenColumn>
+            <RadzenStack>
+                <RadzenFormField Text="Name">
+                    <RadzenTextBox Name="Name" @bind-Value="_input.Name" AutoComplete=false/>
+                    <RadzenRequiredValidator Component="Name" Popup/>
+                    <RadzenLengthValidator Component="Name" Max="100" Popup/>
+                </RadzenFormField>
+                <RadzenFormField Text="Query Runner" Variant="Variant.Outlined">
+                    <RadzenDropDown Name="QueryRunnerId" TValue="string" ValueChanged="QueryRunnerChanged" Value="_input.QueryRunnerId" Context="x" Data="_queryRunners" ValueProperty="@nameof(QueryRunner.Id)" TextProperty="@nameof(QueryRunner.Name)">
+                        <Template>
+                            @{
+                                if (x is QueryRunner runner)
+                                {
+                                    <QueryRunnerDisplay Name="@runner.Name" RunnerIcon="@runner.RunnerIcon" />
+                                }
+                            }
+                        </Template>
+                    </RadzenDropDown>
+                    <RadzenRequiredValidator Component="QueryRunnerId" Text="A query runner must be selected" Popup />
+                </RadzenFormField>
+                @if (_selectedQueryRunner != null)
+                {
+                    foreach (var parameter in _selectedQueryRunner.Parameters.OrderBy(p => p.RenderOrder))
+                    {
+                        <DataSourceParameter QueryRunnerParameter="parameter" ValueChanged="ParameterValueChanged" />
+                    }
+                }
+            </RadzenStack>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" Gap="1rem" class="rz-mt-8 rz-mb-4">
+        <RadzenButton Text="Cancel" ButtonType="ButtonType.Button" ButtonStyle=ButtonStyle.Light Icon="cancel" Click="@(() => NavigationManager.NavigateTo("/DataSources"))" />
+        <RadzenButton Text="Save" ButtonType="ButtonType.Submit" Icon="save" />
+    </RadzenStack>
+</RadzenTemplateForm>
