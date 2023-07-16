@@ -14,7 +14,6 @@ namespace TheGrid.Shared.Models
         /// <summary>
         /// Tags being modified.
         /// </summary>
-
         [Tags]
         public string[] Tags { get; set; } = Array.Empty<string>();
     }

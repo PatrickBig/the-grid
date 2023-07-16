@@ -67,9 +67,9 @@ namespace TheGrid.Api.Controllers
         /// <summary>
         /// Information about a single query definition.
         /// </summary>
-        /// <param name="queryId"></param>
-        /// <param name="cancellation"></param>
-        /// <returns></returns>
+        /// <param name="queryId">Unique id of the query being retreived.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Information about a single query definition.</returns>
         [HttpGet("{queryId:int}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult> GetQueryAsync([FromRoute][Required][Range(1, int.MaxValue)] int queryId, CancellationToken cancellationToken = default)
@@ -93,6 +93,13 @@ namespace TheGrid.Api.Controllers
             return Ok(item);
         }
 
+        /// <summary>
+        /// Updates an existing query definition.
+        /// </summary>
+        /// <param name="queryId">Unique identifier of the query to update.</param>
+        /// <param name="request">Query information to update.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>A success code indicating the record was updated.</returns>
         [HttpPut("{queryId:int}")]
         public async Task<ActionResult> UpdateQueryAsync([FromRoute][Required][Range(1, int.MaxValue)] int queryId, [FromBody] UpdateQueryRequest request, CancellationToken cancellationToken = default)
         {
@@ -181,7 +188,7 @@ namespace TheGrid.Api.Controllers
         /// <param name="queryId">Identifier of the query the tags should be added to.</param>
         /// <param name="request">Add tags request.</param>
         /// <param name="cancellationToken">Canellation token.</param>
-        /// <returns></returns>
+        /// <returns>A response message indicating the number of tags modified.</returns>
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(TagsResponse), StatusCodes.Status201Created)]
         [HttpPost("{queryId:int}/Tags")]
@@ -212,7 +219,7 @@ namespace TheGrid.Api.Controllers
         /// <param name="queryId">Identifier of the query to remove tags from.</param>
         /// <param name="request">Tags to delete.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns></returns>
+        /// <returns>A response message indicating the number of tags removed.</returns>
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(TagsResponse), StatusCodes.Status201Created)]
         [HttpDelete("{queryId:int}/Tags")]
