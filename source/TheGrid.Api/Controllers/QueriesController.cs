@@ -42,8 +42,9 @@ namespace TheGrid.Api.Controllers
         /// </summary>
         /// <param name="request">Request to create a new query.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns></returns>
+        /// <returns>A status code indicating success or failure.</returns>
         [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         [HttpPost]
         public async Task<ActionResult> CreateQueryAsync([FromBody] CreateQueryRequest request, CancellationToken cancellationToken = default)
         {
@@ -65,7 +66,7 @@ namespace TheGrid.Api.Controllers
         }
 
         /// <summary>
-        /// Information about a single query definition.
+        /// Gets information about a single query definition.
         /// </summary>
         /// <param name="queryId">Unique id of the query being retreived.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
@@ -78,7 +79,7 @@ namespace TheGrid.Api.Controllers
             {
                 Command = q.Command,
                 DataSourceId = q.DataSourceId,
-                DataSourceName = q.DataSource.Name ?? string.Empty,
+                DataSourceName = q.DataSource!.Name,
                 Name = q.Name,
                 Description = q.Description,
                 Id = q.Id,

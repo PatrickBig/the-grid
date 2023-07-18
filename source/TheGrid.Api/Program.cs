@@ -2,7 +2,6 @@
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
-using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using TheGrid.Api;
@@ -18,7 +17,6 @@ builder.WebHost.ConfigureKestrel(options => options.AddServerHeader = false);
 builder.Services.AddApiVersioning(o =>
 {
     o.ReportApiVersions = true;
-
 }).AddApiExplorer(o =>
 {
     o.GroupNameFormat = "'v'VVV";

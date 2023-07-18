@@ -1,39 +1,34 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+// <copyright file="DataSourceParameter.razor.cs" company="BiglerNet">
+// Copyright (c) BiglerNet. All rights reserved.
+// </copyright>
+
 using Microsoft.AspNetCore.Components;
-using System.Net.Http;
-using System.Net.Http.Json;
-using Microsoft.AspNetCore.Components.Forms;
-using Microsoft.AspNetCore.Components.Routing;
-using Microsoft.AspNetCore.Components.Web;
-using Microsoft.AspNetCore.Components.Web.Virtualization;
-using Microsoft.AspNetCore.Components.WebAssembly.Http;
-using Microsoft.JSInterop;
-using TheGrid.Client;
-using TheGrid.Client.Shared;
-using TheGrid.Client.Shared.DataSources;
 using TheGrid.Shared.Models;
-using BlazorMonaco;
-using BlazorMonaco.Editor;
-using Radzen;
-using Radzen.Blazor;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq.Expressions;
 
 namespace TheGrid.Client.Shared.DataSources
 {
+    /// <summary>
+    /// Code behind file for the data source parameter component.
+    /// </summary>
     public partial class DataSourceParameter : ComponentBase
     {
+        /// <summary>
+        /// Information about the source parameter to bind to.
+        /// </summary>
         [Parameter]
         [EditorRequired]
         public QueryRunnerParameter? QueryRunnerParameter { get; set; }
 
+        /// <summary>
+        /// Fired when the value of the parameter has changed.
+        /// </summary>
         [Parameter]
         [EditorRequired]
         public EventCallback<(string Name, string? Value)> ValueChanged { get; set; }
 
+        /// <summary>
+        /// Current value of the parameter.
+        /// </summary>
         public string? Value { get; set; }
 
         private async Task OnValueChangedAsync(string? value)

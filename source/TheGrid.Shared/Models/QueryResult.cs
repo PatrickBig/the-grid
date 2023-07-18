@@ -6,8 +6,8 @@ namespace TheGrid.Shared.Models
 {
     public class QueryResult
     {
-        public IEnumerable<string> Columns { get; set; } = Enumerable.Empty<string>();
+        public List<string> Columns { get; set; } = new();
 
-        public IEnumerable<Dictionary<string, object>> Rows { get; set; } = Enumerable.Empty<Dictionary<string, object>>();
+        public List<Dictionary<string, object>> Rows { get; set; } = new();
     }
 }

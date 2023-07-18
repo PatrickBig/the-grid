@@ -11,9 +11,16 @@ using TheGrid.Shared.Models;
 
 namespace TheGrid.QueryRunners.Attributes
 {
+    /// <summary>
+    /// Attribute to define metadata about a query runner.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
     public class QueryRunnerAttribute : Attribute
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="QueryRunnerAttribute"/> class.
+        /// </summary>
+        /// <param name="name">Display name for the query runner.</param>
         public QueryRunnerAttribute(string name)
         {
             Name = name;
@@ -30,7 +37,7 @@ namespace TheGrid.QueryRunners.Attributes
         public string? EditorLanguage { get; set; }
 
         /// <summary>
-        /// Icon for the
+        /// Icon used in the user interface for the runner.
         /// </summary>
         public string? IconFileName { get; set; } = "undefined.png";
     }
