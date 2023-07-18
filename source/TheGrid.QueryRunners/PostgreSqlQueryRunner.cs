@@ -3,9 +3,6 @@
 // </copyright>
 
 using Npgsql;
-using TheGrid.QueryRunners.Attributes;
-using TheGrid.QueryRunners.Models;
-using TheGrid.Shared.Models;
 
 namespace TheGrid.QueryRunners
 {
@@ -30,9 +27,6 @@ namespace TheGrid.QueryRunners
             : base(runnerParameters)
         {
         }
-
-        /// <inheritdoc/>
-        protected override EditorLanguage EditorLanguage => EditorLanguage.PgSql;
 
         /// <inheritdoc/>
         public async Task<DatabaseSchema> GetSchemaAsync(CancellationToken cancellationToken = default)
@@ -118,7 +112,7 @@ namespace TheGrid.QueryRunners
             return results;
         }
 
-        private static IEnumerable<string> GetColumns(NpgsqlDataReader reader)
+        private static List<string> GetColumns(NpgsqlDataReader reader)
         {
             var columns = new List<string>();
 

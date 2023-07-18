@@ -50,11 +50,11 @@ namespace TheGrid.Api.Controllers
         [HttpPost]
         public async Task<ActionResult<CreateDataSourceResponse>> PostAsync([FromBody] CreateDataSourceRequest request, CancellationToken cancellationToken = default)
         {
-            if (!(await _db.Organizations.AnyAsync(d => d.Id == request.OrganizationId, cancellationToken)))
-            {
-                ModelState.AddModelError(nameof(request.OrganizationId), "No organization was found.");
-                return ValidationProblem(ModelState);
-            }
+            //if (!(await _db.Organizations.AnyAsync(d => d.Id == request.OrganizationId, cancellationToken)))
+            //{
+            //    ModelState.AddModelError(nameof(request.OrganizationId), "No organization was found.");
+            //    return ValidationProblem(ModelState);
+            //}
 
             //if (!(await _db.QueryRunners.AnyAsync(d => d.Id == request.QueryRunnerId, cancellationToken: cancellationToken)))
             //{
@@ -115,7 +115,7 @@ namespace TheGrid.Api.Controllers
                     Id = d.Id,
                     Name = d.Name,
                     QueryRunnerId = d.QueryRunnerId,
-                    QueryRunnerIcon = d.QueryRunner.RunnerIcon,
+                    QueryRunnerIcon = d.QueryRunner!.RunnerIcon,
                     QueryRunnerName = d.QueryRunner.Name,
                 });
 

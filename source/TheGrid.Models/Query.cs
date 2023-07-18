@@ -3,23 +3,13 @@
 // </copyright>
 
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using TheGrid.Shared;
 using TheGrid.Shared.Attributes;
 using TheGrid.Shared.Models;
 
 namespace TheGrid.Models
 {
-    //public enum QueryResultState
-    //{
-    //    None,
-
-    //    InProgress,
-
-    //    Complete,
-
-    //    Error,
-    //}
-
     /// <summary>
     /// Represents a query that can be executed by a runner.
     /// </summary>
@@ -76,12 +66,18 @@ namespace TheGrid.Models
         public DateTime? ResultsRefreshed { get; set; }
 
         /// <summary>
-        /// Columns 
+        /// Columns in the query result.
         /// </summary>
         public Dictionary<string, QueryResultColumn>? Columns { get; set; }
 
+        /// <summary>
+        /// State of the last execution of the query.
+        /// </summary>
         public QueryResultState ResultState { get; set; } = QueryResultState.None;
 
+        /// <summary>
+        /// Last error message from the previous query execution.
+        /// </summary>
         public string? LastErrorMessage { get; set; }
     }
 }

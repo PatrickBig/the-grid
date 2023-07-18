@@ -1,14 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// <copyright file="GetQueryResponse.cs" company="BiglerNet">
+// Copyright (c) BiglerNet. All rights reserved.
+// </copyright>
+
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 using TheGrid.Shared.Attributes;
 
 namespace TheGrid.Shared.Models
 {
+    /// <summary>
+    /// Information about a query definition.
+    /// </summary>
     public class GetQueryResponse
     {
         /// <summary>
@@ -62,13 +64,14 @@ namespace TheGrid.Shared.Models
         public DateTime? ResultsRefreshed { get; set; }
 
         /// <summary>
-        /// Columns
+        /// State of the last execution of the query.
         /// </summary>
-        //public Dictionary<string, QueryResultColumn>? Columns { get; set; }
-
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public QueryResultState ResultState { get; set; } = QueryResultState.None;
 
+        /// <summary>
+        /// Last error message from the previous query execution.
+        /// </summary>
         public string? LastErrorMessage { get; set; }
     }
 }

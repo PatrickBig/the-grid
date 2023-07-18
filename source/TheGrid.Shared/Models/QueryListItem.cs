@@ -2,28 +2,15 @@
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 using TheGrid.Shared.Attributes;
 
 namespace TheGrid.Shared.Models
 {
-    public enum QueryResultState
-    {
-        None,
-
-        InProgress,
-
-        Complete,
-
-        Error,
-    }
-
+    /// <summary>
+    /// Information about a query.
+    /// </summary>
     public class QueryListItem
     {
         /// <summary>
@@ -55,9 +42,15 @@ namespace TheGrid.Shared.Models
         /// </summary>
         public DateTime? ResultsRefreshed { get; set; }
 
+        /// <summary>
+        /// State of the last execution of the query.
+        /// </summary>
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public QueryResultState ResultState { get; set; } = QueryResultState.None;
 
+        /// <summary>
+        /// Last error message from the previous query execution.
+        /// </summary>
         public string? LastErrorMessage { get; set; }
     }
 }
