@@ -18,7 +18,7 @@ All query runners must meet the following minimum criteria:
 
 ### Define the runner
 
-For this exercise we will create an example runner that will produce some results by reading a text file in the following format:
+For this exercise we will create an example runner that will produce some results by connect to a fictional database engine, run a query against it and return the results.
 
 
 First lets setup our base class and inherit from `QueryRunnerBase`.
@@ -205,10 +205,31 @@ The `Type` property is an enum with the following values
 |`Boolean`                   |Checkbox yes/no style input.                                      |
 
 
-Lets setup our attributes so we can accept the common **Connection String**, **Database**, **Username**, and **Password** parameters.
+Lets add our attributes to the `MyDatabaseRunner` class so we can accept the common **Connection String**, **Database**, **Username**, and **Password** parameters.
+
+For the `Name` property on the `QueryRunnerParameterAttribute` you can either enter a string, or make use of the `CommonConnectionParameters` class which contain some constants for commonly used connection properties.
 
 ```csharp
 [QueryRunner("My Database")]
+[QueryRunnerParameter(CommonConnectionParameters.ConnectionString, QueryRunnerParameterType.SingleLineText, Required = true)]
+[QueryRunnerParameter(CommonConnectionParameters.Username, QueryRunnerParameterType.SingleLineText, Required = true)]
+[QueryRunnerParameter(CommonConnectionParameters.Password, QueryRunnerParameterType.SingleLineText, Required = true)]
+public class MyDatabaseRunner : QueryRunnerBase
+{
+}
+```
+
+In order to make use of these parameters in the `RunQueryAsync` method you can consume the `RunnerParameters` property, which is a protected property on the `QueryRunnerBase` class.
+
+
+Lets build our connection string using these parameters.
+
+
+```csharp
+[QueryRunner("My Database")]
+[QueryRunnerParameter(CommonConnectionParameters.ConnectionString, QueryRunnerParameterType.SingleLineText, Required = true)]
+[QueryRunnerParameter(CommonConnectionParameters.Username, QueryRunnerParameterType.SingleLineText, Required = true)]
+[QueryRunnerParameter(CommonConnectionParameters.Password, QueryRunnerParameterType.SingleLineText, Required = true)]
 public class MyDatabaseRunner : QueryRunnerBase
 {
     // ... constructor
@@ -216,53 +237,29 @@ public class MyDatabaseRunner : QueryRunnerBase
     /// <inheritdoc />
     public override async Task<QueryResult> RunQueryAsync(string query, Dictionary<string, object>? queryParameters, CancellationToken cancellationToken = default)
     {
-        // Build our connection
-        using var connection = new MyDatabaseConnection("host=localhost;port=1234;database=test_db;");
+        var connection = GetConnection();
 
-        await connection.OpenAsync(cancellationToken);
-
-        bool firstReadDone = false;
-        var results = new QueryResult();
-
-        await using (var command = new MyDatabaseCommand(query, connection))
-        {
-            if (queryParameters != null && queryParameters.Any())
-            {
-                foreach (var parameter in queryParameters)
-                {
-                    command.Parameters.Add(parameter.Key, parameter.Value);
-                }
-            }
-
-            await using var reader = await command.ExecuteQueryAsync(cancellationToken);
-
-            // Iterate over the results and add them to the results
-            while (await reader.ReadStreamAsync(cancellationToken))
-            {
-                if (!firstReadDone)
-                {
-                    results.Columns = reader.Fields.Select(f => f.Name).ToList();
-                    firstReadDone = true;
-                }
-
-                // Create each row
-                var row = new Dictionary<string, object>();
-
-                foreach (var fieldName in results.Columns)
-                {
-                    row.Add(fieldName, reader.GetValue(fieldName));
-                }
-
-                results.Add(row);
-            }
-        }
+        // ... implementation goes here.
 
         return results;
     }
 
     private MyDatabaseConnection GetConnection()
     {
-        var builder = new MyDatabaseConnectionStringBuilder(RunnerProperties["Connection String"]);
+        var connectionStringBuilder = new MyDatabaseConnectionStringBuilder(RunnerParameters[CommonConnectionParameters.ConnectionString]);
+
+        // If there is a username or password, try using those to update the settings.
+        if (properties.TryGetValue(CommonConnectionParameters.Password, out string? password))
+        {
+            builder.Password = password;
+        }
+
+        if (properties.TryGetValue(CommonConnectionParameters.Username, out string? username))
+        {
+            builder.Username = username;
+        }
+
+        return new MyDatabaseConnection(connectionStringBuilder.ConnectionString);
     }
 }
 ```
