@@ -10,8 +10,8 @@ namespace TheGrid.QueryRunners
     /// Executes PostgreSQL queries.
     /// </summary>
     [QueryRunner("PostgreSQL", EditorLanguage = EditorLanguage.PgSql, IconFileName = "postgresql.png")]
-    [QueryRunnerParameter(RelationalDatabaseProperties.ConnectionString, QueryRunnerParameterType.SingleLineText, Required = true, HelpText = "Standard [PostgreSQL connection string](https://www.connectionstrings.com/postgresql/).")]
-    [QueryRunnerParameter(RelationalDatabaseProperties.DatabaseName, QueryRunnerParameterType.SingleLineText, Required = true)]
+    [QueryRunnerParameter(CommonConnectionParameters.ConnectionString, QueryRunnerParameterType.SingleLineText, Required = true, HelpText = "Standard [PostgreSQL connection string](https://www.connectionstrings.com/postgresql/).")]
+    [QueryRunnerParameter(CommonConnectionParameters.DatabaseName, QueryRunnerParameterType.SingleLineText, Required = true)]
     [QueryRunnerParameter("Username", QueryRunnerParameterType.SingleLineText, Required = true)]
     [QueryRunnerParameter("Password", QueryRunnerParameterType.ProtectedText, Required = true)]
     public class PostgreSqlQueryRunner : QueryRunnerBase, ISchemaDiscovery
@@ -128,7 +128,7 @@ namespace TheGrid.QueryRunners
         private static NpgsqlConnection GetConnection(Dictionary<string, string> properties)
         {
             // Attempt to build a connection based on the information
-            var builder = new NpgsqlConnectionStringBuilder(properties[RelationalDatabaseProperties.ConnectionString]);
+            var builder = new NpgsqlConnectionStringBuilder(properties[CommonConnectionParameters.ConnectionString]);
 
             // If there is a username or password, try using those to update the settings.
             if (properties.TryGetValue(_password, out string? password))
@@ -141,7 +141,7 @@ namespace TheGrid.QueryRunners
                 builder.Username = username;
             }
 
-            if (properties.TryGetValue(RelationalDatabaseProperties.DatabaseName, out string? databaseName))
+            if (properties.TryGetValue(CommonConnectionParameters.DatabaseName, out string? databaseName))
             {
                 builder.Database = databaseName;
             }
