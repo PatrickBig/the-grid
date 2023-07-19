@@ -177,11 +177,11 @@ namespace TheGrid.QueryRunners.Integration.Tests
             return new Dictionary<string, string>
                 {
                     {
-                        RelationalDatabaseProperties.ConnectionString,
+                        CommonConnectionParameters.ConnectionString,
                         "Host=localhost"
                     },
                     {
-                        RelationalDatabaseProperties.DatabaseName,
+                        CommonConnectionParameters.DatabaseName,
                         "test"
                     },
                     {
