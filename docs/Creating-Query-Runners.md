@@ -263,3 +263,58 @@ public class MyDatabaseRunner : QueryRunnerBase
     }
 }
 ```
+
+# Adding database schema discovery support
+
+If your query runner connects to a database it might have a defined schema. For things like SQL database providers this would be things like tables, fields/columns, and attributes for those objects.
+
+For the query runner framework to know your runner supports discoverying database schema you should implement the `ISchemaDiscovery` interface.
+
+This will introduce the `public async Task<DatabaseSchema> GetSchemaAsync(CancellationToken cancellationToken = default)` method.
+
+The `GetSchemaAsync` method should return a `DatabaseSchema` object.
+
+```csharp
+[QueryRunner("My Database")]
+[QueryRunnerParameter(CommonConnectionParameters.ConnectionString, QueryRunnerParameterType.SingleLineText, Required = true)]
+[QueryRunnerParameter(CommonConnectionParameters.Username, QueryRunnerParameterType.SingleLineText, Required = true)]
+[QueryRunnerParameter(CommonConnectionParameters.Password, QueryRunnerParameterType.SingleLineText, Required = true)]
+public class MyDatabaseRunner : QueryRunnerBase, ISchemaDiscovery
+{
+    /// ... implementation
+
+    public async Task<DatabaseSchema> GetSchemaAsync(CancellationToken cancellationToken = default)
+    {
+        var connection = GetConnection();
+
+        await connection.OpenAsync(cancellationToken);
+
+        var result = new DatabaseShema();
+        
+        var tables = new List<DatabaseObject>();
+
+        await using (var command = new MyDatabaseCommand("SELECT name, type FROM system.schema WHERE type = 'TABLE' OR type = 'VIEW'", connection))
+        {
+            await using var reader = await command.ExecuteQueryAsync(cancellationToken);
+
+            while (await reader.ReadStreamAsync(cancellationToken))
+            {
+                var table = new DatabaseObject
+                {
+                    Name = reader.GetValue("name"),
+                    ObjectTypeName = reader.GetValue("type"),
+                };
+
+                // You can also get fields/columns and add them to the DatabaseObject
+                table.Fields = GetFieldsForTable(tableName);
+
+                tables.Add(table);
+            }
+        }
+
+        result.DatabaseObjects = tables;
+
+        return result;
+    }
+}
+```

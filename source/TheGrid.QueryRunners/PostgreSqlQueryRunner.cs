@@ -12,13 +12,10 @@ namespace TheGrid.QueryRunners
     [QueryRunner("PostgreSQL", EditorLanguage = EditorLanguage.PgSql, IconFileName = "postgresql.png")]
     [QueryRunnerParameter(CommonConnectionParameters.ConnectionString, QueryRunnerParameterType.SingleLineText, Required = true, HelpText = "Standard [PostgreSQL connection string](https://www.connectionstrings.com/postgresql/).")]
     [QueryRunnerParameter(CommonConnectionParameters.DatabaseName, QueryRunnerParameterType.SingleLineText, Required = true)]
-    [QueryRunnerParameter("Username", QueryRunnerParameterType.SingleLineText, Required = true)]
-    [QueryRunnerParameter("Password", QueryRunnerParameterType.ProtectedText, Required = true)]
+    [QueryRunnerParameter(CommonConnectionParameters.Username, QueryRunnerParameterType.SingleLineText, Required = true)]
+    [QueryRunnerParameter(CommonConnectionParameters.Password, QueryRunnerParameterType.ProtectedText, Required = true)]
     public class PostgreSqlQueryRunner : QueryRunnerBase, ISchemaDiscovery
     {
-        private const string _username = "Username";
-        private const string _password = "Password";
-
         /// <summary>
         /// Initializes a new instance of the <see cref="PostgreSqlQueryRunner"/> class.
         /// </summary>
@@ -131,12 +128,12 @@ namespace TheGrid.QueryRunners
             var builder = new NpgsqlConnectionStringBuilder(properties[CommonConnectionParameters.ConnectionString]);
 
             // If there is a username or password, try using those to update the settings.
-            if (properties.TryGetValue(_password, out string? password))
+            if (properties.TryGetValue(CommonConnectionParameters.Password, out string? password))
             {
                 builder.Password = password;
             }
 
-            if (properties.TryGetValue(_username, out string? username))
+            if (properties.TryGetValue(CommonConnectionParameters.Username, out string? username))
             {
                 builder.Username = username;
             }
