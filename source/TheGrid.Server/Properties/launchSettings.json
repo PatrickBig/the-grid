@@ -9,7 +9,7 @@
     }
   },
   "profiles": {
-    "TheGrid.Api": {
+    "TheGrid.Server": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,

@@ -6,7 +6,7 @@ using Mapster;
 using TheGrid.QueryRunners.Models;
 using TheGrid.Shared.Models;
 
-namespace TheGrid.Api
+namespace TheGrid.Server
 {
     /// <summary>
     /// Configures object to object mapping configuration.
