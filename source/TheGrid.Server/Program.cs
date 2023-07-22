@@ -4,7 +4,8 @@
 
 using System.Reflection;
 using System.Text.Json.Serialization;
-using TheGrid.Api;
+using TheGrid.Data;
+using TheGrid.Server;
 using TheGrid.Services;
 
 MappingConfiguration.Setup();
@@ -48,6 +49,8 @@ builder.Services.AddTheGridDbContext(builder.Configuration);
 builder.Services.AddTransient<QueryRunnerDiscoveryService>();
 builder.Services.AddTransient<IQueryExecutor, QueryExecutor>();
 builder.Services.AddLazyCache();
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<TheGridDbContext>();
 
 var app = builder.Build();
 
@@ -83,6 +86,7 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHealthChecks("/api/Health");
 app.MapFallbackToFile("index.html");
 
 app.Run();
