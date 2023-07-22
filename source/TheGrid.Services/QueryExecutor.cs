@@ -4,20 +4,17 @@
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using TheGrid.Data;
 using TheGrid.Models;
 using TheGrid.QueryRunners;
-using TheGrid.QueryRunners.Models;
 using TheGrid.Shared.Models;
 
 namespace TheGrid.Services
 {
+    /// <summary>
+    /// Executes query jobs.
+    /// </summary>
     public class QueryExecutor : IQueryExecutor
     {
         private readonly TheGridDbContext _db;
@@ -26,8 +23,8 @@ namespace TheGrid.Services
         /// <summary>
         /// Initializes a new instance of the <see cref="QueryExecutor"/> class.
         /// </summary>
-        /// <param name="db"></param>
-        /// <param name="logger"></param>
+        /// <param name="db">Database context.</param>
+        /// <param name="logger">Logging instance.</param>
         public QueryExecutor(TheGridDbContext db, ILogger<QueryExecutor> logger)
         {
             _db = db;
@@ -115,7 +112,6 @@ namespace TheGrid.Services
             await _db.SaveChangesAsync(cancellationToken);
 
             var rowsDeleted = await _db.QueryResultRows.Where(q => q.QueryId == query.Id).ExecuteDeleteAsync(cancellationToken);
-
         }
     }
 }

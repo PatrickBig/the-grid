@@ -2,7 +2,7 @@
 
 @if (_updateRequest != null)
 {
-	<EditForm Model="@_updateRequest" OnValidSubmit="ValidSubmitAsync" OnInvalidSubmit="InvalidSubmitAsync">
+	<EditForm Model="@_updateRequest" OnValidSubmit="ValidSubmitAsync">
 		<DataAnnotationsValidator />
 		<ValidationSummary />
 		<RadzenRow>

@@ -1,4 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿// <copyright file="20230706024608_DisableQueryRunners.cs" company="BiglerNet">
+// Copyright (c) BiglerNet. All rights reserved.
+// </copyright>
+
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 

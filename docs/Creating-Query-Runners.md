@@ -14,8 +14,6 @@ All query runners must meet the following minimum criteria:
 * Apply a `TheGrid.QueryRunners.Attributes.QueryRunnerAttribute`
 
 
-
-
 ### Define the runner
 
 For this exercise we will create an example runner that will produce some results by connect to a fictional database engine, run a query against it and return the results.

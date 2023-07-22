@@ -101,7 +101,7 @@ namespace TheGrid.QueryRunners.Integration.Tests
             _output.WriteLine("Found the following rows:");
             foreach (var row in results.Rows)
             {
-                _output.WriteLine(string.Join(", ", row.Values.Select(v => v.ToString())));
+                _output.WriteLine(string.Join(", ", row.Values.Select(v => v == null ? "(null)" : v.ToString())));
             }
         }
 
@@ -133,7 +133,7 @@ namespace TheGrid.QueryRunners.Integration.Tests
             _output.WriteLine("Found the following rows:");
             foreach (var row in results.Rows)
             {
-                _output.WriteLine(string.Join(", ", row.Values.Select(v => v.ToString())));
+                _output.WriteLine(string.Join(", ", row.Values.Select(v => v == null ? "(null)" : v.ToString())));
             }
         }
 

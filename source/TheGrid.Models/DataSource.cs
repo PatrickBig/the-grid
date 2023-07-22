@@ -44,7 +44,7 @@ namespace TheGrid.Models
         public string QueryRunnerId { get; set; } = string.Empty;
 
         /// <summary>
-        /// 
+        /// Navigation property to the query runner used to execute queries for the data source.
         /// </summary>
         public QueryRunner? QueryRunner { get; set; }
 
