@@ -12,7 +12,7 @@ using TheGrid.Data;
 using TheGrid.QueryRunners.Models;
 using TheGrid.Shared.Models;
 
-namespace TheGrid.Api.Controllers
+namespace TheGrid.Server.Controllers
 {
     /// <summary>
     /// Manages organizations in The Grid.

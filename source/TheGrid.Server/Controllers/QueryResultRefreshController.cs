@@ -6,7 +6,7 @@ using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
 using TheGrid.Services;
 
-namespace TheGrid.Api.Controllers
+namespace TheGrid.Server.Controllers
 {
     /// <summary>
     /// Controller for requesting query result refreshes.

@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Net.Mime;
 using TheGrid.Data;
 
-namespace TheGrid.Api.Controllers
+namespace TheGrid.Server.Controllers
 {
     /// <summary>
     /// Gets the results from a query execution.
@@ -40,7 +40,6 @@ namespace TheGrid.Api.Controllers
         public async Task<ActionResult> GetResultsAsync([FromRoute] int queryId, CancellationToken cancellationToken = default)
         {
             return Ok(await _db.QueryResultRows.AsNoTracking().Where(r => r.QueryId == queryId).ToListAsync(cancellationToken));
-            //return Ok(await _queryExecutor.ExecuteQueryAsync(queryId, cancellationToken));
         }
     }
 }

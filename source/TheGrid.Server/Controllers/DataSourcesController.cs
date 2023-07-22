@@ -12,7 +12,7 @@ using TheGrid.Data;
 using TheGrid.Models;
 using TheGrid.Shared.Models;
 
-namespace TheGrid.Api.Controllers
+namespace TheGrid.Server.Controllers
 {
     /// <summary>
     /// Controller for interacting with data sources available in the system.

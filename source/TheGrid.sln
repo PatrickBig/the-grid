@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheGrid.Api", "TheGrid.Api\TheGrid.Api.csproj", "{17B79226-272C-40D7-AE69-83CA70F92A7A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheGrid.Server", "TheGrid.Server\TheGrid.Server.csproj", "{17B79226-272C-40D7-AE69-83CA70F92A7A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheGrid.QueryRunners", "TheGrid.QueryRunners\TheGrid.QueryRunners.csproj", "{50DB72B7-1DBF-41E8-B286-0071EB36A02D}"
 EndProject
