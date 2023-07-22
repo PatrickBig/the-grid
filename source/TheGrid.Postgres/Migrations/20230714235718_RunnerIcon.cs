@@ -1,4 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿// <copyright file="20230714235718_RunnerIcon.cs" company="BiglerNet">
+// Copyright (c) BiglerNet. All rights reserved.
+// </copyright>
+
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -15,7 +19,7 @@ namespace TheGrid.Postgres.Migrations
                 table: "QueryRunners",
                 type: "text",
                 nullable: false,
-                defaultValue: "");
+                defaultValue: "unknown.png");
         }
 
         /// <inheritdoc />

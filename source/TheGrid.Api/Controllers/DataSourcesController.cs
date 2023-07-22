@@ -8,10 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.Net.Mime;
-using System.Runtime.CompilerServices;
 using TheGrid.Data;
 using TheGrid.Models;
-using TheGrid.Services;
 using TheGrid.Shared.Models;
 
 namespace TheGrid.Api.Controllers
@@ -23,20 +21,17 @@ namespace TheGrid.Api.Controllers
     [ApiController]
     [Produces(MediaTypeNames.Application.Json)]
     [ApiVersion("1.0")]
-    public class DataSources1Controller : ControllerBase
+    public class DataSourcesController : ControllerBase
     {
         private readonly TheGridDbContext _db;
-        private readonly QueryRunnerDiscoveryService _queryRunnerDiscoveryService;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DataSources1Controller"/> class.
+        /// Initializes a new instance of the <see cref="DataSourcesController"/> class.
         /// </summary>
-        /// <param name="db"></param>
-        /// <param name="queryRunnerDiscoveryService"></param>
-        public DataSources1Controller(TheGridDbContext db, QueryRunnerDiscoveryService queryRunnerDiscoveryService)
+        /// <param name="db">Database context.</param>
+        public DataSourcesController(TheGridDbContext db)
         {
             _db = db;
-            _queryRunnerDiscoveryService = queryRunnerDiscoveryService;
         }
 
         /// <summary>
@@ -50,17 +45,17 @@ namespace TheGrid.Api.Controllers
         [HttpPost]
         public async Task<ActionResult<CreateDataSourceResponse>> PostAsync([FromBody] CreateDataSourceRequest request, CancellationToken cancellationToken = default)
         {
-            //if (!(await _db.Organizations.AnyAsync(d => d.Id == request.OrganizationId, cancellationToken)))
-            //{
-            //    ModelState.AddModelError(nameof(request.OrganizationId), "No organization was found.");
-            //    return ValidationProblem(ModelState);
-            //}
+            if (!(await _db.Organizations.AnyAsync(d => d.Id == request.OrganizationId, cancellationToken)))
+            {
+                ModelState.AddModelError(nameof(request.OrganizationId), "No organization was found.");
+                return ValidationProblem(ModelState);
+            }
 
-            //if (!(await _db.QueryRunners.AnyAsync(d => d.Id == request.QueryRunnerId, cancellationToken: cancellationToken)))
-            //{
-            //    ModelState.AddModelError(nameof(request.QueryRunnerId), "Invalid query runner ID specified.");
-            //    return ValidationProblem(ModelState);
-            //}
+            if (!(await _db.QueryRunners.AnyAsync(d => d.Id == request.QueryRunnerId, cancellationToken: cancellationToken)))
+            {
+                ModelState.AddModelError(nameof(request.QueryRunnerId), "Invalid query runner ID specified.");
+                return ValidationProblem(ModelState);
+            }
 
             var dataSource = request.Adapt<DataSource>();
 

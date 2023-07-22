@@ -11,11 +11,14 @@ using System.Reflection;
 
 namespace TheGrid.Data
 {
+    /// <summary>
+    /// Database context factory.
+    /// </summary>
     public class TheGridContextFactory : IDesignTimeDbContextFactory<TheGridDbContext>
     {
+        /// <inheritdoc/>
         public TheGridDbContext CreateDbContext(string[] args)
         {
-            //Debugger.Launch();
             var parentDirectory = Directory.GetParent(Directory.GetCurrentDirectory())?.FullName ?? throw new NullReferenceException("Unable to determine parent directory");
             var apiProjectDirectory = Path.Combine(parentDirectory, "TheGrid.Api");
             var apiProjectProvider = new PhysicalFileProvider(Path.Combine(parentDirectory, "TheGrid.Api"));
@@ -32,7 +35,7 @@ namespace TheGrid.Data
 
             if (dataConfig?.DatabaseProvider == DatabaseProviders.PostgreSql)
             {
-                //builder.UseNpgsql(dataConfig.ConnectionString);
+                // builder.UseNpgsql(dataConfig.ConnectionString);
                 builder.UseNpgsql(dataConfig.ConnectionString, o => o.MigrationsAssembly("TheGrid.Postgres"));
             }
             else

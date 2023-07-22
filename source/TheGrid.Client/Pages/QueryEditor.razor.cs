@@ -71,10 +71,5 @@ namespace TheGrid.Client.Pages
             // Push the update
             await HttpClient.PutAsJsonAsync($"/api/v1/Queries/{QueryId}", _updateRequest);
         }
-
-        private async Task InvalidSubmitAsync(EditContext editContext)
-        {
-            Logger.LogInformation("Context: {editContext}", editContext);
-        }
     }
 }

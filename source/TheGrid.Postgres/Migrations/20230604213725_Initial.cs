@@ -1,5 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// <copyright file="20230604213725_Initial.cs" company="BiglerNet">
+// Copyright (c) BiglerNet. All rights reserved.
+// </copyright>
+
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TheGrid.Models;
@@ -25,7 +27,7 @@ namespace TheGrid.Postgres.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Slug = table.Column<string>(type: "text", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
-                    DateCreated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    DateCreated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -41,7 +43,7 @@ namespace TheGrid.Postgres.Migrations
                     Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     OrganizationId = table.Column<int>(type: "integer", nullable: false),
                     QueryRunnerId = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
-                    ExecutorParameters = table.Column<Dictionary<string, string>>(type: "hstore", nullable: false)
+                    ExecutorParameters = table.Column<Dictionary<string, string>>(type: "hstore", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -69,7 +71,7 @@ namespace TheGrid.Postgres.Migrations
                     ResultsRefreshed = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     Columns = table.Column<Dictionary<string, QueryResultColumn>>(type: "jsonb", nullable: true),
                     ResultState = table.Column<int>(type: "integer", nullable: false),
-                    LastErrorMessage = table.Column<string>(type: "text", nullable: true)
+                    LastErrorMessage = table.Column<string>(type: "text", nullable: true),
                 },
                 constraints: table =>
                 {
@@ -89,7 +91,7 @@ namespace TheGrid.Postgres.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     QueryId = table.Column<int>(type: "integer", nullable: false),
-                    Data = table.Column<Dictionary<string, object>>(type: "jsonb", nullable: false)
+                    Data = table.Column<Dictionary<string, object>>(type: "jsonb", nullable: false),
                 },
                 constraints: table =>
                 {

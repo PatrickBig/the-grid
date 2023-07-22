@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿// <copyright file="20230705235734_Runners.cs" company="BiglerNet">
+// Copyright (c) BiglerNet. All rights reserved.
+// </copyright>
+
 using Microsoft.EntityFrameworkCore.Migrations;
 using TheGrid.Shared.Models;
 
@@ -29,7 +32,7 @@ namespace TheGrid.Postgres.Migrations
                     Name = table.Column<string>(type: "text", nullable: false),
                     Parameters = table.Column<List<QueryRunnerParameter>>(type: "jsonb", nullable: false),
                     SupportsConnectionTest = table.Column<bool>(type: "boolean", nullable: false),
-                    SupportsSchemaDiscovery = table.Column<bool>(type: "boolean", nullable: false)
+                    SupportsSchemaDiscovery = table.Column<bool>(type: "boolean", nullable: false),
                 },
                 constraints: table =>
                 {

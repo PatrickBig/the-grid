@@ -8,8 +8,14 @@ using TheGrid.Shared.Models;
 
 namespace TheGrid.Api
 {
+    /// <summary>
+    /// Configures object to object mapping configuration.
+    /// </summary>
     public static class MappingConfiguration
     {
+        /// <summary>
+        /// Sets up the mapping configuration.
+        /// </summary>
         public static void Setup()
         {
             TypeAdapterConfig<Organization, OrganizationDetails>

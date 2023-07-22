@@ -27,6 +27,6 @@ namespace TheGrid.Models
         /// <summary>
         /// Data from the row.
         /// </summary>
-        public Dictionary<string, object> Data { get; set; } = new();
+        public Dictionary<string, object?> Data { get; set; } = new();
     }
 }

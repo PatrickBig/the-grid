@@ -29,7 +29,6 @@ namespace TheGrid.Shared.Models
         /// </summary>
         public string QueryRunnerName { get; set; } = string.Empty;
 
-
 #pragma warning disable SA1629 // Documentation text should end with a period
         /// <summary>
         /// Filename of the icon to be used in the front end when rendering the data source. Absolute path for the icon should be /images/runner-icons/<see cref="QueryRunnerIcon"/>.

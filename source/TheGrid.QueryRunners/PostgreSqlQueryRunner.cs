@@ -69,7 +69,7 @@ namespace TheGrid.QueryRunners
             var results = new QueryResult();
             bool firstReadDone = false;
 
-            var rows = new List<Dictionary<string, object>>();
+            var rows = new List<Dictionary<string, object?>>();
 
             // Run the query
             await using (var command = new NpgsqlCommand(query, connection))
@@ -93,7 +93,7 @@ namespace TheGrid.QueryRunners
                         firstReadDone = true;
                     }
 
-                    var row = new Dictionary<string, object>();
+                    var row = new Dictionary<string, object?>();
 
                     for (int i = 0; i < reader.FieldCount; i++)
                     {
