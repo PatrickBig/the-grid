@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Net.Mime;
 using TheGrid.Data;
 
-namespace TheGrid.Api.Controllers
+namespace TheGrid.Server.Controllers
 {
     /// <summary>
     /// Gets information about the query runners available in the system.

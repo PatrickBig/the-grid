@@ -5,7 +5,7 @@
 using Microsoft.AspNetCore.Mvc;
 using TheGrid.Services;
 
-namespace TheGrid.Api.Controllers
+namespace TheGrid.Server.Controllers
 {
     /// <summary>
     /// System control functionality.
