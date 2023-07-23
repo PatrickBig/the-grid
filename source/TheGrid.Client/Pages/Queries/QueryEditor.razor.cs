@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Components.Forms;
 using System.Net.Http.Json;
 using TheGrid.Shared.Models;
 
-namespace TheGrid.Client.Pages
+namespace TheGrid.Client.Pages.Queries
 {
     /// <summary>
     /// Code behind file for the query editor page.

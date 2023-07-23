@@ -41,5 +41,10 @@ namespace TheGrid.Shared.Models
         /// </example>
         public string? QueryRunnerIcon { get; set; } = "unknown.png";
 #pragma warning restore SA1629 // Documentation text should end with a period
+
+        /// <summary>
+        /// Language name used for the editor to provide autocomplete and syntax highlighting.
+        /// </summary>
+        public string? QueryRunnerEditorLanguage { get; set; }
     }
 }

@@ -48,7 +48,7 @@ namespace TheGrid.Server.Controllers
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(CreateDataSourceResponse), StatusCodes.Status201Created)]
         [HttpPost]
-        public async Task<ActionResult<CreateOrganizationResponse>> PostAsync([FromBody] CreateOrganizationRequest request, CancellationToken cancellationToken = default)
+        public async Task<ActionResult<CreateOrganizationResponse>> Post([FromBody] CreateOrganizationRequest request, CancellationToken cancellationToken = default)
         {
             // Check for a duplicate organization name based on the slug.
             if (await _db.Organizations.AnyAsync(o => o.Slug == request.Slug, cancellationToken: cancellationToken))
@@ -63,7 +63,7 @@ namespace TheGrid.Server.Controllers
 
             await _db.SaveChangesAsync(cancellationToken);
 
-            return CreatedAtAction(nameof(GetAsync), new { organizationId = dto.Id }, new CreateOrganizationResponse { OrganizationId = dto.Id });
+            return CreatedAtAction(nameof(Get), new { organizationId = dto.Id }, new CreateOrganizationResponse { OrganizationId = dto.Id });
         }
 
         /// <summary>
@@ -75,7 +75,7 @@ namespace TheGrid.Server.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(OrganizationDetails), StatusCodes.Status200OK)]
         [HttpGet("{slug}")]
-        public async Task<ActionResult<OrganizationDetails>> GetAsync([FromRoute] string slug, CancellationToken cancellationToken = default)
+        public async Task<ActionResult<OrganizationDetails>> Get([FromRoute] string slug, CancellationToken cancellationToken = default)
         {
             var org = await _db.Organizations.FirstOrDefaultAsync(o => o.Slug == slug, cancellationToken: cancellationToken);
 
@@ -97,7 +97,7 @@ namespace TheGrid.Server.Controllers
         [HttpPut("{slug}")]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult> PutAsync([FromRoute] string slug, UpdateOrganizationRequest request, CancellationToken cancellationToken = default)
+        public async Task<ActionResult> Put([FromRoute] string slug, UpdateOrganizationRequest request, CancellationToken cancellationToken = default)
         {
             var org = await _db.Organizations.FirstOrDefaultAsync(o => o.Slug == slug, cancellationToken: cancellationToken);
 
@@ -119,7 +119,7 @@ namespace TheGrid.Server.Controllers
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>A list of organizations in the system.</returns>
         [HttpGet]
-        public async IAsyncEnumerable<OrganizationDetails> GetAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
+        public async IAsyncEnumerable<OrganizationDetails> Get([EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             var organizations = _db.Organizations.ProjectToType<OrganizationDetails>().OrderBy(o => o.Name).AsAsyncEnumerable();
 

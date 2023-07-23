@@ -43,7 +43,7 @@ namespace TheGrid.Server.Controllers
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(CreateDataSourceResponse), StatusCodes.Status201Created)]
         [HttpPost]
-        public async Task<ActionResult<CreateDataSourceResponse>> PostAsync([FromBody] CreateDataSourceRequest request, CancellationToken cancellationToken = default)
+        public async Task<ActionResult<CreateDataSourceResponse>> Post([FromBody] CreateDataSourceRequest request, CancellationToken cancellationToken = default)
         {
             if (!(await _db.Organizations.AnyAsync(d => d.Id == request.OrganizationId, cancellationToken)))
             {
@@ -62,7 +62,7 @@ namespace TheGrid.Server.Controllers
             _db.DataSources.Add(dataSource);
             await _db.SaveChangesAsync(cancellationToken);
 
-            return CreatedAtAction(nameof(GetAsync), new { dataSourceId = dataSource.Id }, new CreateDataSourceResponse { DataSourceId = dataSource.Id });
+            return CreatedAtAction(nameof(Get), new { dataSourceId = dataSource.Id }, new CreateDataSourceResponse { DataSourceId = dataSource.Id });
         }
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace TheGrid.Server.Controllers
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>Information about the data source.</returns>
         [HttpGet("{dataSourceId:int}")]
-        public async Task<ActionResult<DataSource>> GetAsync([FromRoute] int dataSourceId, CancellationToken cancellationToken = default)
+        public async Task<ActionResult<DataSource>> Get([FromRoute] int dataSourceId, CancellationToken cancellationToken = default)
         {
             var dataSource = await _db.DataSources.FirstOrDefaultAsync(d => d.Id == dataSourceId, cancellationToken);
 
@@ -95,7 +95,7 @@ namespace TheGrid.Server.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(PaginatedResult<DataSourceListItem>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult> GetListAsync(
+        public async Task<ActionResult> GetList(
             [FromQuery] string organization,
             [FromQuery] int skip = 0,
             [FromQuery][Range(1, 200)] int take = 25,
@@ -112,6 +112,7 @@ namespace TheGrid.Server.Controllers
                     QueryRunnerId = d.QueryRunnerId,
                     QueryRunnerIcon = d.QueryRunner!.RunnerIcon,
                     QueryRunnerName = d.QueryRunner.Name,
+                    QueryRunnerEditorLanguage = d.QueryRunner.EditorLanguage,
                 });
 
             var resultQuery = baseQuery
