@@ -34,7 +34,7 @@ namespace TheGrid.Server.Controllers
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>Status code indicating the result of the request.</returns>
         [HttpGet("{queryId:int}")]
-        public async Task<ActionResult> GetAsync([FromRoute] int queryId, CancellationToken cancellationToken = default)
+        public async Task<ActionResult> Get([FromRoute] int queryId, CancellationToken cancellationToken = default)
         {
             await _queryExecutor.RefreshQueryResults(queryId, cancellationToken);
 

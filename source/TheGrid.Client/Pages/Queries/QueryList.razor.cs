@@ -1,4 +1,4 @@
-// <copyright file="Queries.razor.cs" company="BiglerNet">
+// <copyright file="QueryList.razor.cs" company="BiglerNet">
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
@@ -13,7 +13,7 @@ namespace TheGrid.Client.Pages
     /// <summary>
     /// Code behind file for the query list page.
     /// </summary>
-    public partial class Queries
+    public partial class QueryList
     {
         private IEnumerable<QueryListItem>? _items;
         private int _totalItems;

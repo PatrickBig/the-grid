@@ -37,7 +37,7 @@ namespace TheGrid.Server.Controllers
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>The results of the query execution.</returns>
         [HttpGet("{queryId}")]
-        public async Task<ActionResult> GetResultsAsync([FromRoute] int queryId, CancellationToken cancellationToken = default)
+        public async Task<ActionResult> GetResults([FromRoute] int queryId, CancellationToken cancellationToken = default)
         {
             return Ok(await _db.QueryResultRows.AsNoTracking().Where(r => r.QueryId == queryId).ToListAsync(cancellationToken));
         }
