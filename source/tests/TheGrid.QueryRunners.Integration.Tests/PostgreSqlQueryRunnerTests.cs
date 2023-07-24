@@ -155,7 +155,23 @@ namespace TheGrid.QueryRunners.Integration.Tests
             {
                 foreach (var obj in schema.DatabaseObjects)
                 {
-                    _output.WriteLine("Table: " + obj.Name);
+                    _output.WriteLine($"{obj.ObjectTypeName}: {obj.Name}");
+
+                    foreach (var col in obj.Fields)
+                    {
+                        _output.WriteLine($"\t{col.TypeName}: {col.Name}");
+                        foreach (var attribute in col.Attributes)
+                        {
+                            if (attribute.Value == null)
+                            {
+                                _output.WriteLine($"\t\t{attribute.Key}");
+                            }
+                            else
+                            {
+                                _output.WriteLine($"\t\t{attribute.Key} = {attribute.Value}");
+                            }
+                        }
+                    }
                 }
             }
         }

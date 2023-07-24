@@ -2,8 +2,6 @@
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
-using TheGrid.QueryRunners.Models;
-
 namespace TheGrid.QueryRunners
 {
     /// <summary>

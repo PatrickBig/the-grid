@@ -24,7 +24,7 @@ namespace TheGrid.QueryRunners.Models
         /// Additional attributes the column may have.
         /// </summary>
         /// <example>{ { "Nullable": "false", "Max Length": "150" } }</example>
-        public Dictionary<string, string>? Attributes { get; set; }
+        public Dictionary<string, string?> Attributes { get; set; } = new();
 #pragma warning restore SA1629 // Documentation text should end with a period
     }
 }
