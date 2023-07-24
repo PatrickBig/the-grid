@@ -28,11 +28,16 @@ namespace TheGrid.QueryRunners.Models
         /// <summary>
         /// All of the fields/columns in this database object.
         /// </summary>
-        public IReadOnlyList<DatabaseObjectColumn>? Fields { get; set; }
+        public List<DatabaseObjectColumn> Fields { get; set; } = new();
 
         /// <summary>
         /// Additional attributes for the database object.
         /// </summary>
         public Dictionary<string, string>? Attributes { get; set; }
+
+        /// <summary>
+        /// Optional schema name for the object.
+        /// </summary>
+        public string? Schema { get; set; }
     }
 }
