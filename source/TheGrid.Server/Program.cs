@@ -77,9 +77,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseForwardedHeaders();
+app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
 app.UseRouting();
-app.UseBlazorFrameworkFiles();
 
 app.UseHttpsRedirection();
 
