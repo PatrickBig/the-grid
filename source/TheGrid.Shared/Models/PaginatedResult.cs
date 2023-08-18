@@ -8,16 +8,12 @@ namespace TheGrid.Shared.Models
     /// Data structure representing a paginated list of items.
     /// </summary>
     /// <typeparam name="TItem">Type of item contained in the result set.</typeparam>
-    public class PaginatedResult<TItem>
+    public class PaginatedResult<TItem> : IPaginatedResult<TItem>
     {
-        /// <summary>
-        /// Total number of items in the results.
-        /// </summary>
+        /// <inheritdoc/>
         public int TotalItems { get; set; }
 
-        /// <summary>
-        /// One page of items.
-        /// </summary>
+        /// <inheritdoc/>
         public IEnumerable<TItem> Items { get; set; } = Enumerable.Empty<TItem>();
     }
 }

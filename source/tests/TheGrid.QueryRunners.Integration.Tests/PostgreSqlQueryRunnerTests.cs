@@ -151,29 +151,33 @@ namespace TheGrid.QueryRunners.Integration.Tests
 
             _output.WriteLine($"Discovered schema: {schema.DatabaseName}");
 
-            if (schema.DatabaseObjects != null)
+            Assert.NotNull(schema.DatabaseObjects);
+            foreach (var obj in schema.DatabaseObjects)
             {
-                foreach (var obj in schema.DatabaseObjects)
-                {
-                    _output.WriteLine($"{obj.ObjectTypeName}: {obj.Name}");
+                _output.WriteLine($"{obj.ObjectTypeName}: {obj.Name}");
 
-                    foreach (var col in obj.Fields)
+                foreach (var col in obj.Fields)
+                {
+                    _output.WriteLine($"\t{col.TypeName}: {col.Name}");
+                    foreach (var attribute in col.Attributes)
                     {
-                        _output.WriteLine($"\t{col.TypeName}: {col.Name}");
-                        foreach (var attribute in col.Attributes)
+                        if (attribute.Value == null)
                         {
-                            if (attribute.Value == null)
-                            {
-                                _output.WriteLine($"\t\t{attribute.Key}");
-                            }
-                            else
-                            {
-                                _output.WriteLine($"\t\t{attribute.Key} = {attribute.Value}");
-                            }
+                            _output.WriteLine($"\t\t{attribute.Key}");
+                        }
+                        else
+                        {
+                            _output.WriteLine($"\t\t{attribute.Key} = {attribute.Value}");
                         }
                     }
                 }
             }
+        }
+
+        [Fact]
+        public async Task TestConnection_Test()
+        {
+
         }
 
         private static string GetCreateTestTableQuery(string tableName)

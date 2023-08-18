@@ -5,6 +5,7 @@
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TheGrid.Models;
+using TheGrid.Shared.Models;
 
 #nullable disable
 

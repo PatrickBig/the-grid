@@ -1,0 +1,12 @@
+﻿@page "/Queries/{QueryId:int}"
+@using Mapster;
+@inherits TheGridComponentBase
+
+<RadzenSplitter Orientation="Orientation.Vertical">
+    <RadzenSplitterPane Size="50%">
+        <QueryEditor QueryEditorInput="_input" QuerySaved="SaveQueryAsync"/>
+    </RadzenSplitterPane>
+    <RadzenSplitterPane Size="50%">
+        <Visualizations QueryId="QueryId" />
+    </RadzenSplitterPane>
+</RadzenSplitter>

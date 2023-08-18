@@ -5,8 +5,10 @@
 using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.Net.Mime;
 using TheGrid.Data;
+using TheGrid.Shared.Models;
 
 namespace TheGrid.Server.Controllers
 {
@@ -34,12 +36,36 @@ namespace TheGrid.Server.Controllers
         /// Gets the results from a query execution.
         /// </summary>
         /// <param name="queryId">Unique ID of the query to get the results from.</param>
+        /// <param name="skip" default="0">Number of records to skip for a paginated request.</param>
+        /// <param name="take" default="25">Number of records to take for a single request.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>The results of the query execution.</returns>
         [HttpGet("{queryId}")]
-        public async Task<ActionResult> GetResults([FromRoute] int queryId, CancellationToken cancellationToken = default)
+        [ProducesResponseType(typeof(PaginatedQueryResult), StatusCodes.Status200OK)]
+        public async Task<ActionResult> GetResults(
+            [FromRoute] int queryId,
+            [FromQuery] int skip = 0,
+            [FromQuery][Range(1, 200)] int take = 25,
+            CancellationToken cancellationToken = default)
         {
-            return Ok(await _db.QueryResultRows.AsNoTracking().Where(r => r.QueryId == queryId).ToListAsync(cancellationToken));
+            var queryBase = _db.QueryResultRows
+                .AsNoTracking()
+                .Where(q => q.QueryId == queryId);
+
+            var resultQuery = queryBase
+                .Skip(skip)
+                .Take(take);
+
+            var columns = await _db.Queries.Where(c => c.Id == queryId).Select(q => q.Columns).FirstOrDefaultAsync(cancellationToken);
+
+            var response = new PaginatedQueryResult
+            {
+                Items = await resultQuery.Select(r => r.Data).ToListAsync(cancellationToken),
+                Columns = columns ?? new(),
+                TotalItems = await queryBase.CountAsync(cancellationToken),
+            };
+
+            return Ok(response);
         }
     }
 }

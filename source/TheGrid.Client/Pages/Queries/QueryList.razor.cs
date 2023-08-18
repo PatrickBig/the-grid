@@ -17,6 +17,7 @@ namespace TheGrid.Client.Pages
     {
         private IEnumerable<QueryListItem>? _items;
         private int _totalItems;
+        private bool _isLoading = true;
 
         [Inject]
         private HttpClient HttpClient { get; set; } = null!;
@@ -26,7 +27,7 @@ namespace TheGrid.Client.Pages
 
         private async Task OnLoadDataAsync(LoadDataArgs e)
         {
-            var response = await HttpClient.GetAsync(e.GetQueryUrl("/api/v1/Queries", new() { { "organization", UserOrganization.Slug } }));
+            var response = await HttpClient.GetAsync(e.GetQueryUrl("/api/v1/Queries", true, new() { { "organization", UserOrganization.Slug } }));
 
             var data = await response.Content.ReadFromJsonAsync<PaginatedResult<QueryListItem>>();
 
@@ -35,6 +36,8 @@ namespace TheGrid.Client.Pages
                 _items = data.Items;
                 _totalItems = data.TotalItems;
             }
+
+            _isLoading = false;
         }
     }
 }

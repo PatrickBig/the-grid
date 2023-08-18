@@ -8,8 +8,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.Net.Mime;
+using System.Linq.Dynamic.Core;
 using TheGrid.Data;
 using TheGrid.Models;
+using TheGrid.Server.Extensions;
 using TheGrid.Shared.Models;
 
 namespace TheGrid.Server.Controllers
@@ -56,7 +58,7 @@ namespace TheGrid.Server.Controllers
 
                 await _db.SaveChangesAsync(cancellationToken);
 
-                return CreatedAtAction(nameof(GetQuery), new { queryId = query.Id });
+                return CreatedAtAction(nameof(GetQuery), new { queryId = query.Id }, new CreateQueryResponse { QueryId = query.Id });
             }
             else
             {
@@ -73,7 +75,7 @@ namespace TheGrid.Server.Controllers
         /// <returns>Information about a single query definition.</returns>
         [HttpGet("{queryId:int}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult> GetQuery([FromRoute][Required][Range(1, int.MaxValue)] int queryId, CancellationToken cancellationToken = default)
+        public async Task<ActionResult> GetQuery([Required][Range(1, int.MaxValue)] int queryId, CancellationToken cancellationToken = default)
         {
             var item = await _db.Queries.Select(q => new GetQueryResponse
             {
@@ -121,6 +123,7 @@ namespace TheGrid.Server.Controllers
         /// List queries available for a given organization.
         /// </summary>
         /// <param name="organization">Organization to get a list of queries from.</param>
+        /// <param name="sort">Optional sorting information.</param>
         /// <param name="skip" default="0">Number of records to skip for a paginated request.</param>
         /// <param name="take" default="25">Number of records to take for a single request.</param>
         /// <param name="cancellationToken">Cancelltion token.</param>
@@ -130,6 +133,7 @@ namespace TheGrid.Server.Controllers
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> GetList(
             [FromQuery][Required] string organization,
+            [FromQuery] Sort[]? sort,
             [FromQuery] int skip = 0,
             [FromQuery][Range(1, 200)] int take = 25,
             CancellationToken cancellationToken = default)
@@ -146,6 +150,11 @@ namespace TheGrid.Server.Controllers
                     ResultState = q.ResultState,
                     Tags = q.Tags,
                 });
+
+            if (sort != null && sort.Any())
+            {
+                baseQuery = baseQuery.OrderBy(sort.GetSortStatement());
+            }
 
             var resultQuery = baseQuery
                 .Skip(skip)

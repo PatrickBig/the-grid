@@ -1,0 +1,31 @@
+﻿@inherits TheGridComponentBase
+<RadzenDataGrid
+    Data="_data"
+    TItem="Dictionary<string, object>"
+    Count="_totalItems"
+    LoadData="OnLoadDataAsync"
+    ColumnWidth="200px"
+    IsLoading="_isLoading"
+    AllowPaging
+    AllowSorting="false"
+    >
+    <Columns>
+        <RadzenDataGridColumn TItem="string" Title="Some column">
+            <Template>
+                test content
+            </Template>
+        </RadzenDataGridColumn>
+        @foreach (var kv in _columns)
+        {
+            <RadzenDataGridColumn
+                TItem="Dictionary<string, object>"
+                Title="@(kv.Value.DisplayName ?? kv.Key)"
+                Type="@GetTypeForColumnType(kv.Value.Type)"
+                Property="@GetPropertyExpression(kv.Key)">
+                <Template>
+                    @context[kv.Key]
+                </Template>
+            </RadzenDataGridColumn>
+        }
+    </Columns>
+</RadzenDataGrid>

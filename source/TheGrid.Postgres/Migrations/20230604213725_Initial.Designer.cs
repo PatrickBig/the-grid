@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TheGrid.Data;
 using TheGrid.Models;
+using TheGrid.Shared.Models;
 
 #nullable disable
 

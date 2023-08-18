@@ -32,6 +32,12 @@ namespace TheGrid.Client.Shared
         protected UserOrganization UserOrganization { get; set; } = null!;
 
         /// <summary>
+        /// Http client.
+        /// </summary>
+        [Inject]
+        protected HttpClient HttpClient { get; set; } = null!;
+
+        /// <summary>
         /// Disposes of the cancellation token.
         /// </summary>
         public virtual void Dispose()

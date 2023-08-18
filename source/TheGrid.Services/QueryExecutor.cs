@@ -63,6 +63,8 @@ namespace TheGrid.Services
                     query.ResultsRefreshed = DateTime.UtcNow;
                     query.ResultState = QueryResultState.Complete;
                 }
+
+                query.Columns = results.Columns;
             }
             catch (Exception ex)
             {
@@ -89,11 +91,6 @@ namespace TheGrid.Services
 
             var runnerType = runnerAssembly?.GetType(query.DataSource.QueryRunnerId) ?? throw new ArgumentException("No runner found.");
             return Activator.CreateInstance(runnerType, query.DataSource.ExecutorParameters) as IQueryRunner ?? throw new InvalidCastException("Unable to create query runner instance from type.");
-        }
-
-        private Dictionary<string, QueryResultColumn> GetColumns(Query query, QueryResult result)
-        {
-            return new();
         }
 
         /// <summary>

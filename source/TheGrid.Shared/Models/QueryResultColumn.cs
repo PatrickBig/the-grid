@@ -2,7 +2,9 @@
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
-namespace TheGrid.Models
+using System.Text.Json.Serialization;
+
+namespace TheGrid.Shared.Models
 {
     /// <summary>
     /// Identifies the type stored in the column.
@@ -13,16 +15,6 @@ namespace TheGrid.Models
         /// Text value.
         /// </summary>
         Text,
-
-        /// <summary>
-        /// Date value.
-        /// </summary>
-        Date,
-
-        /// <summary>
-        /// Date and time value.
-        /// </summary>
-        DateTime,
 
         /// <summary>
         /// Boolean value.
@@ -43,6 +35,16 @@ namespace TheGrid.Models
         /// Decimal value.
         /// </summary>
         Decimal,
+
+        /// <summary>
+        /// Date and/or time value.
+        /// </summary>
+        DateTime,
+
+        /// <summary>
+        /// Time / timespan value.
+        /// </summary>
+        Time,
     }
 
     /// <summary>
@@ -58,6 +60,12 @@ namespace TheGrid.Models
         /// <summary>
         /// Data type for the column.
         /// </summary>
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public QueryResultColumnType Type { get; set; } = QueryResultColumnType.Text;
+
+        /// <summary>
+        /// Order the column should be displayed in.
+        /// </summary>
+        public int DisplayOrder { get; set; }
     }
 }

@@ -26,7 +26,7 @@ builder.Services.AddApiVersioning(o =>
 
 builder.Services.AddControllers(o =>
 {
-    o.SuppressAsyncSuffixInActionNames = false;
+    //o.SuppressAsyncSuffixInActionNames = false;
 }).AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
@@ -65,10 +65,10 @@ if (app.Environment.IsDevelopment())
     {
         var descriptions = app.DescribeApiVersions();
 
-        foreach (var description in descriptions)
+        foreach (var group in descriptions.Select(d => d.GroupName))
         {
-            var url = $"/swagger/{description.GroupName}/swagger.json";
-            var name = description.GroupName.ToUpperInvariant();
+            var url = $"/swagger/{group}/swagger.json";
+            var name = group.ToUpperInvariant();
             o.SwaggerEndpoint(url, name);
         }
 

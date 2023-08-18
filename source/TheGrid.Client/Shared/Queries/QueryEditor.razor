@@ -1,0 +1,71 @@
+﻿@inherits TheGridComponentBase
+
+@if (QueryEditorInput != null)
+{
+    <RadzenTemplateForm TItem="QueryEditorInput" Data="QueryEditorInput" Submit="QuerySavedAsync">
+        <RadzenRow>
+            <RadzenColumn Size="6">
+                <RadzenFormField Text="Name" class="w-100">
+                    <RadzenTextBox @bind-Value="@QueryEditorInput.Name" Name="Name" AutoComplete="false" />
+                    <RadzenRequiredValidator Component="Name" Text="Name is required" Popup />
+                    <RadzenLengthValidator Component="Name" Max="50" Min="3" Popup />
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="6">
+                <RadzenFormField Text="Data Source" class="w-100">
+                    <RadzenDropDownDataGrid TValue="int?"
+                                            Value="@QueryEditorInput.DataSourceId"
+                                            ValueChanged="DataSourceChangedAsync"
+                                            LoadData="LoadDataSourcesAsync"
+                                            Data="_dataSources"
+                                            Count="_totalDataSources"
+                                            AllowVirtualization
+                                            AllowClear
+                                            AllowFiltering="false"
+                                            TextProperty="@nameof(DataSourceListItem.Name)"
+                                            ValueProperty="@nameof(DataSourceListItem.Id)"
+                                            Name="Data Source"
+                                            Context="datasource">
+                        <Columns>
+                            <RadzenDropDownDataGridColumn Property="@nameof(DataSourceListItem.Name)" Title="Name" />
+                            <RadzenDropDownDataGridColumn Property="@nameof(DataSourceListItem.QueryRunnerId)" Title="Runner">
+                                <Template Context="data">
+                                    @if (data is DataSourceListItem item && item != null)
+                                    {
+                                        <QueryRunnerDisplay Name="@item.QueryRunnerName" RunnerIcon="@item.QueryRunnerIcon" />
+                                    }
+                                </Template>
+                            </RadzenDropDownDataGridColumn>
+                        </Columns>
+                        <ValueTemplate>
+                            @if (datasource is DataSourceListItem item && item != null)
+                            {
+                                @item.Name @:-
+                                <QueryRunnerDisplay Name="@item.QueryRunnerName" RunnerIcon="@item.QueryRunnerIcon" />
+                            }
+                        </ValueTemplate>
+                    </RadzenDropDownDataGrid>
+                </RadzenFormField>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow>
+            <RadzenColumn>
+                <RadzenFormField Text="Description" class="w-100">
+                    <RadzenTextBox @bind-Value="@QueryEditorInput.Description" Name="Description" AutoComplete="false" />
+                    <RadzenLengthValidator Component="Description" Max="500" Popup />
+                </RadzenFormField>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow class="flex-container">
+            <RadzenColumn Size="12" Style="padding-top: 4px; padding-bottom: 4px">
+                <StandaloneCodeEditor Id="query-editor" ConstructionOptions="EditorConstructionOptions" @ref="_editor" CssClass="query-editor w-100 h-100" OnDidInit="EditorInitializedAsync" />
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow>
+            <RadzenColumn Size="12">
+                <RadzenButton ButtonStyle="ButtonStyle.Secondary" ButtonType="ButtonType.Button">Cancel</RadzenButton>
+                <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit">Save</RadzenButton>
+            </RadzenColumn>
+        </RadzenRow>
+    </RadzenTemplateForm>
+}
