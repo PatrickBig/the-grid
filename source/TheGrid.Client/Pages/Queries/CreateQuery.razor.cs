@@ -2,10 +2,11 @@
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
-using BlazorMonaco.Editor;
+using Mapster;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Forms;
 using System.Net.Http.Json;
+using TheGrid.Client.Shared;
+using TheGrid.Client.Shared.Queries;
 using TheGrid.Shared.Models;
 
 namespace TheGrid.Client.Pages.Queries
@@ -13,54 +14,24 @@ namespace TheGrid.Client.Pages.Queries
     /// <summary>
     /// Code behind for the query creation page.
     /// </summary>
-    public partial class CreateQuery : QueryBase
+    public partial class CreateQuery : TheGridComponentBase
     {
-        private readonly CreateQueryRequest _input = new();
-        private StandaloneCodeEditor? _editor;
+        private readonly QueryEditorInput _input = new();
 
-        /// <inheritdoc/>
-        protected override void OnInitialized()
+        [Inject]
+        private NavigationManager NavigationManager { get; set; } = null!;
+
+        private async Task SaveQueryAsync(QueryEditorInput input)
         {
-            base.OnInitialized();
-        }
+            var createRequest = input.Adapt<CreateQueryRequest>();
+            var response = await HttpClient.PostAsJsonAsync($"/api/v1/Queries", createRequest, CancellationToken);
 
-        private async Task CreateQueryAsync(CreateQueryRequest request)
-        {
-            if (_editor != null)
+            if (response != null)
             {
-                _input.Command = await _editor.GetValue();
-            }
-
-            await HttpClient.PostAsJsonAsync("/api/v1/Queries", _input);
-        }
-
-        private StandaloneEditorConstructionOptions EditorConstructionOptions(StandaloneCodeEditor editor)
-        {
-            return new StandaloneEditorConstructionOptions
-            {
-                AutomaticLayout = true,
-                Language = "unknown",
-            };
-        }
-
-        private async Task DataSourceChangedAsync(int? dataSourceId)
-        {
-            if (dataSourceId != null)
-            {
-                _input.DataSourceId = dataSourceId.Value;
-            }
-
-            if (_editor != null)
-            {
-                if (dataSourceId != null)
+                var creationResponse = await response.Content.ReadFromJsonAsync<CreateQueryResponse>(cancellationToken: CancellationToken);
+                if (creationResponse != null)
                 {
-                    var dataSource = DataSources.FirstOrDefault(d => d.Id == dataSourceId);
-
-                    if (dataSource != null)
-                    {
-                        var model = await _editor.GetModel();
-                        await Global.SetModelLanguage(model, dataSource.QueryRunnerEditorLanguage ?? "unknown");
-                    }
+                    NavigationManager.NavigateTo($"/Queries/{creationResponse.QueryId}");
                 }
             }
         }

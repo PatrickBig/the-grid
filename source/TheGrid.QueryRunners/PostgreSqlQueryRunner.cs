@@ -4,6 +4,7 @@
 
 using Dapper;
 using Npgsql;
+using TheGrid.QueryRunners.Extensions;
 
 namespace TheGrid.QueryRunners
 {
@@ -15,7 +16,7 @@ namespace TheGrid.QueryRunners
     [QueryRunnerParameter(CommonConnectionParameters.DatabaseName, QueryRunnerParameterType.SingleLineText, Required = true)]
     [QueryRunnerParameter(CommonConnectionParameters.Username, QueryRunnerParameterType.SingleLineText, Required = true)]
     [QueryRunnerParameter(CommonConnectionParameters.Password, QueryRunnerParameterType.ProtectedText, Required = true)]
-    public class PostgreSqlQueryRunner : QueryRunnerBase, ISchemaDiscovery
+    public class PostgreSqlQueryRunner : QueryRunnerBase, ISchemaDiscovery, IConnectionTest
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="PostgreSqlQueryRunner"/> class.
@@ -176,14 +177,28 @@ namespace TheGrid.QueryRunners
             return results;
         }
 
-        private static List<string> GetColumns(NpgsqlDataReader reader)
+        /// <inheritdoc/>
+        public async Task<bool> TestConnectionAsync(CancellationToken cancellationToken = default)
         {
-            var columns = new List<string>();
+            await using var connection = GetConnection(RunnerParameters);
+
+            await connection.OpenAsync(cancellationToken);
+
+            await using var command = new NpgsqlCommand("select 1", connection);
+
+            return true;
+        }
+
+        private static Dictionary<string, QueryResultColumn> GetColumns(NpgsqlDataReader reader)
+        {
+            var columns = new Dictionary<string, QueryResultColumn>();
 
             // Write out the field names
             for (int i = 0; i < reader.FieldCount; i++)
             {
-                columns.Add(reader.GetName(i));
+                var field = reader.GetName(i);
+                var type = reader.GetFieldType(i).GetQueryResultColumnTypeForType();
+                columns.Add(field, new QueryResultColumn { Type = type, DisplayName = field });
             }
 
             return columns;

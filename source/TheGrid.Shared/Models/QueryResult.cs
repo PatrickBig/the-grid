@@ -10,9 +10,9 @@ namespace TheGrid.Shared.Models
     public class QueryResult
     {
         /// <summary>
-        /// List of column names from the results.
+        /// Columns from the results.
         /// </summary>
-        public List<string> Columns { get; set; } = new();
+        public Dictionary<string, QueryResultColumn> Columns { get; set; } = new();
 
         /// <summary>
         /// Data from the query.
