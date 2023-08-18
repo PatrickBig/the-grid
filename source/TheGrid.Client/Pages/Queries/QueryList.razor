@@ -1,0 +1,27 @@
+﻿@page "/Queries"
+@namespace TheGrid.Client.Pages
+
+<RadzenLink Path="/Queries/Create" Text="Create new" />
+<RadzenDataGrid
+    Data="_items"
+    Count="_totalItems"
+    LoadData="OnLoadDataAsync"
+    TItem="QueryListItem"
+    IsLoading="_isLoading"
+    AllowSorting>
+    <Columns>
+        <RadzenDataGridColumn TItem="QueryListItem" Property="@(nameof(QueryListItem.Name))" Title="Name">
+            <Template>
+                <RadzenLink Path="@($"/Queries/{context.Id}")" Text="@context.Name" />
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="QueryListItem" Property="@(nameof(QueryListItem.Description))" Title="Description" />
+        <RadzenDataGridColumn TItem="QueryListItem" Property="@(nameof(QueryListItem.ResultState))" Title="State" />
+        <RadzenDataGridColumn TItem="QueryListItem" Property="@(nameof(QueryListItem.ResultsRefreshed))" Title="Last Refresh" />
+        <RadzenDataGridColumn TItem="QueryListItem" Property="@(nameof(QueryListItem.Tags))" Title="Tags">
+            <Template Context="details">
+                <TagsDisplay Tags="@details?.Tags" />
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>

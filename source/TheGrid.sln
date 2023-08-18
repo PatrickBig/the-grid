@@ -1,0 +1,83 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33213.308
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheGrid.Server", "TheGrid.Server\TheGrid.Server.csproj", "{17B79226-272C-40D7-AE69-83CA70F92A7A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheGrid.QueryRunners", "TheGrid.QueryRunners\TheGrid.QueryRunners.csproj", "{50DB72B7-1DBF-41E8-B286-0071EB36A02D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheGrid.Shared", "TheGrid.Shared\TheGrid.Shared.csproj", "{01543EC6-F7BF-40FD-B56A-71C2C88250C7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{774D035D-7A8F-49C0-A577-0B4B540B7A24}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheGrid.QueryRunners.Integration.Tests", "tests\TheGrid.QueryRunners.Integration.Tests\TheGrid.QueryRunners.Integration.Tests.csproj", "{51B382DE-C79C-4ABB-A6C6-5B41BAC9919B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheGrid.Services", "TheGrid.Services\TheGrid.Services.csproj", "{E921BA7C-5938-4FB7-B48F-F25305D4D433}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheGrid.Models", "TheGrid.Models\TheGrid.Models.csproj", "{A6C79963-152F-4AE3-81BF-1B6BD5A24FF3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{50B36448-6A56-4689-83ED-34194592DA39}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheGrid.Data", "TheGrid.Data\TheGrid.Data.csproj", "{4D758B6C-5410-4CDB-A58E-0CBA7D19988B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Database Providers", "Database Providers", "{003B3AED-ACFC-4B9A-90FD-195E056BEEA8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheGrid.Postgres", "TheGrid.Postgres\TheGrid.Postgres.csproj", "{D3D0D416-A8FF-489F-8AFA-A50727CE62F7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheGrid.Client", "TheGrid.Client\TheGrid.Client.csproj", "{52AA27C8-FBD6-42DE-A472-C2600F7EA08E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{17B79226-272C-40D7-AE69-83CA70F92A7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{17B79226-272C-40D7-AE69-83CA70F92A7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{17B79226-272C-40D7-AE69-83CA70F92A7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{17B79226-272C-40D7-AE69-83CA70F92A7A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{50DB72B7-1DBF-41E8-B286-0071EB36A02D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{50DB72B7-1DBF-41E8-B286-0071EB36A02D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{50DB72B7-1DBF-41E8-B286-0071EB36A02D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{50DB72B7-1DBF-41E8-B286-0071EB36A02D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{01543EC6-F7BF-40FD-B56A-71C2C88250C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{01543EC6-F7BF-40FD-B56A-71C2C88250C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{01543EC6-F7BF-40FD-B56A-71C2C88250C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{01543EC6-F7BF-40FD-B56A-71C2C88250C7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{51B382DE-C79C-4ABB-A6C6-5B41BAC9919B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{51B382DE-C79C-4ABB-A6C6-5B41BAC9919B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{51B382DE-C79C-4ABB-A6C6-5B41BAC9919B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{51B382DE-C79C-4ABB-A6C6-5B41BAC9919B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E921BA7C-5938-4FB7-B48F-F25305D4D433}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E921BA7C-5938-4FB7-B48F-F25305D4D433}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E921BA7C-5938-4FB7-B48F-F25305D4D433}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E921BA7C-5938-4FB7-B48F-F25305D4D433}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A6C79963-152F-4AE3-81BF-1B6BD5A24FF3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A6C79963-152F-4AE3-81BF-1B6BD5A24FF3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A6C79963-152F-4AE3-81BF-1B6BD5A24FF3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A6C79963-152F-4AE3-81BF-1B6BD5A24FF3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4D758B6C-5410-4CDB-A58E-0CBA7D19988B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D758B6C-5410-4CDB-A58E-0CBA7D19988B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D758B6C-5410-4CDB-A58E-0CBA7D19988B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D758B6C-5410-4CDB-A58E-0CBA7D19988B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D3D0D416-A8FF-489F-8AFA-A50727CE62F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D3D0D416-A8FF-489F-8AFA-A50727CE62F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D3D0D416-A8FF-489F-8AFA-A50727CE62F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D3D0D416-A8FF-489F-8AFA-A50727CE62F7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{52AA27C8-FBD6-42DE-A472-C2600F7EA08E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{52AA27C8-FBD6-42DE-A472-C2600F7EA08E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{52AA27C8-FBD6-42DE-A472-C2600F7EA08E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{52AA27C8-FBD6-42DE-A472-C2600F7EA08E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{51B382DE-C79C-4ABB-A6C6-5B41BAC9919B} = {774D035D-7A8F-49C0-A577-0B4B540B7A24}
+		{D3D0D416-A8FF-489F-8AFA-A50727CE62F7} = {003B3AED-ACFC-4B9A-90FD-195E056BEEA8}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B47BC8D3-4D25-49B8-8646-D1A69B540949}
+	EndGlobalSection
+EndGlobal

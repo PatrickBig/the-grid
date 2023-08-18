@@ -1,0 +1,62 @@
+﻿@page "/DataSources"
+@using TheGrid.Shared.Models
+
+<PageTitle>Data Sources</PageTitle>
+
+<RadzenText TextStyle="TextStyle.DisplayH2">Data Sources</RadzenText>
+
+<RadzenLink Path="/DataSources/Create">Create new</RadzenLink>
+
+@if (_items != null)
+{
+    <RadzenDataGrid
+        Data="_items"
+        Count="_totalItems"
+        TItem="DataSourceListItem"
+        AllowSorting>
+        <Columns>
+            <RadzenDataGridColumn TItem="DataSourceListItem" Property="@nameof(DataSourceListItem.Name)" Title="Name" />
+            <RadzenDataGridColumn TItem="DataSourceListItem" Property="@nameof(DataSourceListItem.QueryRunnerName)" Title="Runner">
+                <Template>
+                    <QueryRunnerDisplay Name="@context.QueryRunnerName" RunnerIcon="@context.QueryRunnerIcon" />
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+}
+else
+{
+    <div class="rz-m-12">
+        <RadzenProgressBar Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+    </div>
+}
+
+@code {
+    private IEnumerable<DataSourceListItem> _items = Enumerable.Empty<DataSourceListItem>();
+    private int _totalItems;
+
+    [CascadingParameter]
+    private UserOrganization UserOrganization { get; set; } = null!;
+
+    [Inject]
+    private HttpClient HttpClient { get; set; } = null!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var response = await HttpClient.GetAsync("/api/v1/DataSources?organization=" + UserOrganization.Slug);
+        if (response.IsSuccessStatusCode && response.Content != null)
+        {
+            var data = await response.Content.ReadFromJsonAsync<PaginatedResult<DataSourceListItem>>();
+
+            if (data != null)
+            {
+                _items = data.Items;
+                _totalItems = data.TotalItems;
+            }
+        }
+        else
+        {
+            
+        }
+    }
+}

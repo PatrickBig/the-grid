@@ -1,0 +1,12 @@
+# NOTE: Requires **VS2019 16.3** or later
+
+# Standard rules
+# Description: Set of rules used in TheGrid project
+
+# Code files
+[*.{cs,vb}]
+
+
+dotnet_diagnostic.SA1101.severity = none
+dotnet_diagnostic.SA1309.severity = none
+dotnet_diagnostic.SA1623.severity = none

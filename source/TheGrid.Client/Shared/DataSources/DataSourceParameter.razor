@@ -1,0 +1,20 @@
+﻿
+@if (QueryRunnerParameter != null)
+{
+    <RadzenFormField Text="@QueryRunnerParameter.Name">
+        @if (QueryRunnerParameter.Type == QueryRunnerParameterType.SingleLineText)
+        {
+            <RadzenTextBox Name="@QueryRunnerParameter.Name" Change="OnValueChangedAsync" AutoComplete=false />
+        }
+        else if (QueryRunnerParameter.Type == QueryRunnerParameterType.ProtectedText)
+        {
+            <RadzenPassword Name="@QueryRunnerParameter.Name" Change="OnValueChangedAsync" AutoComplete=false />
+        }
+
+        @if (QueryRunnerParameter.Required)
+        {
+            <RadzenRequiredValidator Component="@QueryRunnerParameter.Name" Popup/>
+        }
+    </RadzenFormField>
+    
+}
