@@ -1,0 +1,21 @@
+﻿<RadzenTabs RenderMode="TabRenderMode.Client">
+    <Tabs>
+        <RadzenTabsItem Text="Table">
+            <TheGrid.Client.Shared.Visualizations.Table QueryId="QueryId" />
+        </RadzenTabsItem>
+        <RadzenTabsItem Text="Bar Chart">
+            <RadzenChart>
+                
+            </RadzenChart>
+        </RadzenTabsItem>
+    </Tabs>
+</RadzenTabs>
+
+@code {
+    /// <summary>
+    /// Identifier for the query to display the visualizations for.
+    /// </summary>
+    [Parameter]
+    [EditorRequired]
+    public int QueryId { get; set; }
+}
