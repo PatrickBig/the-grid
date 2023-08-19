@@ -167,10 +167,35 @@ namespace TheGrid.QueryRunners.Integration.Tests
             }
         }
 
+        /// <summary>
+        /// Tests the ability to test a database connection.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
         public async Task TestConnection_Test()
         {
+            // Arrange
+            var runner = new PostgreSqlQueryRunner(GetConnectionConfiguration());
 
+            // Act
+            var result = await runner.TestConnectionAsync();
+
+            Assert.True(result);
+        }
+
+        /// <summary>
+        /// Tests that an exception is thrown when the connection test fails.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task TestConnection_Fails_Test()
+        {
+            // Arrange
+            var connectionInformation = GetConnectionConfiguration("badhost");
+            var runner = new PostgreSqlQueryRunner(connectionInformation);
+
+            // Act & assert
+            await Assert.ThrowsAnyAsync<Exception>(async () => await runner.TestConnectionAsync());
         }
 
         /// <summary>
@@ -201,17 +226,17 @@ namespace TheGrid.QueryRunners.Integration.Tests
                 ");";
         }
 
-        private static Dictionary<string, string> GetConnectionConfiguration()
+        private static Dictionary<string, string> GetConnectionConfiguration(string host = "localhost", string databaseName = "test")
         {
             return new Dictionary<string, string>
                 {
                     {
                         CommonConnectionParameters.ConnectionString,
-                        "Host=localhost"
+                        "Host=" + host
                     },
                     {
                         CommonConnectionParameters.DatabaseName,
-                        "test"
+                        databaseName
                     },
                     {
                         "Username",
