@@ -62,7 +62,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          ./.sonar/scanner/dotnet-sonarscanner begin /k:"PatrickBig_the-grid" /o:"patrickbig" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.vscoveragexml.reportsPaths=./test/coverage.xml /d:sonar.cs.vstest.reportsPaths=./test/testresults/*.trx
+          ./.sonar/scanner/dotnet-sonarscanner begin /k:"PatrickBig_the-grid" /o:"patrickbig" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.vscoveragexml.reportsPaths=test/coverage.xml /d:sonar.cs.vstest.reportsPaths=test/testresults/*.trx
           dotnet restore ./source/TheGrid.sln
           dotnet build ./source/TheGrid.sln
       - name: Run tests
