@@ -34,6 +34,8 @@ jobs:
           distribution: 'zulu' # Alternative distribution options are available.
       - name: Install dotnet-coverage
         run: dotnet tool install --global dotnet-coverage
+      - name: Install Report Generator
+        run: dotnet tool install --global dotnet-reportgenerator-globaltool
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
@@ -60,13 +62,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          ./.sonar/scanner/dotnet-sonarscanner begin /k:"PatrickBig_the-grid" /o:"patrickbig" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
+          ./.sonar/scanner/dotnet-sonarscanner begin /k:"PatrickBig_the-grid" /o:"patrickbig" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.vscoveragexml.reportsPaths=./test/coverage.xml /d:sonar.cs.vstest.reportsPaths=./test/testresults/*.trx
           dotnet restore ./source/TheGrid.sln
           dotnet build ./source/TheGrid.sln
       - name: Run tests
         run: |
-          dotnet-coverage collect "dotnet test ./source/tests/TheGrid.QueryRunners.Integration.Tests/TheGrid.QueryRunners.Integration.Tests.csproj --logger trx --results-directory ./test/testresults"  -f xml -o "coverage.xml"
-          #reportgenerator -reports:./test/testresults/**/coverage.cobertura.xml -targetdir:./test/coverlet/reports -reporttypes:"SonarQube"
+          dotnet-coverage collect "dotnet test ./source/tests/TheGrid.QueryRunners.Integration.Tests/TheGrid.QueryRunners.Integration.Tests.csproj --logger trx --results-directory ./test/testresults"  -f xml -o ./test/coverage.xml
       - name: Publish test results
         uses: EnricoMi/publish-unit-test-result-action@v2
         with:
