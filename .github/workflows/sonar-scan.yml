@@ -9,12 +9,28 @@ jobs:
   build:
     name: Build and analyze
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: test
+          POSTGRES_HOST_AUTH_METHOD: password
+          POSTGRES_DB: test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
     steps:
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           java-version: 17
           distribution: 'zulu' # Alternative distribution options are available.
+      - name: Install Report Generator
+        run: dotnet tool install --global dotnet-reportgenerator-globaltool
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
@@ -44,4 +60,6 @@ jobs:
           ./.sonar/scanner/dotnet-sonarscanner begin /k:"PatrickBig_the-grid" /o:"patrickbig" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
           dotnet restore ./source/TheGrid.sln
           dotnet build ./source/TheGrid.sln
+          dotnet test ./source/tests/TheGrid.QueryRunners.Integration.Tests/TheGrid.QueryRunners.Integration.Tests.csproj --collect:"XPlat Code Coverage" --logger trx --results-directory $GITHUB_WORKSPACE/test/testresults
+          reportgenerator -reports:$GITHUB_WORKSPACE/test/testresults/**/coverage.cobertura.xml -targetdir:$GITHUB_WORKSPACE/test/coverlet/reports -reporttypes:"SonarQube"
           ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
