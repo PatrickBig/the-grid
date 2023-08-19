@@ -24,7 +24,7 @@ jobs:
         with:
           context: ./source
           push: true
-          tags: patrickbig/the-grid${{ steps.meta.outputs.tags }}
+          tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
       - name: push README to Dockerhub
         uses: christian-korneck/update-container-description-action@v1
@@ -34,5 +34,5 @@ jobs:
         with:
           destination_container_repo: patrickbig/the-grid
           provider: dockerhub
-          short_description: 'my short description 😊'
+          short_description: 'the-grid is yet another data visualization tool! 😊'
           readme_file: 'README.md'
