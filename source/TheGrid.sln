@@ -18,6 +18,10 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheGrid.Models", "TheGrid.Models\TheGrid.Models.csproj", "{A6C79963-152F-4AE3-81BF-1B6BD5A24FF3}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{50B36448-6A56-4689-83ED-34194592DA39}"
+	ProjectSection(SolutionItems) = preProject
+		Dockerfile = Dockerfile
+		..\README.md = ..\README.md
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheGrid.Data", "TheGrid.Data\TheGrid.Data.csproj", "{4D758B6C-5410-4CDB-A58E-0CBA7D19988B}"
 EndProject
