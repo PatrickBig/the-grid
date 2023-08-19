@@ -67,15 +67,15 @@ jobs:
           #reportgenerator -reports:$GITHUB_WORKSPACE/test/testresults/**/coverage.cobertura.xml -targetdir:$GITHUB_WORKSPACE/test/coverlet/reports -reporttypes:"SonarQube"
       - name: Run tests
         run: |
-          dotnet test ./source/tests/TheGrid.QueryRunners.Integration.Tests/TheGrid.QueryRunners.Integration.Tests.csproj --collect:"XPlat Code Coverage" --logger trx --results-directory $GITHUB_WORKSPACE/test/testresults
-          reportgenerator -reports:$GITHUB_WORKSPACE/test/testresults/**/coverage.cobertura.xml -targetdir:$GITHUB_WORKSPACE/test/coverlet/reports -reporttypes:"SonarQube"
+          dotnet test ./source/tests/TheGrid.QueryRunners.Integration.Tests/TheGrid.QueryRunners.Integration.Tests.csproj --collect:"XPlat Code Coverage" --logger trx --results-directory ./test/testresults
+          reportgenerator -reports:./test/testresults/**/coverage.cobertura.xml -targetdir:./test/coverlet/reports -reporttypes:"SonarQube"
       - name: Publish test results
         uses: EnricoMi/publish-unit-test-result-action@v2
         with:
           files: |
-            $GITHUB_WORKSPACE/test/testresults/**/*.xml
-            $GITHUB_WORKSPACE/test/testresults/**/*.trx
-            $GITHUB_WORKSPACE/test/testresults/**/*.json
+            ./test/testresults/**/*.xml
+            ./test/testresults/**/*.trx
+            ./test/testresults/**/*.json
       - name: Publish SonarScan to SonarCloud
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
