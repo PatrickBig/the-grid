@@ -1,0 +1,38 @@
+name: Publish Docker image
+on:
+  release:
+    types: [published]
+jobs:
+  build_and_push:
+    name: Build and push Docker image to Docker Hub
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+      - name: Login to Dockerhub
+        uses: docker/login-action@v2.2.0
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4.6.0
+        with:
+          images: patrickbig/the-grid
+      - name: Build and push
+        uses: docker/build-push-action@v4.1.1
+        with:
+          context: ./source
+          push: true
+          tags: patrickbig/the-grid${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+      - name: push README to Dockerhub
+        uses: christian-korneck/update-container-description-action@v1
+        env:
+          DOCKER_USER: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKER_PASS: ${{ secrets.DOCKERHUB_PASSWORD }}
+        with:
+          destination_container_repo: patrickbig/the-grid
+          provider: dockerhub
+          short_description: 'my short description 😊'
+          readme_file: 'README.md'
