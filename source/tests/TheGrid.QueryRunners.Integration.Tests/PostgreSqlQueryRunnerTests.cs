@@ -76,7 +76,7 @@ namespace TheGrid.QueryRunners.Integration.Tests
             _output.WriteLine("Found the following columns:");
             foreach (var column in results.Columns)
             {
-                _output.WriteLine(column);
+                _output.WriteLine(column.Key);
             }
         }
 
