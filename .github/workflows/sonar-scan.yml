@@ -5,6 +5,9 @@ on:
       - main
   pull_request:
     types: [opened, synchronize, reopened]
+permissions:
+  checks: write
+  pull-requests: write
 jobs:
   build:
     name: Build and analyze
@@ -66,11 +69,13 @@ jobs:
         run: |
           dotnet test ./source/tests/TheGrid.QueryRunners.Integration.Tests/TheGrid.QueryRunners.Integration.Tests.csproj --collect:"XPlat Code Coverage" --logger trx --results-directory $GITHUB_WORKSPACE/test/testresults
           reportgenerator -reports:$GITHUB_WORKSPACE/test/testresults/**/coverage.cobertura.xml -targetdir:$GITHUB_WORKSPACE/test/coverlet/reports -reporttypes:"SonarQube"
-      - name: Upload test results
-        uses: actions/upload-artifact@v3
+      - name: Publish test results
+        uses: EnricoMi/publish-unit-test-result-action@v2
         with:
-          name: 'Test Results'
-          path: $GITHUB_WORKSPACE/test/
+          files: |
+            $GITHUB_WORKSPACE/test/testresults/**/*.xml
+            $GITHUB_WORKSPACE/test/testresults/**/*.trx
+            $GITHUB_WORKSPACE/test/testresults/**/*.json
       - name: Publish SonarScan to SonarCloud
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
