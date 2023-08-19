@@ -44,14 +44,7 @@ namespace TheGrid.QueryRunners.Integration.Tests
         /// <inheritdoc/>
         public void Dispose()
         {
-            if (_connection != null)
-            {
-                var dropTableCommand = new NpgsqlCommand("drop table " + _testTableName, _connection);
-                dropTableCommand.ExecuteNonQuery();
-                _connection.Close();
-                _connection.Dispose();
-            }
-
+            Dispose(true);
             GC.SuppressFinalize(this);
         }
 
@@ -178,6 +171,22 @@ namespace TheGrid.QueryRunners.Integration.Tests
         public async Task TestConnection_Test()
         {
 
+        }
+
+        /// <summary>
+        /// Cleans up the test environment.
+        /// </summary>
+        /// <param name="disposing">Set to true if disposing.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            // Cleanup
+            if (_connection != null)
+            {
+                var dropTableCommand = new NpgsqlCommand("drop table " + _testTableName, _connection);
+                dropTableCommand.ExecuteNonQuery();
+                _connection.Close();
+                _connection.Dispose();
+            }
         }
 
         private static string GetCreateTestTableQuery(string tableName)
