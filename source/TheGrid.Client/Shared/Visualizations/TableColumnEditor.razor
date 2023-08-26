@@ -1,0 +1,53 @@
+﻿@if (Options != null)
+{
+    <RadzenTemplateForm Data="Options" Submit="@((TableVisualizationOptions options) => { Submit(options); })">
+        <RadzenRow>
+            <RadzenColumn>
+                <RadzenStack>
+                    @foreach (var column in Options.Columns)
+                    {
+                        <RadzenFieldset Text="@column.Key">
+                            <RadzenStack Orientation="Orientation.Horizontal" Gap="1rem" Wrap="FlexWrap.Wrap">
+                                <VisibilityToggle @bind-Value="@column.Value.Visible" />
+                                <RadzenFormField Text="Display Name" class="w-100">
+                                    <RadzenTextBox @bind-Value="column.Value.DisplayName" />
+                                </RadzenFormField>
+
+                            </RadzenStack>
+                            <RadzenFormField Text="Type" class="w-100">
+                                <RadzenDropDown Data="_columnTypes" @bind-Value="column.Value.Type" />
+                            </RadzenFormField>
+                            @if (column.Value.Type is not QueryResultColumnType.Text)
+                            {
+                                <RadzenFormField Text="Display Format" class="w-100">
+                                    <RadzenTextBox @bind-Value="column.Value.DisplayFormat" />
+                                </RadzenFormField>
+                            }
+                        </RadzenFieldset>
+                    }
+                </RadzenStack>
+            </RadzenColumn>
+        </RadzenRow>
+    </RadzenTemplateForm>
+}
+
+
+@code {
+    private IEnumerable<ColumnOptionEditorInput>? _columns;
+
+    private IEnumerable<QueryResultColumnType> _columnTypes = Enum.GetValues(typeof(QueryResultColumnType)).Cast<QueryResultColumnType>();
+
+    [Parameter]
+    [EditorRequired]
+    public TableVisualizationOptions? Options { get; set; }
+
+    private class ColumnOptionEditorInput : TableColumn
+    {
+        public string Name { get; set; }
+    }
+
+    private void Submit(TableVisualizationOptions options)
+    {
+        
+    }
+}

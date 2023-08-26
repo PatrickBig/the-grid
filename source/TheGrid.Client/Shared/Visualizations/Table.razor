@@ -1,29 +1,42 @@
 ﻿@inherits TheGridComponentBase
+
 <RadzenDataGrid
     Data="_data"
     TItem="Dictionary<string, object>"
     Count="_totalItems"
     LoadData="OnLoadDataAsync"
-    ColumnWidth="200px"
     IsLoading="_isLoading"
     AllowPaging
+    Style="height: 100%;"
+    PageSize="15"
     AllowSorting="false"
-    >
+    Density="Density.Compact"
+    ColumnResized="OnColumnResize">
     <Columns>
-        <RadzenDataGridColumn TItem="string" Title="Some column">
-            <Template>
-                test content
-            </Template>
-        </RadzenDataGridColumn>
-        @foreach (var kv in _columns)
+        @foreach (var kv in TableVisualization.Columns.OrderBy(c => c.Value.DisplayOrder))
         {
             <RadzenDataGridColumn
                 TItem="Dictionary<string, object>"
                 Title="@(kv.Value.DisplayName ?? kv.Key)"
                 Type="@GetTypeForColumnType(kv.Value.Type)"
-                Property="@GetPropertyExpression(kv.Key)">
+                Property="@kv.Key">
                 <Template>
-                    @context[kv.Key]
+                    @if (string.IsNullOrEmpty(kv.Value.DisplayFormat) || kv.Value.Type == QueryResultColumnType.Text)
+                    {
+                        @context[kv.Key]
+                    }
+                    else
+                    {
+                        var value = context[kv.Key];
+
+                        if (value != null)
+                        {
+                            if (kv.Value.Type == QueryResultColumnType.DateTime && value is DateTime dateTimeValue)
+                            {
+                                @dateTimeValue.ToString(kv.Value.DisplayFormat)
+                            }
+                        }
+                    }
                 </Template>
             </RadzenDataGridColumn>
         }

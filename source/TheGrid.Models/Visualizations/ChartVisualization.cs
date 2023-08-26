@@ -16,6 +16,7 @@ namespace TheGrid.Models.Visualizations
 
         Line,
     }
+
     public class ChartVisualization : VisualizationBase
     {
         public ChartType Type { get; set; }

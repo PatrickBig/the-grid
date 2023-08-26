@@ -1,0 +1,36 @@
+﻿@inherits FormComponent<bool>
+
+<RadzenButton @ref="_buttonReference" ButtonStyle="ButtonStyle.Light" Icon="@(Value ? "visibility" : "visibility_off")" Click="ToggleVisibility" MouseEnter="@(args => ShowVisbilityHint(args))" />
+
+@code {
+    private RadzenButton _buttonReference = null!;
+
+    [Inject]
+    private TooltipService TooltipService { get; set; } = null!;
+
+    [Inject]
+    private ILogger<VisibilityToggle> Logger { get; set; } = null!;
+
+    private void ShowVisbilityHint(ElementReference elementReference, TooltipOptions? tooltipOptions = null)
+    {
+        try
+        {
+            TooltipService.Open(elementReference, Value ? "Visible" : "Hidden");
+        }
+        catch(Exception ex)
+        {
+            Logger.LogError(ex, "Unable to show tooltip for visibility toggler");
+        }
+
+    }
+
+    private Task ToggleVisibility(MouseEventArgs e)
+    {
+        Value = !Value;
+        ShowVisbilityHint(_buttonReference.Element, null);
+
+        StateHasChanged();
+
+        return Task.CompletedTask;
+    }
+}

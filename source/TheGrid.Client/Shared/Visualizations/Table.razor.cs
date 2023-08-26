@@ -5,8 +5,10 @@
 using Microsoft.AspNetCore.Components;
 using Radzen;
 using System.Net.Http.Json;
+using System.Text.Json;
 using TheGrid.Client.Extensions;
 using TheGrid.Shared.Models;
+using TheGrid.Shared.Utilities;
 
 namespace TheGrid.Client.Shared.Visualizations
 {
@@ -17,8 +19,15 @@ namespace TheGrid.Client.Shared.Visualizations
     {
         private IEnumerable<Dictionary<string, object?>>? _data;
         private int _totalItems;
-        private Dictionary<string, QueryResultColumn> _columns = new();
         private bool _isLoading = true;
+        private JsonSerializerOptions _serializerOptions = new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            Converters =
+            {
+                new QueryDataConverter(),
+            },
+        };
 
         /// <summary>
         /// Identifier for the query to display the visualization for.
@@ -26,6 +35,13 @@ namespace TheGrid.Client.Shared.Visualizations
         [Parameter]
         [EditorRequired]
         public int QueryId { get; set; }
+
+        /// <summary>
+        /// Table visualization options.
+        /// </summary>
+        [Parameter]
+        [EditorRequired]
+        public TableVisualizationOptions TableVisualization { get; set; } = null!;
 
         private static Type GetTypeForColumnType(QueryResultColumnType type)
         {
@@ -42,26 +58,28 @@ namespace TheGrid.Client.Shared.Visualizations
             };
         }
 
-        private static string GetPropertyExpression(string columnName)
+        private Task OnColumnResize(DataGridColumnResizedEventArgs<Dictionary<string, object?>> args)
         {
-            var expression = $@"it[""{columnName}""].ToString()";
-            return expression;
+            if (TableVisualization.Columns.TryGetValue(args.Column.Property, out var column))
+            {
+                column.Width = args.Width;
+            }
+
+            return Task.CompletedTask;
         }
 
         private async Task OnLoadDataAsync(LoadDataArgs e)
         {
             _isLoading = true;
-            var response = await HttpClient.GetFromJsonAsync<PaginatedQueryResult>(e.GetQueryUrl($"api/v1/QueryResults/{QueryId}"));
+            var response = await HttpClient.GetFromJsonAsync<PaginatedQueryResult>(e.GetQueryUrl($"api/v1/QueryResults/{QueryId}"), _serializerOptions, CancellationToken);
 
             if (response != null)
             {
                 _totalItems = response.TotalItems;
                 _data = response.Items;
-                _columns = response.Columns;
             }
 
             _isLoading = false;
         }
-
     }
 }

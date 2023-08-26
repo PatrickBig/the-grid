@@ -45,7 +45,7 @@ namespace TheGrid.Server.Controllers
         public async Task<ActionResult> GetResults(
             [FromRoute] int queryId,
             [FromQuery] int skip = 0,
-            [FromQuery][Range(1, 200)] int take = 25,
+            [FromQuery][Range(1, 1500)] int take = 100,
             CancellationToken cancellationToken = default)
         {
             var queryBase = _db.QueryResultRows

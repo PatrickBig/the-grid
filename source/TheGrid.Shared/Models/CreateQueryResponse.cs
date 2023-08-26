@@ -2,16 +2,16 @@
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace TheGrid.Shared.Models
 {
+    /// <summary>
+    /// Response message after creating a new query.
+    /// </summary>
     public class CreateQueryResponse
     {
+        /// <summary>
+        /// Unique identifer of the newly created query.
+        /// </summary>
         public int QueryId { get; set; }
     }
 }

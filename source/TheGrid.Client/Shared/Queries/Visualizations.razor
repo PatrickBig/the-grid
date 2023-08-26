@@ -1,21 +1,88 @@
-﻿<RadzenTabs RenderMode="TabRenderMode.Client">
-    <Tabs>
-        <RadzenTabsItem Text="Table">
-            <TheGrid.Client.Shared.Visualizations.Table QueryId="QueryId" />
-        </RadzenTabsItem>
-        <RadzenTabsItem Text="Bar Chart">
-            <RadzenChart>
+﻿<RadzenStack Orientation="Orientation.Vertical">
+    <RadzenRow>
+        <RadzenTabs RenderMode="TabRenderMode.Client" Style="height: 100%;">
+            <Tabs>
+                <RadzenTabsItem Text="Table" Style="height: 100%;">
+                    <TheGrid.Client.Shared.Visualizations.Table QueryId="QueryId" TableVisualization="_tableVisualization" />
+                </RadzenTabsItem>
+                <RadzenTabsItem Text="Bar Chart">
+                    <RadzenChart>
                 
-            </RadzenChart>
-        </RadzenTabsItem>
-    </Tabs>
-</RadzenTabs>
+                    </RadzenChart>
+                </RadzenTabsItem>
+            </Tabs>
+        </RadzenTabs>
+    </RadzenRow>
+    <RadzenRow>
+        <RadzenButton ButtonStyle="ButtonStyle.Light" ButtonType="ButtonType.Button" Click="ShowOptionsDialog">Options</RadzenButton>
+    </RadzenRow>
+</RadzenStack>
+
 
 @code {
+    private RadzenDialog? _optionsEditor;
     /// <summary>
     /// Identifier for the query to display the visualizations for.
     /// </summary>
     [Parameter]
     [EditorRequired]
     public int QueryId { get; set; }
+
+    private readonly TableVisualizationOptions _tableVisualization = new()
+        {
+            Id = 1,
+            Name = "Table",
+            Columns = new()
+            {
+                {
+                    "id",
+                    new TableColumn
+                    {
+                        DisplayName = "ID",
+                        Type = QueryResultColumnType.Integer,
+                        DisplayOrder = 1,
+                    }
+                },
+                {
+                    "sometext",
+                    new TableColumn
+                    {
+                        DisplayName = "Some Text",
+                        Type = QueryResultColumnType.Text,
+                        DisplayOrder = 2,
+                    }
+                },
+                {
+                    "somenumber",
+                    new TableColumn
+                    {
+                        DisplayName = "Some Number",
+                        Type = QueryResultColumnType.Integer,
+                        DisplayOrder = 3,
+                    }
+                },
+                {
+                    "somedate",
+                    new TableColumn
+                    {
+                        DisplayName = "Some Date",
+                        Type = QueryResultColumnType.DateTime,
+                        DisplayOrder = 1,
+                        DisplayFormat = "yyyy-MM-dd"
+                    }
+                },
+            }
+        };
+
+
+    [Inject]
+    private DialogService DialogService { get; set; } = null!;
+
+    private async Task ShowOptionsDialog(MouseEventArgs e)
+    {
+        DialogService.Open("Table Options", ds =>
+        @<TheGrid.Client.Shared.Visualizations.TableColumnEditor Options=_tableVisualization />);
+    }
+
+    
 }
