@@ -33,18 +33,12 @@
 
 
 @code {
-    private IEnumerable<ColumnOptionEditorInput>? _columns;
 
     private IEnumerable<QueryResultColumnType> _columnTypes = Enum.GetValues(typeof(QueryResultColumnType)).Cast<QueryResultColumnType>();
 
     [Parameter]
     [EditorRequired]
     public TableVisualizationOptions? Options { get; set; }
-
-    private class ColumnOptionEditorInput : TableColumn
-    {
-        public string Name { get; set; }
-    }
 
     private void Submit(TableVisualizationOptions options)
     {
