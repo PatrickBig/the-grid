@@ -3,13 +3,13 @@
 // </copyright>
 
 using System.ComponentModel.DataAnnotations;
-using TheGrid.QueryRunners.Models;
+using TheGrid.Connectors.Models;
 using TheGrid.Shared.Models;
 
 namespace TheGrid.Models
 {
     /// <summary>
-    /// A mechanism to run a query from using a query runner.
+    /// A mechanism to run a query from using a connector.
     /// </summary>
     public class DataSource
     {
@@ -44,12 +44,12 @@ namespace TheGrid.Models
         public string QueryRunnerId { get; set; } = string.Empty;
 
         /// <summary>
-        /// Navigation property to the query runner used to execute queries for the data source.
+        /// Navigation property to the connector used to execute queries for the data source.
         /// </summary>
         public QueryRunner? QueryRunner { get; set; }
 
         /// <summary>
-        /// Extra properties passed to the query runner used to connect. This often contains connection strings, username, password, etc.
+        /// Extra properties passed to the connector used to connect. This often contains connection strings, username, password, etc.
         /// </summary>
         /// <remarks>
         /// This value is encrypted in the database when stored.

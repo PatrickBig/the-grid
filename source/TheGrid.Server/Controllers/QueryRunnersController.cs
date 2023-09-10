@@ -11,7 +11,7 @@ using TheGrid.Data;
 namespace TheGrid.Server.Controllers
 {
     /// <summary>
-    /// Gets information about the query runners available in the system.
+    /// Gets information about the connectors available in the system.
     /// </summary>
     [Route("api/v{version:apiVersion}/[controller]")]
     [ApiController]
@@ -31,10 +31,10 @@ namespace TheGrid.Server.Controllers
         }
 
         /// <summary>
-        /// Gets all of the supported query runners in The Grid.
+        /// Gets all of the supported connectors in The Grid.
         /// </summary>
         /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>All of the available query runners in the system.</returns>
+        /// <returns>All of the available connectors in the system.</returns>
         [HttpGet]
         public async Task<ActionResult> Get(CancellationToken cancellationToken = default)
         {

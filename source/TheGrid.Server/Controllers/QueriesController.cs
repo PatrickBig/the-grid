@@ -7,8 +7,8 @@ using Mapster;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
-using System.Net.Mime;
 using System.Linq.Dynamic.Core;
+using System.Net.Mime;
 using TheGrid.Data;
 using TheGrid.Models;
 using TheGrid.Server.Extensions;
@@ -139,7 +139,7 @@ namespace TheGrid.Server.Controllers
             CancellationToken cancellationToken = default)
         {
             var baseQuery = _db.Queries
-                .Where(q => q.DataSource != null && q.DataSource.Organization != null && q.DataSource.Organization.Slug == organization)
+                .Where(q => q.DataSource != null && q.DataSource.Organization != null && q.DataSource.Organization.Id == organization)
                 .Select(q => new QueryListItem
                 {
                     Id = q.Id,

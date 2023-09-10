@@ -5,9 +5,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Reflection;
+using TheGrid.Connectors;
 using TheGrid.Data;
 using TheGrid.Models;
-using TheGrid.QueryRunners;
 using TheGrid.Shared.Models;
 
 namespace TheGrid.Services
@@ -45,12 +45,12 @@ namespace TheGrid.Services
 
             await ResetQueryAsync(query, cancellationToken);
 
-            // Create the query runner
+            // Create the connector
             var runner = GetQueryRunner(query);
 
             try
             {
-                var results = await runner.RunQueryAsync(query.Command, null, cancellationToken);
+                var results = await runner.GetDataAsync(query.Command, null, cancellationToken);
 
                 foreach (var row in results.Rows)
                 {
@@ -78,11 +78,11 @@ namespace TheGrid.Services
             }
         }
 
-        private IQueryRunner GetQueryRunner(Query query)
+        private IConnector GetQueryRunner(Query query)
         {
-            _logger.LogTrace("Creating query runner for type: {queryRunnerId}", query.DataSource?.QueryRunnerId);
+            _logger.LogTrace("Creating connector for type: {queryRunnerId}", query.DataSource?.QueryRunnerId);
 
-            var runnerAssembly = Assembly.GetAssembly(typeof(IQueryRunner));
+            var runnerAssembly = Assembly.GetAssembly(typeof(IConnector));
 
             if (query.DataSource == null)
             {
@@ -90,7 +90,7 @@ namespace TheGrid.Services
             }
 
             var runnerType = runnerAssembly?.GetType(query.DataSource.QueryRunnerId) ?? throw new ArgumentException("No runner found.");
-            return Activator.CreateInstance(runnerType, query.DataSource.ExecutorParameters) as IQueryRunner ?? throw new InvalidCastException("Unable to create query runner instance from type.");
+            return Activator.CreateInstance(runnerType, query.DataSource.ExecutorParameters) as IConnector ?? throw new InvalidCastException("Unable to create connector instance from type.");
         }
 
         /// <summary>

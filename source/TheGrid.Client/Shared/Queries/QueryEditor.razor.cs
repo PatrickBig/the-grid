@@ -57,7 +57,7 @@ namespace TheGrid.Client.Shared.Queries
         /// <returns>A <see cref = "Task"/> representing the asynchronous operation.</returns>
         private async Task LoadDataSourcesAsync(LoadDataArgs e)
         {
-            var response = await HttpClient.GetAsync(e.GetQueryUrl("/api/v1/DataSources", new() { { "organization", UserOrganization.Slug } }));
+            var response = await HttpClient.GetAsync(e.GetQueryUrl("/api/v1/DataSources", new() { { "organization", UserOrganization.OrganizationId } }));
             if (response.IsSuccessStatusCode && response.Content != null)
             {
                 var data = await response.Content.ReadFromJsonAsync<PaginatedResult<DataSourceListItem>>(cancellationToken: CancellationToken);

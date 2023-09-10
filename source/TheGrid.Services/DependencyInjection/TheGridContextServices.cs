@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using TheGrid.Data;
 using TheGrid.Data.Extensions;
-using TheGrid.Postgres;
 
 namespace Microsoft.Extensions.DependencyInjection
 {

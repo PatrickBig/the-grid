@@ -12,6 +12,6 @@ namespace TheGrid.Shared.Models
         /// <summary>
         /// The unique identifier of the newly created organization.
         /// </summary>
-        public int OrganizationId { get; set; }
+        public string OrganizationId { get; set; } = string.Empty;
     }
 }

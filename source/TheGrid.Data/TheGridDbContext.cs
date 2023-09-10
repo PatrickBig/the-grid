@@ -3,8 +3,8 @@
 // </copyright>
 
 using Microsoft.EntityFrameworkCore;
+using TheGrid.Connectors.Models;
 using TheGrid.Models;
-using TheGrid.QueryRunners.Models;
 using TheGrid.Shared.Models;
 
 namespace TheGrid.Data
@@ -44,7 +44,7 @@ namespace TheGrid.Data
         public DbSet<QueryResultRow> QueryResultRows { get; set; }
 
         /// <summary>
-        /// Query runners.
+        /// connectors.
         /// </summary>
         public DbSet<QueryRunner> QueryRunners { get; set; }
 

@@ -14,7 +14,7 @@
 		<ProjectReference Include="..\TheGrid.Data\TheGrid.Data.csproj" />
 		<ProjectReference Include="..\TheGrid.Models\TheGrid.Models.csproj" />
 		<ProjectReference Include="..\TheGrid.Postgres\TheGrid.Postgres.csproj" />
-		<ProjectReference Include="..\TheGrid.QueryRunners\TheGrid.QueryRunners.csproj" />
+		<ProjectReference Include="..\TheGrid.Connectors\TheGrid.Connectors.csproj" />
 	</ItemGroup>
 
 </Project>

@@ -4,7 +4,6 @@
 
 using Radzen;
 using System.Net;
-using TheGrid.Shared.Models;
 
 namespace TheGrid.Client.Extensions
 {

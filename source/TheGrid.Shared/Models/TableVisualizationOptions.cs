@@ -1,25 +1,19 @@
-﻿// <copyright file="TableVisualization.cs" company="BiglerNet">
+﻿// <copyright file="TableVisualizationOptions.cs" company="BiglerNet">
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace TheGrid.Shared.Models
 {
     public class TableVisualizationOptions : VisualizationOptions
     {
-        
+
 
         public Dictionary<string, TableColumn> Columns { get; set; }
     }
 
     public class TableColumn
     {
-        public string DisplayName { get; set; }
+        public string? DisplayName { get; set; }
 
         public QueryResultColumnType Type { get; set; } = QueryResultColumnType.Text;
 
@@ -31,6 +25,8 @@ namespace TheGrid.Shared.Models
         public bool Visible { get; set; } = true;
 
         public string? DisplayFormat { get; set; }
+
+        public string? DisplayTemplate { get; set; }
 
         public double? Width { get; set; }
     }

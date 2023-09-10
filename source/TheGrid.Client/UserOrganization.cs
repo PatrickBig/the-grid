@@ -12,12 +12,7 @@ namespace TheGrid.Client
         /// <summary>
         /// Unique identifier for the current organization.
         /// </summary>
-        public int OrganizationId { get; set; }
-
-        /// <summary>
-        /// Short name / slug that represents the organization.
-        /// </summary>
-        public string Slug { get; set; } = string.Empty;
+        public string OrganizationId { get; set; } = string.Empty;
 
         /// <summary>
         /// Name of the organization.

@@ -3,7 +3,7 @@
 // </copyright>
 
 using Mapster;
-using TheGrid.QueryRunners.Models;
+using TheGrid.Connectors.Models;
 using TheGrid.Shared.Models;
 
 namespace TheGrid.Server

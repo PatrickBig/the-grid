@@ -3,7 +3,7 @@
 // </copyright>
 
 using System.Reflection;
-using TheGrid.QueryRunners;
+using TheGrid.Connectors;
 
 namespace TheGrid.Services
 {
@@ -24,13 +24,13 @@ namespace TheGrid.Services
         }
 
         /// <summary>
-        /// Gets the types that implement IQueryRunner.
+        /// Gets the types that implement IConnector.
         /// </summary>
         /// <typeparam name="T">The type to check.</typeparam>
         /// <returns>A list of types.</returns>
         /// <exception cref="ArgumentNullException">Thrown if the assembly is null.</exception>
         public static IEnumerable<T> GetEnumerableOfType<T>()
-            where T : class, IQueryRunner
+            where T : class, IConnector
         {
             var assembly = Assembly.GetAssembly(typeof(T));
 

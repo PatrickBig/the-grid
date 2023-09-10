@@ -27,10 +27,10 @@ namespace TheGrid.Shared.Models
         /// This ID must be valid and have a corresponding Organization.
         /// </remarks>
         [Required]
-        public int OrganizationId { get; set; }
+        public string OrganizationId { get; set; }
 
         /// <summary>
-        /// ID of the query runner used to execute queries. This must be a valid runner ID.
+        /// ID of the connector used to execute queries. This must be a valid runner ID.
         /// </summary>
         /// <example>TheGrid.QueryRunners.PostgreSqlQueryRunner</example>
         [Required]
@@ -38,7 +38,7 @@ namespace TheGrid.Shared.Models
         public string QueryRunnerId { get; set; } = string.Empty;
 
         /// <summary>
-        /// Extra properties passed to the query runner used to connect. This often contains connection strings, username, password, etc.
+        /// Extra properties passed to the connector used to connect. This often contains connection strings, username, password, etc.
         /// </summary>
         /// <remarks>
         /// This value is encrypted in the database when stored.

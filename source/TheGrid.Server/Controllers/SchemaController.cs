@@ -1,19 +1,29 @@
-﻿using Asp.Versioning;
-using Microsoft.AspNetCore.Http;
+﻿// <copyright file="SchemaController.cs" company="BiglerNet">
+// Copyright (c) BiglerNet. All rights reserved.
+// </copyright>
+
+using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
-using TheGrid.Data;
 
 namespace TheGrid.Server.Controllers
 {
+    /// <summary>
+    /// Controller for managing connection schemas.
+    /// </summary>
     [Route("api/v{version:apiVersion}/[controller]")]
     [ApiController]
     [ApiVersion("1.0")]
     public class SchemaController : ControllerBase
     {
-        private readonly TheGridDbContext _db;
-
+        /// <summary>
+        /// Gets the schema for a given connection.
+        /// </summary>
+        /// <param name="connectionId">Unique ID of the connection to get the schema for.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Schema information for the given connection.</returns>
+        /// <exception cref="NotImplementedException">Currently not implemented.</exception>
         [HttpGet]
-        public async Task<ActionResult> Get([FromRoute]int dataSourceId, CancellationToken cancellationToken = default)
+        public Task<ActionResult> Get([FromRoute] int connectionId, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }

@@ -39,12 +39,12 @@ namespace TheGrid.Shared.Models
     }
 
     /// <summary>
-    /// Information about a property passed to a query runner.
+    /// Information about a property passed to a connector.
     /// </summary>
     public class QueryRunnerParameter
     {
         /// <summary>
-        /// Name of the query runner paramter.
+        /// Name of the connector paramter.
         /// </summary>
         public string Name { get; set; } = string.Empty;
 

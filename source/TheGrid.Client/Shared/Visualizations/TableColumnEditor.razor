@@ -6,24 +6,41 @@
                 <RadzenStack>
                     @foreach (var column in Options.Columns)
                     {
-                        <RadzenFieldset Text="@column.Key">
-                            <RadzenStack Orientation="Orientation.Horizontal" Gap="1rem" Wrap="FlexWrap.Wrap">
-                                <VisibilityToggle @bind-Value="@column.Value.Visible" />
-                                <RadzenFormField Text="Display Name" class="w-100">
-                                    <RadzenTextBox @bind-Value="column.Value.DisplayName" />
-                                </RadzenFormField>
-
-                            </RadzenStack>
-                            <RadzenFormField Text="Type" class="w-100">
-                                <RadzenDropDown Data="_columnTypes" @bind-Value="column.Value.Type" />
+                        <RadzenRow>
+                            <RadzenColumn>
+                                <RadzenText Text="@column.Key" Style="font-weight: bold;" />
+                            </RadzenColumn>
+                            <RadzenColumn>
+                                <RadzenRow AlignItems="AlignItems.End">
+                                    <RadzenColumn>
+                                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
+                                            <RadzenLabel Text="Visible" />
+                                            <RadzenSwitch @bind-Value="@column.Value.Visible" />
+                                        </RadzenStack>
+                                    </RadzenColumn>
+                                </RadzenRow>
+                            </RadzenColumn>
+                        </RadzenRow>
+                        <RadzenStack Orientation="Orientation.Vertical">
+                            <RadzenFormField Text="Type">
+                                <RadzenDropDown Data="_columnTypes" @bind-Value="@column.Value.Type" />
+                            </RadzenFormField>
+                            <RadzenFormField Text="Display Name">
+                                <RadzenTextBox @bind-Value="column.Value.DisplayName" />
+                                <RadzenLengthValidator Max="50" />
                             </RadzenFormField>
                             @if (column.Value.Type is not QueryResultColumnType.Text)
                             {
-                                <RadzenFormField Text="Display Format" class="w-100">
+                                <RadzenFormField Text="Display Format">
                                     <RadzenTextBox @bind-Value="column.Value.DisplayFormat" />
+                                    <RadzenLengthValidator Max="50" />
                                 </RadzenFormField>
                             }
-                        </RadzenFieldset>
+                            <RadzenFormField Text="Display Template">
+                                <RadzenTextBox @bind-Value="column.Value.DisplayTemplate" Placeholder="@("{{ @" + column.Key + " }}")" />
+                                <RadzenLengthValidator Max="150" />
+                            </RadzenFormField>
+                        </RadzenStack>
                     }
                 </RadzenStack>
             </RadzenColumn>

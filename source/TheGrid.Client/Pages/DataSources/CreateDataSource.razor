@@ -10,7 +10,7 @@
                     <RadzenRequiredValidator Component="Name" Popup/>
                     <RadzenLengthValidator Component="Name" Max="100" Popup/>
                 </RadzenFormField>
-                <RadzenFormField Text="Query Runner" Variant="Variant.Outlined">
+                <RadzenFormField Text="connector" Variant="Variant.Outlined">
                     <RadzenDropDown Name="QueryRunnerId" TValue="string" ValueChanged="QueryRunnerChanged" Value="_input.QueryRunnerId" Context="x" Data="_queryRunners" ValueProperty="@nameof(QueryRunner.Id)" TextProperty="@nameof(QueryRunner.Name)">
                         <Template>
                             @{
@@ -21,7 +21,7 @@
                             }
                         </Template>
                     </RadzenDropDown>
-                    <RadzenRequiredValidator Component="QueryRunnerId" Text="A query runner must be selected" Popup />
+                    <RadzenRequiredValidator Component="QueryRunnerId" Text="A connector must be selected" Popup />
                 </RadzenFormField>
                 @if (_selectedQueryRunner != null)
                 {

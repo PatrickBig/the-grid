@@ -25,7 +25,7 @@ namespace TheGrid.Shared.Models
         public string QueryRunnerId { get; set; } = string.Empty;
 
         /// <summary>
-        /// Name of the query runner.
+        /// Name of the connector.
         /// </summary>
         public string QueryRunnerName { get; set; } = string.Empty;
 

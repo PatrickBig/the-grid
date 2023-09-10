@@ -43,7 +43,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var response = await HttpClient.GetAsync("/api/v1/DataSources?organization=" + UserOrganization.Slug);
+        var response = await HttpClient.GetAsync("/api/v1/DataSources?organization=" + UserOrganization.OrganizationId);
         if (response.IsSuccessStatusCode && response.Content != null)
         {
             var data = await response.Content.ReadFromJsonAsync<PaginatedResult<DataSourceListItem>>();

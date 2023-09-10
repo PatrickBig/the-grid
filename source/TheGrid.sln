@@ -5,13 +5,13 @@ VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheGrid.Server", "TheGrid.Server\TheGrid.Server.csproj", "{17B79226-272C-40D7-AE69-83CA70F92A7A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheGrid.QueryRunners", "TheGrid.QueryRunners\TheGrid.QueryRunners.csproj", "{50DB72B7-1DBF-41E8-B286-0071EB36A02D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheGrid.Connectors", "TheGrid.Connectors\TheGrid.Connectors.csproj", "{50DB72B7-1DBF-41E8-B286-0071EB36A02D}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheGrid.Shared", "TheGrid.Shared\TheGrid.Shared.csproj", "{01543EC6-F7BF-40FD-B56A-71C2C88250C7}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{774D035D-7A8F-49C0-A577-0B4B540B7A24}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheGrid.QueryRunners.Integration.Tests", "tests\TheGrid.QueryRunners.Integration.Tests\TheGrid.QueryRunners.Integration.Tests.csproj", "{51B382DE-C79C-4ABB-A6C6-5B41BAC9919B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheGrid.Connectors.Integration.Tests", "tests\TheGrid.Connectors.Integration.Tests\TheGrid.Connectors.Integration.Tests.csproj", "{51B382DE-C79C-4ABB-A6C6-5B41BAC9919B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheGrid.Services", "TheGrid.Services\TheGrid.Services.csproj", "{E921BA7C-5938-4FB7-B48F-F25305D4D433}"
 EndProject

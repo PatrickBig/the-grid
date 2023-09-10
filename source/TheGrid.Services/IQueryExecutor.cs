@@ -2,8 +2,6 @@
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
-using TheGrid.Shared.Models;
-
 namespace TheGrid.Services
 {
     /// <summary>

@@ -8,8 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Net.Mime;
 using System.Runtime.CompilerServices;
+using TheGrid.Connectors.Models;
 using TheGrid.Data;
-using TheGrid.QueryRunners.Models;
 using TheGrid.Shared.Models;
 
 namespace TheGrid.Server.Controllers
@@ -51,7 +51,7 @@ namespace TheGrid.Server.Controllers
         public async Task<ActionResult<CreateOrganizationResponse>> Post([FromBody] CreateOrganizationRequest request, CancellationToken cancellationToken = default)
         {
             // Check for a duplicate organization name based on the slug.
-            if (await _db.Organizations.AnyAsync(o => o.Slug == request.Slug, cancellationToken: cancellationToken))
+            if (await _db.Organizations.AnyAsync(o => o.Id == request.Slug, cancellationToken: cancellationToken))
             {
                 ModelState.AddModelError(nameof(CreateOrganizationRequest.Slug), $"An organization with the slug of \"{request.Slug}\" already exists. Choose a unique name and try again.");
                 return ValidationProblem(ModelState);
@@ -69,7 +69,7 @@ namespace TheGrid.Server.Controllers
         /// <summary>
         /// Gets details about an existing Organization in the system.
         /// </summary>
-        /// <param name="slug">Slug for the organization being requested.</param>
+        /// <param name="slug">Id for the organization being requested.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>Details about the requested organization.</returns>
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
@@ -77,7 +77,7 @@ namespace TheGrid.Server.Controllers
         [HttpGet("{slug}")]
         public async Task<ActionResult<OrganizationDetails>> Get([FromRoute] string slug, CancellationToken cancellationToken = default)
         {
-            var org = await _db.Organizations.FirstOrDefaultAsync(o => o.Slug == slug, cancellationToken: cancellationToken);
+            var org = await _db.Organizations.FirstOrDefaultAsync(o => o.Id == slug, cancellationToken: cancellationToken);
 
             if (org == null)
             {
@@ -90,7 +90,7 @@ namespace TheGrid.Server.Controllers
         /// <summary>
         /// Updates details about an organization.
         /// </summary>
-        /// <param name="slug">Slug of the organization to update.</param>
+        /// <param name="slug">Id of the organization to update.</param>
         /// <param name="request">Information being updated on the organization.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>The result of the operation.</returns>
@@ -99,7 +99,7 @@ namespace TheGrid.Server.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult> Put([FromRoute] string slug, UpdateOrganizationRequest request, CancellationToken cancellationToken = default)
         {
-            var org = await _db.Organizations.FirstOrDefaultAsync(o => o.Slug == slug, cancellationToken: cancellationToken);
+            var org = await _db.Organizations.FirstOrDefaultAsync(o => o.Id == slug, cancellationToken: cancellationToken);
 
             if (org == null)
             {

@@ -1,11 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// <copyright file="ChartVisualization.cs" company="BiglerNet">
+// Copyright (c) BiglerNet. All rights reserved.
+// </copyright>
 
 namespace TheGrid.Models.Visualizations
 {
+    /// <summary>
+    /// Type of chart to display to the user.
+    /// </summary>
     public enum ChartType
     {
         Area,
@@ -17,7 +18,10 @@ namespace TheGrid.Models.Visualizations
         Line,
     }
 
-    public class ChartVisualization : VisualizationBase
+    /// <summary>
+    /// Chart visualization options.
+    /// </summary>
+    public class ChartVisualization : VisualizationOptions
     {
         public ChartType Type { get; set; }
     }

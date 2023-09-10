@@ -53,7 +53,7 @@ namespace TheGrid.Server.Controllers
 
             if (!(await _db.QueryRunners.AnyAsync(d => d.Id == request.QueryRunnerId, cancellationToken: cancellationToken)))
             {
-                ModelState.AddModelError(nameof(request.QueryRunnerId), "Invalid query runner ID specified.");
+                ModelState.AddModelError(nameof(request.QueryRunnerId), "Invalid connector ID specified.");
                 return ValidationProblem(ModelState);
             }
 
@@ -103,7 +103,7 @@ namespace TheGrid.Server.Controllers
         {
             var baseQuery = _db.DataSources
                 .Include(d => d.QueryRunner)
-                .Where(d => d.Organization != null && d.Organization.Slug == organization && d.QueryRunner != null)
+                .Where(d => d.Organization != null && d.Organization.Id == organization && d.QueryRunner != null)
                 .OrderBy(d => d.Name)
                 .Select(d => new DataSourceListItem
                 {

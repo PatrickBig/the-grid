@@ -2,9 +2,11 @@
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using TheGrid.Models;
 
-namespace TheGrid.QueryRunners.Models
+namespace TheGrid.Connectors.Models
 {
     /// <summary>
     /// Top level resource object.
@@ -12,14 +14,11 @@ namespace TheGrid.QueryRunners.Models
     public class Organization
     {
         /// <summary>
-        /// The unique ID of the organization.
-        /// </summary>
-        public int Id { get; set; }
-
-        /// <summary>
         /// The short name / slug of the organization.
         /// </summary>
-        public string Slug { get; set; } = string.Empty;
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        public string Id { get; set; } = string.Empty;
 
         /// <summary>
         /// The display name of the organization.

@@ -30,45 +30,35 @@
 
     private readonly TableVisualizationOptions _tableVisualization = new()
         {
-            Id = 1,
+            //Id = 1,
             Name = "Table",
             Columns = new()
             {
                 {
-                    "id",
+                    "year",
                     new TableColumn
                     {
-                        DisplayName = "ID",
+                        DisplayName = "Year",
                         Type = QueryResultColumnType.Integer,
                         DisplayOrder = 1,
                     }
                 },
                 {
-                    "sometext",
+                    "month",
                     new TableColumn
                     {
-                        DisplayName = "Some Text",
-                        Type = QueryResultColumnType.Text,
+                        DisplayName = "Month",
+                        Type = QueryResultColumnType.Integer,
                         DisplayOrder = 2,
                     }
                 },
                 {
-                    "somenumber",
+                    "totalsales",
                     new TableColumn
                     {
-                        DisplayName = "Some Number",
-                        Type = QueryResultColumnType.Integer,
+                        DisplayName = "Total Sales",
+                        Type = QueryResultColumnType.Decimal,
                         DisplayOrder = 3,
-                    }
-                },
-                {
-                    "somedate",
-                    new TableColumn
-                    {
-                        DisplayName = "Some Date",
-                        Type = QueryResultColumnType.DateTime,
-                        DisplayOrder = 1,
-                        DisplayFormat = "yyyy-MM-dd"
                     }
                 },
             }

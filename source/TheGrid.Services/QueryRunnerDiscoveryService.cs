@@ -6,15 +6,15 @@ using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Reflection;
+using TheGrid.Connectors;
+using TheGrid.Connectors.Attributes;
 using TheGrid.Data;
-using TheGrid.QueryRunners;
-using TheGrid.QueryRunners.Attributes;
 using TheGrid.Shared.Models;
 
 namespace TheGrid.Services
 {
     /// <summary>
-    /// Used to get information about query runners.
+    /// Used to get information about connectors.
     /// </summary>
     public class QueryRunnerDiscoveryService
     {
@@ -33,7 +33,7 @@ namespace TheGrid.Services
         }
 
         /// <summary>
-        /// Discovers all query runners and updates them in the database.
+        /// Discovers all connectors and updates them in the database.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task RefreshQueryRunnersAsync()
@@ -70,7 +70,7 @@ namespace TheGrid.Services
                     Id = runner.FullName ?? throw new NullReferenceException("Unable to determine type."),
                 };
 
-                var queryRunnerInformation = runner.GetCustomAttribute<QueryRunnerAttribute>(false);
+                var queryRunnerInformation = runner.GetCustomAttribute<ConnectorAttribute>(false);
 
                 if (queryRunnerInformation == null)
                 {
@@ -83,9 +83,9 @@ namespace TheGrid.Services
                     details.RunnerIcon = queryRunnerInformation.IconFileName ?? "unknown.png";
                 }
 
-                var parameters = runner.GetCustomAttributes<QueryRunnerParameterAttribute>(true);
+                var parameters = runner.GetCustomAttributes<ConnectorParameterAttribute>(true);
 
-                foreach (QueryRunnerParameterAttribute attribute in parameters.Cast<QueryRunnerParameterAttribute>())
+                foreach (ConnectorParameterAttribute attribute in parameters.Cast<ConnectorParameterAttribute>())
                 {
                     details.Parameters.Add(attribute.Adapt<QueryRunnerParameter>());
                 }
@@ -101,7 +101,7 @@ namespace TheGrid.Services
 
         private static IEnumerable<Type> GetQueryRunnerTypes()
         {
-            var assembly = Assembly.GetAssembly(typeof(IQueryRunner));
+            var assembly = Assembly.GetAssembly(typeof(IConnector));
 
             if (assembly == null)
             {
@@ -111,7 +111,7 @@ namespace TheGrid.Services
             {
                 var queryRunnerTypes = assembly.GetTypes()
                     .Where(t => t.IsClass && !t.IsAbstract && t.GetInterfaces()
-                    .Any(i => i == typeof(IQueryRunner)));
+                    .Any(i => i == typeof(IConnector)));
 
                 foreach (var type in queryRunnerTypes)
                 {
