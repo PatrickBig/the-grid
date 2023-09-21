@@ -33,7 +33,7 @@ namespace TheGrid.Connectors
         /// <summary>
         /// Performs basic validation on connection parameters and throws an exception if needed.
         /// </summary>
-        /// <param name="runnerParameters">Parameters used to connect to a data source for the runner.</param>
+        /// <param name="runnerParameters">Parameters used to connect to a connection for the runner.</param>
         /// <exception cref="ConnectorParameterException">Thrown if query parameters were invalid.</exception>
         protected void ValidateParameters(Dictionary<string, string> runnerParameters)
         {

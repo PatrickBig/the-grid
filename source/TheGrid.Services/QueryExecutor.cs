@@ -32,44 +32,46 @@ namespace TheGrid.Services
         }
 
         /// <inheritdoc/>
-        public async Task RefreshQueryResults(int queryId, CancellationToken cancellationToken = default)
+        public async Task RefreshQueryResultsAsync(long queryExecutionId, CancellationToken cancellationToken = default)
         {
-            var query = await _db.Queries
-                .Include(q => q.DataSource)
-                .SingleOrDefaultAsync(q => q.Id == queryId, cancellationToken);
+            var queryExecution = await _db.QueryExecutions
+                .Include(q => q.Query)
+                .Include(q => q.Query!.Connection)
+                .SingleOrDefaultAsync(q => q.Id == queryExecutionId, cancellationToken);
 
-            if (query == null)
+            if (queryExecution == null || queryExecution.Query == null)
             {
-                throw new ArgumentException("Invalid query specified.", nameof(queryId));
+                throw new ArgumentException("Invalid query specified.", nameof(queryExecutionId));
             }
 
-            await ResetQueryAsync(query, cancellationToken);
+            await UpdateQueryExecutionRecordStatusAsync(queryExecution, cancellationToken);
 
             // Create the connector
-            var runner = GetQueryRunner(query);
+            var runner = GetQueryRunner(queryExecution.Query);
 
             try
             {
-                var results = await runner.GetDataAsync(query.Command, null, cancellationToken);
+                var results = await runner.GetDataAsync(queryExecution.Query.Command, null, cancellationToken);
 
                 foreach (var row in results.Rows)
                 {
                     _db.QueryResultRows.Add(new QueryResultRow
                     {
-                        QueryId = queryId,
+                        QueryExecutionId = queryExecutionId,
                         Data = row,
                     });
 
-                    query.ResultsRefreshed = DateTime.UtcNow;
-                    query.ResultState = QueryResultState.Complete;
+                    queryExecution.DateCompleted = DateTime.UtcNow;
+                    queryExecution.Status = QueryExecutionStatus.Complete;
                 }
 
-                query.Columns = results.Columns;
+                //queryExecution.Query.Columns = results.Columns;
             }
             catch (Exception ex)
             {
-                query.ResultState = QueryResultState.Error;
-                query.LastErrorMessage = ex.Message;
+                queryExecution.Status = QueryExecutionStatus.Error;
+                queryExecution.ErrorOutput = ex.Message;
+                _logger.LogError(ex, "There was an error executing the query.");
                 throw;
             }
             finally
@@ -80,35 +82,32 @@ namespace TheGrid.Services
 
         private IConnector GetQueryRunner(Query query)
         {
-            _logger.LogTrace("Creating connector for type: {queryRunnerId}", query.DataSource?.QueryRunnerId);
+            _logger.LogTrace("Creating connector for type: {queryRunnerId}", query.Connection?.ConnectorId);
 
             var runnerAssembly = Assembly.GetAssembly(typeof(IConnector));
 
-            if (query.DataSource == null)
+            if (query.Connection == null)
             {
-                throw new ArgumentNullException(nameof(query.DataSource), "Data source for query cannot be null");
+                throw new ArgumentNullException(nameof(query.Connection), "connection for query cannot be null");
             }
 
-            var runnerType = runnerAssembly?.GetType(query.DataSource.QueryRunnerId) ?? throw new ArgumentException("No runner found.");
-            return Activator.CreateInstance(runnerType, query.DataSource.ExecutorParameters) as IConnector ?? throw new InvalidCastException("Unable to create connector instance from type.");
+            var runnerType = runnerAssembly?.GetType(query.Connection.ConnectorId) ?? throw new ArgumentException("No runner found.");
+            return Activator.CreateInstance(runnerType, query.Connection.ConnectionProperties) as IConnector ?? throw new InvalidCastException("Unable to create connector instance from type.");
         }
 
         /// <summary>
         /// Resets the query to the original state with no results.
         /// </summary>
-        /// <param name="query">Query to update.</param>
+        /// <param name="queryExecution">Query execution to update.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        private async Task ResetQueryAsync(Query query, CancellationToken cancellationToken = default)
+        private async Task UpdateQueryExecutionRecordStatusAsync(QueryExecution queryExecution, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("Resetting query ID {queryId} to initial state.", query.Id);
+            _logger.LogInformation("Creation execution record for query ID {queryId}.", queryExecution.Id);
 
-            query.ResultState = QueryResultState.InProgress;
-            query.LastErrorMessage = null;
+            queryExecution.Status = QueryExecutionStatus.InProgress;
 
             await _db.SaveChangesAsync(cancellationToken);
-
-            var rowsDeleted = await _db.QueryResultRows.Where(q => q.QueryId == query.Id).ExecuteDeleteAsync(cancellationToken);
         }
     }
 }

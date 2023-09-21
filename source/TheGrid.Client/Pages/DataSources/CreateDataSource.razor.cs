@@ -9,13 +9,13 @@ using TheGrid.Shared.Models;
 namespace TheGrid.Client.Pages.DataSources
 {
     /// <summary>
-    /// Code behind file for the page to create new data sources.
+    /// Code behind file for the page to create new connections.
     /// </summary>
     public partial class CreateDataSource
     {
         private readonly CreateDataSourceRequest _input = new();
-        private IEnumerable<QueryRunner>? _queryRunners = null;
-        private QueryRunner? _selectedQueryRunner = null;
+        private IEnumerable<Connector>? _queryRunners = null;
+        private Connector? _selectedQueryRunner = null;
 
         [CascadingParameter]
         private UserOrganization UserOrganization { get; set; } = null!;
@@ -30,7 +30,7 @@ namespace TheGrid.Client.Pages.DataSources
         protected override async Task OnInitializedAsync()
         {
             var response = await HttpClient.GetAsync("/api/v1/QueryRunners");
-            _queryRunners = await response.Content.ReadFromJsonAsync<IEnumerable<QueryRunner>>();
+            _queryRunners = await response.Content.ReadFromJsonAsync<IEnumerable<Connector>>();
         }
 
         private void QueryRunnerChanged(string queryRunnerId)

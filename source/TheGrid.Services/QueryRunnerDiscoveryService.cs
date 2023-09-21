@@ -41,31 +41,31 @@ namespace TheGrid.Services
             var runners = DiscoverQueryRunners();
 
             // Disable all runners
-            await _db.QueryRunners.ExecuteUpdateAsync(s => s.SetProperty(r => r.Disabled, true));
+            await _db.Connectors.ExecuteUpdateAsync(s => s.SetProperty(r => r.Disabled, true));
 
             foreach (var runner in runners)
             {
-                if (await _db.QueryRunners.Where(r => r.Id == runner.Id).AnyAsync())
+                if (await _db.Connectors.Where(r => r.Id == runner.Id).AnyAsync())
                 {
-                    _db.QueryRunners.Update(runner);
+                    _db.Connectors.Update(runner);
                 }
                 else
                 {
                     // Insert
-                    await _db.QueryRunners.AddAsync(runner);
+                    await _db.Connectors.AddAsync(runner);
                 }
             }
 
             await _db.SaveChangesAsync();
         }
 
-        private static IEnumerable<QueryRunner> DiscoverQueryRunners()
+        private static IEnumerable<Connector> DiscoverQueryRunners()
         {
             var queryRunners = GetQueryRunnerTypes();
 
             foreach (var runner in queryRunners)
             {
-                var details = new QueryRunner
+                var details = new Connector
                 {
                     Id = runner.FullName ?? throw new NullReferenceException("Unable to determine type."),
                 };

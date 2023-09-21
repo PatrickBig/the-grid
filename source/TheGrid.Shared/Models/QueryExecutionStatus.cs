@@ -1,13 +1,13 @@
-﻿// <copyright file="QueryResultState.cs" company="BiglerNet">
+﻿// <copyright file="QueryExecutionStatus.cs" company="BiglerNet">
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
 namespace TheGrid.Shared.Models
 {
     /// <summary>
-    /// State of the query execution.
+    /// Status of the query execution.
     /// </summary>
-    public enum QueryResultState
+    public enum QueryExecutionStatus
     {
         /// <summary>
         /// Query has never been executed.

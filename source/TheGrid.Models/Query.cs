@@ -5,7 +5,6 @@
 using System.ComponentModel.DataAnnotations;
 using TheGrid.Shared;
 using TheGrid.Shared.Attributes;
-using TheGrid.Shared.Models;
 
 namespace TheGrid.Models
 {
@@ -20,15 +19,15 @@ namespace TheGrid.Models
         public int Id { get; set; }
 
         /// <summary>
-        /// Data source used to execute the query.
+        /// connection used to execute the query.
         /// </summary>
         [Required]
         public int DataSourceId { get; set; }
 
         /// <summary>
-        /// Navigation property to the <see cref="DataSource"/> that owns this query.
+        /// Navigation property to the <see cref="Models.Connection"/> that owns this query.
         /// </summary>
-        public DataSource? DataSource { get; set; }
+        public Connection? Connection { get; set; }
 
         /// <summary>
         /// Name of the query.
@@ -44,14 +43,9 @@ namespace TheGrid.Models
         public string? Description { get; set; }
 
         /// <summary>
-        /// Command / statement to execute by the runner.
+        /// Command / statement to execute by the connector.
         /// </summary>
         public string Command { get; set; } = string.Empty;
-
-        /// <summary>
-        /// Parameters passed to the statement if parameterized.
-        /// </summary>
-        public Dictionary<string, object>? Parameters { get; set; }
 
         /// <summary>
         /// Tags associated to the query.
@@ -60,23 +54,8 @@ namespace TheGrid.Models
         public List<string> Tags { get; set; } = new();
 
         /// <summary>
-        /// Date the results were last refreshed.
+        /// Navigation property to the columns the query returns.
         /// </summary>
-        public DateTime? ResultsRefreshed { get; set; }
-
-        /// <summary>
-        /// Columns in the query result.
-        /// </summary>
-        public Dictionary<string, QueryResultColumn>? Columns { get; set; }
-
-        /// <summary>
-        /// State of the last execution of the query.
-        /// </summary>
-        public QueryResultState ResultState { get; set; } = QueryResultState.None;
-
-        /// <summary>
-        /// Last error message from the previous query execution.
-        /// </summary>
-        public string? LastErrorMessage { get; set; }
+        public List<Column>? Columns { get; set; }
     }
 }

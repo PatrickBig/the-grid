@@ -5,7 +5,7 @@
 namespace TheGrid.Connectors
 {
     /// <summary>
-    /// Can connect to a data source and provide results back.
+    /// Can connect to a connection and provide results back.
     /// </summary>
     public interface IConnector
     {

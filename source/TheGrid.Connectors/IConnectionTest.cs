@@ -5,12 +5,12 @@
 namespace TheGrid.Connectors
 {
     /// <summary>
-    /// Supports testing connectivity to the data source.
+    /// Supports testing connectivity to the connection.
     /// </summary>
     public interface IConnectionTest
     {
         /// <summary>
-        /// Tests connectivity to the data source.
+        /// Tests connectivity to the connection.
         /// </summary>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>A boolean indicating a successful connection test.</returns>

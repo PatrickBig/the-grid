@@ -43,10 +43,10 @@ namespace TheGrid.Shared.Models
         public DateTime? ResultsRefreshed { get; set; }
 
         /// <summary>
-        /// State of the last execution of the query.
+        /// Status of the last execution of the query.
         /// </summary>
         [JsonConverter(typeof(JsonStringEnumConverter))]
-        public QueryResultState ResultState { get; set; } = QueryResultState.None;
+        public QueryExecutionStatus Status { get; set; } = QueryExecutionStatus.None;
 
         /// <summary>
         /// Last error message from the previous query execution.

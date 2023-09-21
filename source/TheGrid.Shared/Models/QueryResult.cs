@@ -18,5 +18,10 @@ namespace TheGrid.Shared.Models
         /// Data from the query.
         /// </summary>
         public List<Dictionary<string, object?>> Rows { get; set; } = new();
+
+        /// <summary>
+        /// Standard output from the query if available. Eg: print() statement output.
+        /// </summary>
+        public List<string> StandardOutput { get; set; } = new();
     }
 }

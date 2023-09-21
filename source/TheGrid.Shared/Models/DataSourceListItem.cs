@@ -5,22 +5,22 @@
 namespace TheGrid.Shared.Models
 {
     /// <summary>
-    /// Summarzied information about a data source.
+    /// Summarzied information about a connection.
     /// </summary>
     public class DataSourceListItem
     {
         /// <summary>
-        /// Unique identifier of the data source.
+        /// Unique identifier of the connection.
         /// </summary>
         public int Id { get; set; }
 
         /// <summary>
-        /// Name of the data source.
+        /// Name of the connection.
         /// </summary>
         public string Name { get; set; } = string.Empty;
 
         /// <summary>
-        /// Unique ID of the runner used to execute queries for the data source.
+        /// Unique ID of the runner used to execute queries for the connection.
         /// </summary>
         public string QueryRunnerId { get; set; } = string.Empty;
 
@@ -31,7 +31,7 @@ namespace TheGrid.Shared.Models
 
 #pragma warning disable SA1629 // Documentation text should end with a period
         /// <summary>
-        /// Filename of the icon to be used in the front end when rendering the data source. Absolute path for the icon should be /images/runner-icons/<see cref="QueryRunnerIcon"/>.
+        /// Filename of the icon to be used in the front end when rendering the connection. Absolute path for the icon should be /images/runner-icons/<see cref="QueryRunnerIcon"/>.
         /// </summary>
         /// <remarks>
         /// If <see cref="QueryRunnerIcon"/> is set to postgresql.png the actual path of the icon will be /images/runner-icons/postgresql.png.

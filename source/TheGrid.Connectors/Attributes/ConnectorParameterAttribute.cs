@@ -5,7 +5,7 @@
 namespace TheGrid.Connectors.Attributes
 {
     /// <summary>
-    /// Provides metadata required to let a <see cref="IConnector"/> connect to a data source.
+    /// Provides metadata required to let a <see cref="IConnector"/> connect to a connection.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public class ConnectorParameterAttribute : Attribute

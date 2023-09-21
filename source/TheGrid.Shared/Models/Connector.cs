@@ -1,4 +1,4 @@
-﻿// <copyright file="QueryRunner.cs" company="BiglerNet">
+﻿// <copyright file="Connector.cs" company="BiglerNet">
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
@@ -7,7 +7,7 @@ namespace TheGrid.Shared.Models
     /// <summary>
     /// Information about a connector.
     /// </summary>
-    public class QueryRunner
+    public class Connector
     {
         /// <summary>
         /// The unique id of the connector.
@@ -50,7 +50,7 @@ namespace TheGrid.Shared.Models
 
 #pragma warning disable SA1629 // Documentation text should end with a period
         /// <summary>
-        /// Filename of the icon to be used in the front end when rendering the data source. Absolute path for the icon should be /images/runner-icons/<see cref="RunnerIcon"/>.
+        /// Filename of the icon to be used in the front end when rendering the connection. Absolute path for the icon should be /images/runner-icons/<see cref="RunnerIcon"/>.
         /// </summary>
         /// <remarks>
         /// If <see cref="RunnerIcon"/> is set to postgresql.png the actual path of the icon will be /images/runner-icons/postgresql.png.

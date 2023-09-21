@@ -8,7 +8,7 @@ using TheGrid.Shared.Models;
 namespace TheGrid.Client.Shared.DataSources
 {
     /// <summary>
-    /// Code behind file for the data source parameter component.
+    /// Code behind file for the connection parameter component.
     /// </summary>
     public partial class DataSourceParameter : ComponentBase
     {

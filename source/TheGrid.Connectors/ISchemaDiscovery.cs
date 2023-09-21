@@ -13,7 +13,7 @@ namespace TheGrid.Connectors
         /// Discovers the database schema.
         /// </summary>
         /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>Information about a data source schema.</returns>
+        /// <returns>Information about a connection schema.</returns>
         public Task<DatabaseSchema> GetSchemaAsync(CancellationToken cancellationToken = default);
     }
 }

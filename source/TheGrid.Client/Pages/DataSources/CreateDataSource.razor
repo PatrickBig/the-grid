@@ -11,10 +11,10 @@
                     <RadzenLengthValidator Component="Name" Max="100" Popup/>
                 </RadzenFormField>
                 <RadzenFormField Text="connector" Variant="Variant.Outlined">
-                    <RadzenDropDown Name="QueryRunnerId" TValue="string" ValueChanged="QueryRunnerChanged" Value="_input.QueryRunnerId" Context="x" Data="_queryRunners" ValueProperty="@nameof(QueryRunner.Id)" TextProperty="@nameof(QueryRunner.Name)">
+                    <RadzenDropDown Name="QueryRunnerId" TValue="string" ValueChanged="QueryRunnerChanged" Value="_input.QueryRunnerId" Context="x" Data="_queryRunners" ValueProperty="@nameof(Connector.Id)" TextProperty="@nameof(Connector.Name)">
                         <Template>
                             @{
-                                if (x is QueryRunner runner)
+                                if (x is Connector runner)
                                 {
                                     <QueryRunnerDisplay Name="@runner.Name" RunnerIcon="@runner.RunnerIcon" />
                                 }

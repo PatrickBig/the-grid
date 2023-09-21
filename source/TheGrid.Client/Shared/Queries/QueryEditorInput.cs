@@ -12,7 +12,7 @@ namespace TheGrid.Client.Shared.Queries
     public class QueryEditorInput
     {
         /// <summary>
-        /// Data source used to execute the query.
+        /// connection used to execute the query.
         /// </summary>
         [Required]
         public int DataSourceId { get; set; }

@@ -51,7 +51,7 @@ namespace TheGrid.Client.Shared.Queries
         }
 
         /// <summary>
-        /// Load the available data sources.
+        /// Load the available connections.
         /// </summary>
         /// <param name="e">Load data event arguments.</param>
         /// <returns>A <see cref = "Task"/> representing the asynchronous operation.</returns>
@@ -69,7 +69,7 @@ namespace TheGrid.Client.Shared.Queries
             }
             else
             {
-                NotificationService.Notify(NotificationSeverity.Error, "Error fetching data sources");
+                NotificationService.Notify(NotificationSeverity.Error, "Error fetching connections");
             }
         }
 

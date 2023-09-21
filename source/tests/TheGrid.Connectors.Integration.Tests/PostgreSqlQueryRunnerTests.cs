@@ -124,9 +124,19 @@ namespace TheGrid.Connectors.Integration.Tests
             Assert.True(results.Rows.Any());
 
             _output.WriteLine("Found the following rows:");
+            var firstRowRan = false;
             foreach (var row in results.Rows)
             {
-                _output.WriteLine(string.Join(", ", row.Values.Select(v => v == null ? "(null)" : v.ToString())));
+                if (!firstRowRan)
+                {
+                    firstRowRan = true;
+                    foreach (var column in row)
+                    {
+                        _output.WriteLine($"Field = {column.Key}, Type = {column.Value.GetType()}");
+                    }
+                }
+
+                _output.WriteLine(string.Join(", ", row.Values.Select(v => v == null || (v is DBNull) ? "(null)" : v.ToString())));
             }
         }
 
@@ -222,7 +232,8 @@ namespace TheGrid.Connectors.Integration.Tests
                 "varchar_field VARCHAR(20)," +
                 "bool_field BOOL," +
                 "timestamp_field TIMESTAMP," +
-                "date_field DATE" +
+                "date_field DATE, " +
+                "integer_null_field INT NULL" +
                 ");";
         }
 

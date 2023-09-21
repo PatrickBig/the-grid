@@ -12,7 +12,7 @@ namespace TheGrid.Shared.Models
     public class UpdateQueryRequest
     {
         /// <summary>
-        /// Data source used to execute the query.
+        /// connection used to execute the query.
         /// </summary>
         [Required]
         public int DataSourceId { get; set; }

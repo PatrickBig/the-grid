@@ -24,9 +24,9 @@ namespace TheGrid.Data
         }
 
         /// <summary>
-        /// Data sources.
+        /// Connections to various data sources.
         /// </summary>
-        public DbSet<DataSource> DataSources { get; set; }
+        public DbSet<Connection> Connections { get; set; }
 
         /// <summary>
         /// Organizations.
@@ -39,6 +39,11 @@ namespace TheGrid.Data
         public DbSet<Query> Queries { get; set; }
 
         /// <summary>
+        /// Execution history of queries.
+        /// </summary>
+        public DbSet<QueryExecution> QueryExecutions { get; set; }
+
+        /// <summary>
         /// Results from a query execution.
         /// </summary>
         public DbSet<QueryResultRow> QueryResultRows { get; set; }
@@ -46,27 +51,29 @@ namespace TheGrid.Data
         /// <summary>
         /// connectors.
         /// </summary>
-        public DbSet<QueryRunner> QueryRunners { get; set; }
+        public DbSet<Connector> Connectors { get; set; }
 
         /// <inheritdoc/>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<DataSource>().HasIndex(d => d.OrganizationId);
+            //modelBuilder.Entity<Connection>().HasIndex(d => d.OrganizationId);
 
-            modelBuilder.Entity<Query>().HasIndex(q => q.DataSourceId);
-            modelBuilder.Entity<Query>().Property(q => q.Columns)
-                .HasColumnType("jsonb");
+            //modelBuilder.Entity<Query>().HasIndex(q => q.DataSourceId);
 
-            modelBuilder.Entity<Query>().Property(q => q.Parameters)
-                .HasColumnType("jsonb");
+            // Probably don't want this one at all
+            //modelBuilder.Entity<Query>().Property(q => q.Columns)
+            //    .HasColumnType("jsonb");
 
-            modelBuilder.Entity<QueryResultRow>().Property(r => r.Data)
-                .HasColumnType("jsonb");
+            //modelBuilder.Entity<Query>().Property(q => q.Parameters)
+            //    .HasColumnType("jsonb");
 
-            modelBuilder.Entity<QueryResultRow>().HasIndex(q => q.QueryId);
+            //modelBuilder.Entity<QueryResultRow>().Property(r => r.Data)
+            //    .HasColumnType("jsonb");
 
-            modelBuilder.Entity<QueryRunner>().Property(r => r.Parameters)
-                .HasColumnType("jsonb");
+            //modelBuilder.Entity<QueryResultRow>().HasIndex(q => q.QueryId);
+
+            //modelBuilder.Entity<Connector>().Property(r => r.Parameters)
+            //    .HasColumnType("jsonb");
 
             base.OnModelCreating(modelBuilder);
         }

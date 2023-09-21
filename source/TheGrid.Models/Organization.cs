@@ -31,8 +31,8 @@ namespace TheGrid.Connectors.Models
         public DateTime DateCreated { get; set; } = DateTime.UtcNow;
 
         /// <summary>
-        /// The data sources associated to this organization.
+        /// The connections associated to this organization.
         /// </summary>
-        public List<DataSource> DataSources { get; set; } = new();
+        public List<Connection> DataSources { get; set; } = new();
     }
 }

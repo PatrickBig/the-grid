@@ -12,17 +12,17 @@ namespace TheGrid.Models
         /// <summary>
         /// Unique identifier of the row.
         /// </summary>
-        public int Id { get; set; }
+        public long Id { get; set; }
 
         /// <summary>
         /// Unique ID for the query the results were generated for.
         /// </summary>
-        public int QueryId { get; set; }
+        public long QueryExecutionId { get; set; }
 
         /// <summary>
         /// Navigation property to the execution that generated this row.
         /// </summary>
-        public Query? Query { get; set; }
+        public QueryExecution? QueryExecution { get; set; }
 
         /// <summary>
         /// Data from the row.

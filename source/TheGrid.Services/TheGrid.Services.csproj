@@ -7,6 +7,9 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Hangfire.AspNetCore" Version="1.8.5" />
+		<PackageReference Include="Hangfire.Core" Version="1.8.5" />
+		<PackageReference Include="Hangfire.Redis.StackExchange" Version="1.9.0" />
 		<PackageReference Include="LazyCache.AspNetCore" Version="2.4.0" />
 	</ItemGroup>
 

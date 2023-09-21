@@ -19,13 +19,13 @@ namespace TheGrid.Shared.Models
         public int Id { get; set; }
 
         /// <summary>
-        /// Data source used to execute the query.
+        /// connection used to execute the query.
         /// </summary>
         [Required]
         public int DataSourceId { get; set; }
 
         /// <summary>
-        /// Name of the data source.
+        /// Name of the connection.
         /// </summary>
         public string DataSourceName { get; set; } = null!;
 
@@ -64,10 +64,10 @@ namespace TheGrid.Shared.Models
         public DateTime? ResultsRefreshed { get; set; }
 
         /// <summary>
-        /// State of the last execution of the query.
+        /// Status of the last execution of the query.
         /// </summary>
         [JsonConverter(typeof(JsonStringEnumConverter))]
-        public QueryResultState ResultState { get; set; } = QueryResultState.None;
+        public QueryExecutionStatus Status { get; set; } = QueryExecutionStatus.None;
 
         /// <summary>
         /// Last error message from the previous query execution.

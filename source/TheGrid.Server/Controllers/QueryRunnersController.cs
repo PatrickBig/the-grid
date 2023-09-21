@@ -38,7 +38,7 @@ namespace TheGrid.Server.Controllers
         [HttpGet]
         public async Task<ActionResult> Get(CancellationToken cancellationToken = default)
         {
-            var runners = await _db.QueryRunners.ToListAsync(cancellationToken);
+            var runners = await _db.Connectors.ToListAsync(cancellationToken);
             return Ok(runners);
         }
     }

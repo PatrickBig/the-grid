@@ -3,8 +3,12 @@
 // </copyright>
 
 using Asp.Versioning;
+using Hangfire;
 using Microsoft.AspNetCore.Mvc;
+using TheGrid.Data;
+using TheGrid.Models;
 using TheGrid.Services;
+using TheGrid.Shared.Models;
 
 namespace TheGrid.Server.Controllers
 {
@@ -17,14 +21,16 @@ namespace TheGrid.Server.Controllers
     public class QueryResultRefreshController : ControllerBase
     {
         private readonly IQueryExecutor _queryExecutor;
+        private readonly TheGridDbContext _db;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="QueryResultRefreshController"/> class.
         /// </summary>
         /// <param name="queryExecutor">Query execution service.</param>
-        public QueryResultRefreshController(IQueryExecutor queryExecutor)
+        public QueryResultRefreshController(IQueryExecutor queryExecutor, TheGridDbContext db)
         {
             _queryExecutor = queryExecutor;
+            _db = db;
         }
 
         /// <summary>
@@ -36,9 +42,23 @@ namespace TheGrid.Server.Controllers
         [HttpGet("{queryId:int}")]
         public async Task<ActionResult> Get([FromRoute] int queryId, CancellationToken cancellationToken = default)
         {
-            await _queryExecutor.RefreshQueryResults(queryId, cancellationToken);
+            await _queryExecutor.RefreshQueryResultsAsync(queryId, cancellationToken);
 
             return Ok();
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> Post([FromBody] QueryExecutionRequest queryExecutionRequest, CancellationToken cancellationToken = default)
+        {
+            var entry = new QueryExecution
+            {
+                QueryId = queryExecutionRequest.QueryId,
+            };
+
+            await _db.QueryExecutions.AddAsync(entry, cancellationToken);
+
+            // Queue the hangfire job
+            BackgroundJob.Enqueue<IQueryExecutor>(q => q.RefreshQueryResultsAsync(entry.Id, cancellationToken));
         }
     }
 }

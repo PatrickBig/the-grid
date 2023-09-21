@@ -1,4 +1,4 @@
-﻿// <copyright file="DataSource.cs" company="BiglerNet">
+﻿// <copyright file="Connection.cs" company="BiglerNet">
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
@@ -11,25 +11,25 @@ namespace TheGrid.Models
     /// <summary>
     /// A mechanism to run a query from using a connector.
     /// </summary>
-    public class DataSource
+    public class Connection
     {
         /// <summary>
-        /// Unique identifier of the data source.
+        /// Unique identifier of the connection.
         /// </summary>
         public int Id { get; set; }
 
         /// <summary>
-        /// Name of the data source.
+        /// Name of the connection.
         /// </summary>
         [Required]
         [StringLength(100)]
         public string Name { get; set; } = string.Empty;
 
         /// <summary>
-        /// Unique ID of the organization the data source belongs to.
+        /// Unique ID of the organization the connection belongs to.
         /// </summary>
         [Required]
-        public int OrganizationId { get; set; }
+        public string OrganizationId { get; set; } = string.Empty;
 
         /// <summary>
         /// Orgnization navigation property.
@@ -37,23 +37,23 @@ namespace TheGrid.Models
         public Organization? Organization { get; set; }
 
         /// <summary>
-        /// Unique ID of the runner used to execute queries for the data source.
+        /// Unique ID of the connector used to execute queries.
         /// </summary>
         [Required]
         [StringLength(250)]
-        public string QueryRunnerId { get; set; } = string.Empty;
+        public string ConnectorId { get; set; } = string.Empty;
 
         /// <summary>
-        /// Navigation property to the connector used to execute queries for the data source.
+        /// Navigation property to the connector used to execute queries.
         /// </summary>
-        public QueryRunner? QueryRunner { get; set; }
+        public Connector? Connector { get; set; }
 
         /// <summary>
-        /// Extra properties passed to the connector used to connect. This often contains connection strings, username, password, etc.
+        /// Connection properties passed to the connector. This often contains connection strings, username, password, etc.
         /// </summary>
         /// <remarks>
         /// This value is encrypted in the database when stored.
         /// </remarks>
-        public Dictionary<string, string> ExecutorParameters { get; set; } = new();
+        public Dictionary<string, string?> ConnectionProperties { get; set; } = new();
     }
 }

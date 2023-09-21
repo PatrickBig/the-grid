@@ -7,13 +7,13 @@ using System.ComponentModel.DataAnnotations;
 namespace TheGrid.Shared.Models
 {
     /// <summary>
-    /// Request to create a new data source.
+    /// Request to create a new connection.
     /// </summary>
     public class CreateDataSourceRequest
     {
 #pragma warning disable SA1629 // Documentation text should end with a period
         /// <summary>
-        /// Name of the data source.
+        /// Name of the connection.
         /// </summary>
         /// <example>My Connection</example>
         [Required]
@@ -21,7 +21,7 @@ namespace TheGrid.Shared.Models
         public string Name { get; set; } = string.Empty;
 
         /// <summary>
-        /// The ID of the organization the data source is being created for.
+        /// The ID of the organization the connection is being created for.
         /// </summary>
         /// <remarks>
         /// This ID must be valid and have a corresponding Organization.

@@ -12,7 +12,7 @@
                 </RadzenFormField>
             </RadzenColumn>
             <RadzenColumn Size="6">
-                <RadzenFormField Text="Data Source" class="w-100">
+                <RadzenFormField Text="connection" class="w-100">
                     <RadzenDropDownDataGrid TValue="int?"
                                             Value="@QueryEditorInput.DataSourceId"
                                             ValueChanged="DataSourceChangedAsync"
@@ -24,7 +24,7 @@
                                             AllowFiltering="false"
                                             TextProperty="@nameof(DataSourceListItem.Name)"
                                             ValueProperty="@nameof(DataSourceListItem.Id)"
-                                            Name="Data Source"
+                                            Name="connection"
                                             Context="datasource">
                         <Columns>
                             <RadzenDropDownDataGridColumn Property="@nameof(DataSourceListItem.Name)" Title="Name" />

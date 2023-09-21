@@ -62,7 +62,7 @@ namespace TheGrid.Server.Controllers
             }
             else
             {
-                ModelState.AddModelError(nameof(request.DataSourceId), "No data source was found.");
+                ModelState.AddModelError(nameof(request.DataSourceId), "No connection was found.");
                 return ValidationProblem(ModelState);
             }
         }
@@ -81,14 +81,14 @@ namespace TheGrid.Server.Controllers
             {
                 Command = q.Command,
                 DataSourceId = q.DataSourceId,
-                DataSourceName = q.DataSource!.Name,
+                DataSourceName = q.Connection!.Name,
                 Name = q.Name,
                 Description = q.Description,
                 Id = q.Id,
                 LastErrorMessage = q.LastErrorMessage,
                 Parameters = q.Parameters,
                 ResultsRefreshed = q.ResultsRefreshed,
-                ResultState = q.ResultState,
+                Status = q.ResultState,
                 Tags = q.Tags,
             })
                 .SingleOrDefaultAsync(q => q.Id == queryId, cancellationToken);
@@ -139,7 +139,7 @@ namespace TheGrid.Server.Controllers
             CancellationToken cancellationToken = default)
         {
             var baseQuery = _db.Queries
-                .Where(q => q.DataSource != null && q.DataSource.Organization != null && q.DataSource.Organization.Id == organization)
+                .Where(q => q.Connection != null && q.Connection.Organization != null && q.Connection.Organization.Id == organization)
                 .Select(q => new QueryListItem
                 {
                     Id = q.Id,
@@ -147,7 +147,7 @@ namespace TheGrid.Server.Controllers
                     LastErrorMessage = q.LastErrorMessage,
                     Name = q.Name,
                     ResultsRefreshed = q.ResultsRefreshed,
-                    ResultState = q.ResultState,
+                    Status = q.ResultState,
                     Tags = q.Tags,
                 });
 
@@ -252,7 +252,7 @@ namespace TheGrid.Server.Controllers
 
         private async Task<bool> ValidateDataSourceAsync(int dataSourceId)
         {
-            return await _db.DataSources.AnyAsync(d => d.Id == dataSourceId);
+            return await _db.Connections.AnyAsync(d => d.Id == dataSourceId);
         }
     }
 }

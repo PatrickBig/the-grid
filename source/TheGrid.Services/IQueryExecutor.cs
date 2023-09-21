@@ -12,9 +12,9 @@ namespace TheGrid.Services
         /// <summary>
         /// Executes the query and stores the results.
         /// </summary>
-        /// <param name="queryId">Unique identifier of the query to execute.</param>
+        /// <param name="queryExecutionId">Unique identifier of the query to execute.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>Results from the query execution.</returns>
-        public Task RefreshQueryResults(int queryId, CancellationToken cancellationToken = default);
+        public Task RefreshQueryResultsAsync(long queryExecutionId, CancellationToken cancellationToken = default);
     }
 }
