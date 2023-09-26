@@ -17,7 +17,7 @@ namespace TheGrid.Connectors.Attributes
         /// </summary>
         /// <param name="name">Name used to render the label for the control. May only contain letters, numbers, spaces, underscores, and hypens.</param>
         /// <param name="propertyType">Type of the property.</param>
-        public ConnectorParameterAttribute(string name, QueryRunnerParameterType propertyType)
+        public ConnectorParameterAttribute(string name, ConnectionPropertyType propertyType)
         {
             Name = name;
             Type = propertyType;
@@ -62,7 +62,7 @@ namespace TheGrid.Connectors.Attributes
         /// <summary>
         /// Type of control used to render the output.
         /// </summary>
-        public QueryRunnerParameterType Type { get; }
+        public ConnectionPropertyType Type { get; }
 
         /// <summary>
         /// If true the parameter requires input.

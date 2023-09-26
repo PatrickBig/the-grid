@@ -124,18 +124,8 @@ namespace TheGrid.Connectors.Integration.Tests
             Assert.True(results.Rows.Any());
 
             _output.WriteLine("Found the following rows:");
-            var firstRowRan = false;
             foreach (var row in results.Rows)
             {
-                if (!firstRowRan)
-                {
-                    firstRowRan = true;
-                    foreach (var column in row)
-                    {
-                        _output.WriteLine($"Field = {column.Key}, Type = {column.Value.GetType()}");
-                    }
-                }
-
                 _output.WriteLine(string.Join(", ", row.Values.Select(v => v == null || (v is DBNull) ? "(null)" : v.ToString())));
             }
         }

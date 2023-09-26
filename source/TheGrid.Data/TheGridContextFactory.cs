@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileProviders;
+using TheGrid.Models.Configuration;
 
 namespace TheGrid.Data
 {
@@ -18,8 +19,7 @@ namespace TheGrid.Data
         public TheGridDbContext CreateDbContext(string[] args)
         {
             var parentDirectory = Directory.GetParent(Directory.GetCurrentDirectory())?.FullName ?? throw new NullReferenceException("Unable to determine parent directory");
-            var apiProjectDirectory = Path.Combine(parentDirectory, "TheGrid.Api");
-            var apiProjectProvider = new PhysicalFileProvider(Path.Combine(parentDirectory, "TheGrid.Api"));
+            var apiProjectProvider = new PhysicalFileProvider(Path.Combine(parentDirectory, "TheGrid.Server"));
 
             var configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", optional: true)
@@ -27,14 +27,19 @@ namespace TheGrid.Data
                 .AddEnvironmentVariables()
                 .Build();
 
-            var dataConfig = configuration.GetSection(nameof(DataLayerOptions)).Get<DataLayerOptions>();
+            var dataConfig = configuration.GetSection(nameof(SystemOptions)).Get<SystemOptions>();
 
             var builder = new DbContextOptionsBuilder<TheGridDbContext>();
 
-            if (dataConfig?.DatabaseProvider == DatabaseProviders.PostgreSql)
+            var connectionString = configuration.GetConnectionString("Database");
+
+            if (dataConfig?.DatabaseProvider == DatabaseProvider.PostgreSql)
             {
-                // builder.UseNpgsql(dataConfig.ConnectionString);
-                builder.UseNpgsql(dataConfig.ConnectionString, o => o.MigrationsAssembly("TheGrid.Postgres"));
+#if INITIAL_MIGRATION
+                builder.UseNpgsql(connectionString);
+#else
+                builder.UseNpgsql(connectionString, o => o.MigrationsAssembly("TheGrid.Postgres"));
+#endif
             }
             else
             {

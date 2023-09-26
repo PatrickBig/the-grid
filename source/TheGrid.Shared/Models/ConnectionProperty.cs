@@ -1,4 +1,4 @@
-﻿// <copyright file="QueryRunnerParameter.cs" company="BiglerNet">
+﻿// <copyright file="ConnectionProperty.cs" company="BiglerNet">
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
@@ -8,9 +8,9 @@ using System.Text.Json.Serialization;
 namespace TheGrid.Shared.Models
 {
     /// <summary>
-    /// Property types for <see cref="QueryRunnerParameter"/>.
+    /// Property types for <see cref="ConnectionProperty"/>.
     /// </summary>
-    public enum QueryRunnerParameterType
+    public enum ConnectionPropertyType
     {
         /// <summary>
         /// The parameter should be rendered using a single line text input.
@@ -41,7 +41,8 @@ namespace TheGrid.Shared.Models
     /// <summary>
     /// Information about a property passed to a connector.
     /// </summary>
-    public class QueryRunnerParameter
+    public class ConnectionProperty
+
     {
         /// <summary>
         /// Name of the connector paramter.
@@ -63,7 +64,7 @@ namespace TheGrid.Shared.Models
         /// Type of control used to render the output.
         /// </summary>
         [JsonConverter(typeof(JsonStringEnumConverter))]
-        public QueryRunnerParameterType Type { get; set; }
+        public ConnectionPropertyType Type { get; set; }
 
         /// <summary>
         /// If true the parameter requires input.

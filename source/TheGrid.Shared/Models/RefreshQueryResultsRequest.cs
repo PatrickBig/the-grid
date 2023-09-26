@@ -1,4 +1,4 @@
-﻿// <copyright file="QueryExecutionRequest.cs" company="BiglerNet">
+﻿// <copyright file="RefreshQueryResultsRequest.cs" company="BiglerNet">
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
@@ -7,7 +7,7 @@ namespace TheGrid.Shared.Models
     /// <summary>
     /// Request to execute an existing query with parameters.
     /// </summary>
-    public class QueryExecutionRequest
+    public class RefreshQueryResultsRequest
     {
         /// <summary>
         /// Unique identifier of the query definition to execute.

@@ -3,10 +3,7 @@
 // </copyright>
 
 using Asp.Versioning;
-using Hangfire;
 using Microsoft.AspNetCore.Mvc;
-using TheGrid.Data;
-using TheGrid.Models;
 using TheGrid.Services;
 using TheGrid.Shared.Models;
 
@@ -20,45 +17,30 @@ namespace TheGrid.Server.Controllers
     [ApiVersion("1.0")]
     public class QueryResultRefreshController : ControllerBase
     {
-        private readonly IQueryExecutor _queryExecutor;
-        private readonly TheGridDbContext _db;
+        private readonly IQueryRefreshManager _queryRefreshManager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="QueryResultRefreshController"/> class.
         /// </summary>
-        /// <param name="queryExecutor">Query execution service.</param>
-        public QueryResultRefreshController(IQueryExecutor queryExecutor, TheGridDbContext db)
+        /// <param name="queryRefreshManager">Query refresh manageer.</param>
+        public QueryResultRefreshController(IQueryRefreshManager queryRefreshManager)
         {
-            _queryExecutor = queryExecutor;
-            _db = db;
+            _queryRefreshManager = queryRefreshManager;
         }
 
         /// <summary>
-        /// Requests the refresh of query results.
+        /// Requests to refresh a set of query results.
         /// </summary>
-        /// <param name="queryId">Unique ID of the query to refresh the results for.</param>
+        /// <param name="request">Request to refresh the query results.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>Status code indicating the result of the request.</returns>
-        [HttpGet("{queryId:int}")]
-        public async Task<ActionResult> Get([FromRoute] int queryId, CancellationToken cancellationToken = default)
-        {
-            await _queryExecutor.RefreshQueryResultsAsync(queryId, cancellationToken);
-
-            return Ok();
-        }
-
+        /// <returns>Response containing ID of the job that was queued for the request.</returns>
+        [ProducesResponseType(typeof(RefreshQueryResultsResponse), StatusCodes.Status202Accepted)]
         [HttpPost]
-        public async Task<ActionResult> Post([FromBody] QueryExecutionRequest queryExecutionRequest, CancellationToken cancellationToken = default)
+        public async Task<ActionResult> Post([FromBody] RefreshQueryResultsRequest request, CancellationToken cancellationToken = default)
         {
-            var entry = new QueryExecution
-            {
-                QueryId = queryExecutionRequest.QueryId,
-            };
+            var jobId = await _queryRefreshManager.QueueQueryRefreshAsync(request.QueryId, cancellationToken);
 
-            await _db.QueryExecutions.AddAsync(entry, cancellationToken);
-
-            // Queue the hangfire job
-            BackgroundJob.Enqueue<IQueryExecutor>(q => q.RefreshQueryResultsAsync(entry.Id, cancellationToken));
+            return Accepted(new RefreshQueryResultsResponse { QueryExecutionRequestId = jobId });
         }
     }
 }

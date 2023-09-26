@@ -3,6 +3,7 @@
 // </copyright>
 
 using Asp.Versioning;
+using Mapster;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
@@ -48,15 +49,25 @@ namespace TheGrid.Server.Controllers
             [FromQuery][Range(1, 1500)] int take = 100,
             CancellationToken cancellationToken = default)
         {
+            // Get the latest query execution
+            var latestQuery = await _db.QueryExecutions
+                .Include(q => q.Query)
+                .Where(q => q.QueryId == queryId && q.Status == QueryExecutionStatus.Complete)
+                .OrderByDescending(q => q.DateQueued)
+                .SingleAsync(cancellationToken);
+
             var queryBase = _db.QueryResultRows
                 .AsNoTracking()
-                .Where(q => q.QueryId == queryId);
+                .Where(q => q.QueryExecutionId == latestQuery.Id);
 
             var resultQuery = queryBase
                 .Skip(skip)
                 .Take(take);
 
-            var columns = await _db.Queries.Where(c => c.Id == queryId).Select(q => q.Columns).FirstOrDefaultAsync(cancellationToken);
+            var columns = latestQuery.Query!.Columns?.ToDictionary(c => c.Name, c => new QueryResultColumn
+            {
+                Type = c.Type.Adapt<QueryResultColumnType>(),
+            });
 
             var response = new PaginatedQueryResult
             {

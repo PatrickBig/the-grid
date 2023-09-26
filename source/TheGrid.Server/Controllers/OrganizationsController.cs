@@ -46,7 +46,7 @@ namespace TheGrid.Server.Controllers
         /// <response code="201">Returns the unique ID of the newly created item.</response>
         /// <response code="400">If the request is invalid.</response>
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(CreateDataSourceResponse), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(CreateConnectionResponse), StatusCodes.Status201Created)]
         [HttpPost]
         public async Task<ActionResult<CreateOrganizationResponse>> Post([FromBody] CreateOrganizationRequest request, CancellationToken cancellationToken = default)
         {
@@ -57,7 +57,11 @@ namespace TheGrid.Server.Controllers
                 return ValidationProblem(ModelState);
             }
 
-            var dto = request.Adapt<Organization>();
+            var dto = new Organization
+            {
+                Id = request.Slug,
+                Name = request.Name,
+            }; //request.Adapt<Organization>();
 
             await _db.Organizations.AddAsync(dto, cancellationToken);
 

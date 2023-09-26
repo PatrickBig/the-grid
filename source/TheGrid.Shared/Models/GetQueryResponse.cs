@@ -22,12 +22,12 @@ namespace TheGrid.Shared.Models
         /// connection used to execute the query.
         /// </summary>
         [Required]
-        public int DataSourceId { get; set; }
+        public int ConnectionId { get; set; }
 
         /// <summary>
         /// Name of the connection.
         /// </summary>
-        public string DataSourceName { get; set; } = null!;
+        public string ConnectionName { get; set; } = null!;
 
         /// <summary>
         /// Name of the query.

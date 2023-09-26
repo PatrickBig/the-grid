@@ -9,6 +9,8 @@ namespace TheGrid.Services
     /// </summary>
     public interface IQueryExecutor
     {
+
+
         /// <summary>
         /// Executes the query and stores the results.
         /// </summary>

@@ -87,7 +87,7 @@ namespace TheGrid.Services
 
                 foreach (ConnectorParameterAttribute attribute in parameters.Cast<ConnectorParameterAttribute>())
                 {
-                    details.Parameters.Add(attribute.Adapt<QueryRunnerParameter>());
+                    details.Parameters.Add(attribute.Adapt<ConnectionProperty>());
                 }
 
                 var runnerInterfaces = runner.GetInterfaces();

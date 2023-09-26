@@ -58,7 +58,7 @@ namespace TheGrid.Data
         {
             //modelBuilder.Entity<Connection>().HasIndex(d => d.OrganizationId);
 
-            //modelBuilder.Entity<Query>().HasIndex(q => q.DataSourceId);
+            //modelBuilder.Entity<Query>().HasIndex(q => q.ConnectionId);
 
             // Probably don't want this one at all
             //modelBuilder.Entity<Query>().Property(q => q.Columns)
@@ -67,13 +67,13 @@ namespace TheGrid.Data
             //modelBuilder.Entity<Query>().Property(q => q.Parameters)
             //    .HasColumnType("jsonb");
 
-            //modelBuilder.Entity<QueryResultRow>().Property(r => r.Data)
-            //    .HasColumnType("jsonb");
+            modelBuilder.Entity<QueryResultRow>().Property(r => r.Data)
+                .HasColumnType("jsonb");
 
             //modelBuilder.Entity<QueryResultRow>().HasIndex(q => q.QueryId);
 
-            //modelBuilder.Entity<Connector>().Property(r => r.Parameters)
-            //    .HasColumnType("jsonb");
+            modelBuilder.Entity<Connector>().Property(r => r.Parameters)
+                .HasColumnType("jsonb");
 
             base.OnModelCreating(modelBuilder);
         }

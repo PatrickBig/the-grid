@@ -1,7 +1,7 @@
-﻿@page "/DataSources/Create"
+﻿@page "/Connections/Create"
 @using System.ComponentModel.DataAnnotations;
 
-<RadzenTemplateForm TItem="CreateDataSourceRequest" Data="_input" Submit="CreateDataSourceAsync">
+<RadzenTemplateForm TItem="CreateConnectionRequest" Data="_input" Submit="CreateConnectionAsync">
     <RadzenRow Gap="2rem">
         <RadzenColumn>
             <RadzenStack>
@@ -11,12 +11,12 @@
                     <RadzenLengthValidator Component="Name" Max="100" Popup/>
                 </RadzenFormField>
                 <RadzenFormField Text="connector" Variant="Variant.Outlined">
-                    <RadzenDropDown Name="QueryRunnerId" TValue="string" ValueChanged="QueryRunnerChanged" Value="_input.QueryRunnerId" Context="x" Data="_queryRunners" ValueProperty="@nameof(Connector.Id)" TextProperty="@nameof(Connector.Name)">
+                    <RadzenDropDown Name="QueryRunnerId" TValue="string" ValueChanged="QueryRunnerChanged" Value="_input.ConnectorId" Context="x" Data="_queryRunners" ValueProperty="@nameof(Connector.Id)" TextProperty="@nameof(Connector.Name)">
                         <Template>
                             @{
                                 if (x is Connector runner)
                                 {
-                                    <QueryRunnerDisplay Name="@runner.Name" RunnerIcon="@runner.RunnerIcon" />
+                                    <ConnectorDisplay Name="@runner.Name" ConnectorIcon="@runner.RunnerIcon" />
                                 }
                             }
                         </Template>
@@ -34,7 +34,7 @@
         </RadzenColumn>
     </RadzenRow>
     <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" Gap="1rem" class="rz-mt-8 rz-mb-4">
-        <RadzenButton Text="Cancel" ButtonType="ButtonType.Button" ButtonStyle=ButtonStyle.Light Icon="cancel" Click="@(() => NavigationManager.NavigateTo("/DataSources"))" />
+        <RadzenButton Text="Cancel" ButtonType="ButtonType.Button" ButtonStyle=ButtonStyle.Light Icon="cancel" Click="@(() => NavigationManager.NavigateTo("/Connections"))" />
         <RadzenButton Text="Save" ButtonType="ButtonType.Submit" Icon="save" />
     </RadzenStack>
 </RadzenTemplateForm>

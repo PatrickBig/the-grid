@@ -1,0 +1,20 @@
+﻿
+@if (ConnectionProperty != null)
+{
+    <RadzenFormField Text="@ConnectionProperty.Name">
+        @if (ConnectionProperty.Type == ConnectionPropertyType.SingleLineText)
+        {
+            <RadzenTextBox Name="@ConnectionProperty.Name" Change="OnValueChangedAsync" AutoComplete=false />
+        }
+        else if (ConnectionProperty.Type == ConnectionPropertyType.ProtectedText)
+        {
+            <RadzenPassword Name="@ConnectionProperty.Name" Change="OnValueChangedAsync" AutoComplete=false />
+        }
+
+        @if (ConnectionProperty.Required)
+        {
+            <RadzenRequiredValidator Component="@ConnectionProperty.Name" Popup/>
+        }
+    </RadzenFormField>
+    
+}

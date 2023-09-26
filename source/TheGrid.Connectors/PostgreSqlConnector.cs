@@ -11,10 +11,10 @@ namespace TheGrid.Connectors
     /// Executes PostgreSQL queries.
     /// </summary>
     [Connector("PostgreSQL", EditorLanguage = EditorLanguage.PgSql, IconFileName = "postgresql.png")]
-    [ConnectorParameter(CommonConnectionParameters.ConnectionString, QueryRunnerParameterType.SingleLineText, Required = true, HelpText = "Standard [PostgreSQL connection string](https://www.connectionstrings.com/postgresql/).")]
-    [ConnectorParameter(CommonConnectionParameters.DatabaseName, QueryRunnerParameterType.SingleLineText, Required = true)]
-    [ConnectorParameter(CommonConnectionParameters.Username, QueryRunnerParameterType.SingleLineText, Required = true)]
-    [ConnectorParameter(CommonConnectionParameters.Password, QueryRunnerParameterType.ProtectedText, Required = true)]
+    [ConnectorParameter(CommonConnectionParameters.ConnectionString, ConnectionPropertyType.SingleLineText, Required = true, HelpText = "Standard [PostgreSQL connection string](https://www.connectionstrings.com/postgresql/).")]
+    [ConnectorParameter(CommonConnectionParameters.DatabaseName, ConnectionPropertyType.SingleLineText, Required = true)]
+    [ConnectorParameter(CommonConnectionParameters.Username, ConnectionPropertyType.SingleLineText, Required = true)]
+    [ConnectorParameter(CommonConnectionParameters.Password, ConnectionPropertyType.ProtectedText, Required = true)]
     public class PostgreSqlConnector : ConnectorBase, ISchemaDiscovery, IConnectionTest
     {
         /// <summary>

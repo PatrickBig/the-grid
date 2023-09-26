@@ -2,6 +2,7 @@
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
+using Hangfire;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Reflection;
@@ -32,11 +33,12 @@ namespace TheGrid.Services
         }
 
         /// <inheritdoc/>
+        [Queue(JobQueues.QueryRefresh)]
         public async Task RefreshQueryResultsAsync(long queryExecutionId, CancellationToken cancellationToken = default)
         {
             var queryExecution = await _db.QueryExecutions
                 .Include(q => q.Query)
-                .Include(q => q.Query!.Connection)
+                .ThenInclude(q => q!.Connection)
                 .SingleOrDefaultAsync(q => q.Id == queryExecutionId, cancellationToken);
 
             if (queryExecution == null || queryExecution.Query == null)
@@ -88,7 +90,7 @@ namespace TheGrid.Services
 
             if (query.Connection == null)
             {
-                throw new ArgumentNullException(nameof(query.Connection), "connection for query cannot be null");
+                throw new InvalidOperationException("Connection for query cannot be null");
             }
 
             var runnerType = runnerAssembly?.GetType(query.Connection.ConnectorId) ?? throw new ArgumentException("No runner found.");

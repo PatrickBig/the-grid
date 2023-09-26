@@ -5,7 +5,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using TheGrid.Data;
-using TheGrid.Data.Extensions;
+using TheGrid.Models.Configuration;
+using TheGrid.Services;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -24,17 +25,31 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <exception cref="ArgumentNullException">Thrown if no configuration for the data layer was found.</exception>
         public static IServiceCollection AddTheGridDbContext(this IServiceCollection services, IConfiguration configuration)
         {
-            var dataOptions = configuration.GetSection(nameof(DataLayerOptions)).Get<DataLayerOptions>();
+            var dataOptions = configuration.GetSection(nameof(SystemOptions)).Get<SystemOptions>();
 
-            dataOptions.ValidateOptions();
-
-            if (dataOptions?.DatabaseProvider == DatabaseProviders.PostgreSql)
+            if (dataOptions?.DatabaseProvider == DatabaseProvider.PostgreSql)
             {
                 services.AddDbContext<TheGridDbContext>(o =>
                 {
-                    o.UseNpgsql(dataOptions.ConnectionString);
+                    o.UseNpgsql(configuration.GetConnectionString("Database"));
                 });
             }
+
+            return services;
+        }
+
+        /// <summary>
+        /// Adds the backend services required by TheGrid.
+        /// </summary>
+        /// <param name="services">Service collection.</param>
+        /// <param name="configuration">Configuration.</param>
+        /// <returns>A service collection with the backend services required by TheGrid to operate.</returns>
+        public static IServiceCollection AddTheGridBackendServices(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.Configure<SystemOptions>(configuration.GetSection(nameof(SystemOptions)));
+            services.AddTransient<QueryRunnerDiscoveryService>();
+            services.AddTransient<IQueryExecutor, QueryExecutor>();
+            services.AddTransient<IQueryRefreshManager, QueryRefreshManager>();
 
             return services;
         }

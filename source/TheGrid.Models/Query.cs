@@ -22,7 +22,7 @@ namespace TheGrid.Models
         /// connection used to execute the query.
         /// </summary>
         [Required]
-        public int DataSourceId { get; set; }
+        public int ConnectionId { get; set; }
 
         /// <summary>
         /// Navigation property to the <see cref="Models.Connection"/> that owns this query.

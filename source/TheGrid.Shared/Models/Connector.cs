@@ -26,7 +26,7 @@ namespace TheGrid.Shared.Models
         /// <summary>
         /// Parameters used to execute the connector.
         /// </summary>
-        public List<QueryRunnerParameter> Parameters { get; set; } = new List<QueryRunnerParameter>();
+        public List<ConnectionProperty> Parameters { get; set; } = new List<ConnectionProperty>();
 
         /// <summary>
         /// When true this connector supports connection testing.

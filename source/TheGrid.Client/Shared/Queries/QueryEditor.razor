@@ -14,34 +14,34 @@
             <RadzenColumn Size="6">
                 <RadzenFormField Text="connection" class="w-100">
                     <RadzenDropDownDataGrid TValue="int?"
-                                            Value="@QueryEditorInput.DataSourceId"
-                                            ValueChanged="DataSourceChangedAsync"
-                                            LoadData="LoadDataSourcesAsync"
-                                            Data="_dataSources"
-                                            Count="_totalDataSources"
+                                            Value="@QueryEditorInput.ConnectionId"
+                                            ValueChanged="ConnectionChangedAsync"
+                                            LoadData="LoadConnectionsAsync"
+                                            Data="_connections"
+                                            Count="_totalConnections"
                                             AllowVirtualization
                                             AllowClear
                                             AllowFiltering="false"
-                                            TextProperty="@nameof(DataSourceListItem.Name)"
-                                            ValueProperty="@nameof(DataSourceListItem.Id)"
-                                            Name="connection"
-                                            Context="datasource">
+                                            TextProperty="@nameof(ConnectionListItem.Name)"
+                                            ValueProperty="@nameof(ConnectionListItem.Id)"
+                                            Name="Connection"
+                                            Context="connection">
                         <Columns>
-                            <RadzenDropDownDataGridColumn Property="@nameof(DataSourceListItem.Name)" Title="Name" />
-                            <RadzenDropDownDataGridColumn Property="@nameof(DataSourceListItem.QueryRunnerId)" Title="Runner">
+                            <RadzenDropDownDataGridColumn Property="@nameof(ConnectionListItem.Name)" Title="Name" />
+                            <RadzenDropDownDataGridColumn Property="@nameof(ConnectionListItem.ConnectorId)" Title="Connector">
                                 <Template Context="data">
-                                    @if (data is DataSourceListItem item && item != null)
+                                    @if (data is ConnectionListItem item && item != null)
                                     {
-                                        <QueryRunnerDisplay Name="@item.QueryRunnerName" RunnerIcon="@item.QueryRunnerIcon" />
+                                        <ConnectorDisplay Name="@item.ConnectorName" ConnectorIcon="@item.ConnectorIcon" />
                                     }
                                 </Template>
                             </RadzenDropDownDataGridColumn>
                         </Columns>
                         <ValueTemplate>
-                            @if (datasource is DataSourceListItem item && item != null)
+                            @if (connection is ConnectionListItem item && item != null)
                             {
                                 @item.Name @:-
-                                <QueryRunnerDisplay Name="@item.QueryRunnerName" RunnerIcon="@item.QueryRunnerIcon" />
+                                <ConnectorDisplay Name="@item.ConnectorName" ConnectorIcon="@item.ConnectorIcon" />
                             }
                         </ValueTemplate>
                     </RadzenDropDownDataGrid>

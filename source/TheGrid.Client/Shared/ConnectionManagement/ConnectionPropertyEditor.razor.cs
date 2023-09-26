@@ -5,19 +5,19 @@
 using Microsoft.AspNetCore.Components;
 using TheGrid.Shared.Models;
 
-namespace TheGrid.Client.Shared.DataSources
+namespace TheGrid.Client.Shared.ConnectionManagement
 {
     /// <summary>
     /// Code behind file for the connection parameter component.
     /// </summary>
-    public partial class DataSourceParameter : ComponentBase
+    public partial class ConnectionPropertyEditor : ComponentBase
     {
         /// <summary>
         /// Information about the source parameter to bind to.
         /// </summary>
         [Parameter]
         [EditorRequired]
-        public QueryRunnerParameter? QueryRunnerParameter { get; set; }
+        public ConnectionProperty? ConnectionProperty { get; set; }
 
         /// <summary>
         /// Fired when the value of the parameter has changed.
@@ -33,9 +33,9 @@ namespace TheGrid.Client.Shared.DataSources
 
         private async Task OnValueChangedAsync(string? value)
         {
-            if (QueryRunnerParameter != null)
+            if (ConnectionProperty != null)
             {
-                await ValueChanged.InvokeAsync((QueryRunnerParameter.Name, value));
+                await ValueChanged.InvokeAsync((ConnectionProperty.Name, value));
             }
         }
     }

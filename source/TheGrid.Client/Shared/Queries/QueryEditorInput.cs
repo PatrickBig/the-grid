@@ -15,7 +15,7 @@ namespace TheGrid.Client.Shared.Queries
         /// connection used to execute the query.
         /// </summary>
         [Required]
-        public int DataSourceId { get; set; }
+        public int ConnectionId { get; set; }
 
         /// <summary>
         /// Name of the query.

@@ -33,6 +33,6 @@ namespace TheGrid.Connectors.Models
         /// <summary>
         /// The connections associated to this organization.
         /// </summary>
-        public List<Connection> DataSources { get; set; } = new();
+        public List<Connection> Connections { get; set; } = new();
     }
 }

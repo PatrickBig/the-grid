@@ -50,7 +50,7 @@ namespace TheGrid.Server.Controllers
         [HttpPost]
         public async Task<ActionResult> CreateQuery([FromBody] CreateQueryRequest request, CancellationToken cancellationToken = default)
         {
-            if (await ValidateDataSourceAsync(request.DataSourceId))
+            if (await ValidateConnectionAsync(request.ConnectionId))
             {
                 var query = request.Adapt<Query>();
 
@@ -62,7 +62,7 @@ namespace TheGrid.Server.Controllers
             }
             else
             {
-                ModelState.AddModelError(nameof(request.DataSourceId), "No connection was found.");
+                ModelState.AddModelError(nameof(request.ConnectionId), "No connection was found.");
                 return ValidationProblem(ModelState);
             }
         }
@@ -80,15 +80,15 @@ namespace TheGrid.Server.Controllers
             var item = await _db.Queries.Select(q => new GetQueryResponse
             {
                 Command = q.Command,
-                DataSourceId = q.DataSourceId,
-                DataSourceName = q.Connection!.Name,
+                ConnectionId = q.ConnectionId,
+                ConnectionName = q.Connection!.Name,
                 Name = q.Name,
                 Description = q.Description,
                 Id = q.Id,
-                LastErrorMessage = q.LastErrorMessage,
-                Parameters = q.Parameters,
-                ResultsRefreshed = q.ResultsRefreshed,
-                Status = q.ResultState,
+                //LastErrorMessage = q.LastErrorMessage,
+                //Parameters = q.Parameters,
+                //ResultsRefreshed = q.ResultsRefreshed,
+                //Status = q.ResultState,
                 Tags = q.Tags,
             })
                 .SingleOrDefaultAsync(q => q.Id == queryId, cancellationToken);
@@ -111,8 +111,8 @@ namespace TheGrid.Server.Controllers
             originalQuery.Command = request.Command;
             originalQuery.Name = request.Name;
             originalQuery.Description = request.Description;
-            originalQuery.Parameters = request.Parameters;
-            originalQuery.DataSourceId = request.DataSourceId;
+            //originalQuery.Parameters = request.Parameters;
+            originalQuery.ConnectionId = request.ConnectionId;
 
             await _db.SaveChangesAsync(cancellationToken);
 
@@ -144,10 +144,10 @@ namespace TheGrid.Server.Controllers
                 {
                     Id = q.Id,
                     Description = q.Description,
-                    LastErrorMessage = q.LastErrorMessage,
+                    //LastErrorMessage = q.LastErrorMessage,
                     Name = q.Name,
-                    ResultsRefreshed = q.ResultsRefreshed,
-                    Status = q.ResultState,
+                    //ResultsRefreshed = q.ResultsRefreshed,
+                    //Status = q.ResultState,
                     Tags = q.Tags,
                 });
 
@@ -250,9 +250,9 @@ namespace TheGrid.Server.Controllers
             return Ok(new TagsResponse { TagsModified = request.Tags.Length });
         }
 
-        private async Task<bool> ValidateDataSourceAsync(int dataSourceId)
+        private async Task<bool> ValidateConnectionAsync(int connectionId)
         {
-            return await _db.Connections.AnyAsync(d => d.Id == dataSourceId);
+            return await _db.Connections.AnyAsync(d => d.Id == connectionId);
         }
     }
 }

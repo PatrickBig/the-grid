@@ -1,4 +1,4 @@
-﻿// <copyright file="DataSourcesController.cs" company="BiglerNet">
+﻿// <copyright file="ConnectionsController.cs" company="BiglerNet">
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
@@ -21,15 +21,15 @@ namespace TheGrid.Server.Controllers
     [ApiController]
     [Produces(MediaTypeNames.Application.Json)]
     [ApiVersion("1.0")]
-    public class DataSourcesController : ControllerBase
+    public class ConnectionsController : ControllerBase
     {
         private readonly TheGridDbContext _db;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DataSourcesController"/> class.
+        /// Initializes a new instance of the <see cref="ConnectionsController"/> class.
         /// </summary>
         /// <param name="db">Database context.</param>
-        public DataSourcesController(TheGridDbContext db)
+        public ConnectionsController(TheGridDbContext db)
         {
             _db = db;
         }
@@ -41,9 +41,9 @@ namespace TheGrid.Server.Controllers
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>The unique ID of the newly created connection.</returns>
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(CreateDataSourceResponse), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(CreateConnectionResponse), StatusCodes.Status201Created)]
         [HttpPost]
-        public async Task<ActionResult<CreateDataSourceResponse>> Post([FromBody] CreateDataSourceRequest request, CancellationToken cancellationToken = default)
+        public async Task<ActionResult<CreateConnectionResponse>> Post([FromBody] CreateConnectionRequest request, CancellationToken cancellationToken = default)
         {
             if (!(await _db.Organizations.AnyAsync(d => d.Id == request.OrganizationId, cancellationToken)))
             {
@@ -51,37 +51,37 @@ namespace TheGrid.Server.Controllers
                 return ValidationProblem(ModelState);
             }
 
-            if (!(await _db.Connectors.AnyAsync(d => d.Id == request.QueryRunnerId, cancellationToken: cancellationToken)))
+            if (!(await _db.Connectors.AnyAsync(d => d.Id == request.ConnectorId, cancellationToken: cancellationToken)))
             {
-                ModelState.AddModelError(nameof(request.QueryRunnerId), "Invalid connector ID specified.");
+                ModelState.AddModelError(nameof(request.ConnectorId), "Invalid connector ID specified.");
                 return ValidationProblem(ModelState);
             }
 
-            var dataSource = request.Adapt<Connection>();
+            var connection = request.Adapt<Connection>();
 
-            _db.Connections.Add(dataSource);
+            _db.Connections.Add(connection);
             await _db.SaveChangesAsync(cancellationToken);
 
-            return CreatedAtAction(nameof(Get), new { dataSourceId = dataSource.Id }, new CreateDataSourceResponse { DataSourceId = dataSource.Id });
+            return CreatedAtAction(nameof(Get), new { connectionId = connection.Id }, new CreateConnectionResponse { ConnectionId = connection.Id });
         }
 
         /// <summary>
         /// Gets a specific connection.
         /// </summary>
-        /// <param name="dataSourceId">The ID of the connection to fetch.</param>
+        /// <param name="connectionId">The ID of the connection to fetch.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>Information about the connection.</returns>
-        [HttpGet("{dataSourceId:int}")]
-        public async Task<ActionResult<Connection>> Get([FromRoute] int dataSourceId, CancellationToken cancellationToken = default)
+        [HttpGet("{connectionId:int}")]
+        public async Task<ActionResult<Connection>> Get([FromRoute] int connectionId, CancellationToken cancellationToken = default)
         {
-            var dataSource = await _db.Connections.FirstOrDefaultAsync(d => d.Id == dataSourceId, cancellationToken);
+            var connection = await _db.Connections.FirstOrDefaultAsync(d => d.Id == connectionId, cancellationToken);
 
-            if (dataSource == null)
+            if (connection == null)
             {
                 return NotFound();
             }
 
-            return Ok(dataSource);
+            return Ok(connection);
         }
 
         /// <summary>
@@ -93,7 +93,7 @@ namespace TheGrid.Server.Controllers
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>A list of connections in the system.</returns>
         [HttpGet]
-        [ProducesResponseType(typeof(PaginatedResult<DataSourceListItem>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(PaginatedResult<ConnectionListItem>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> GetList(
             [FromQuery] string organization,
@@ -105,21 +105,21 @@ namespace TheGrid.Server.Controllers
                 .Include(d => d.Connector)
                 .Where(d => d.Organization != null && d.Organization.Id == organization && d.Connector != null)
                 .OrderBy(d => d.Name)
-                .Select(d => new DataSourceListItem
+                .Select(d => new ConnectionListItem
                 {
                     Id = d.Id,
                     Name = d.Name,
-                    QueryRunnerId = d.ConnectorId,
-                    QueryRunnerIcon = d.Connector!.RunnerIcon,
-                    QueryRunnerName = d.Connector.Name,
-                    QueryRunnerEditorLanguage = d.Connector.EditorLanguage,
+                    ConnectorId = d.ConnectorId,
+                    ConnectorIcon = d.Connector!.RunnerIcon,
+                    ConnectorName = d.Connector.Name,
+                    ConnectorEditorLanguage = d.Connector.EditorLanguage,
                 });
 
             var resultQuery = baseQuery
                 .Skip(skip)
                 .Take(take);
 
-            var result = new PaginatedResult<DataSourceListItem>
+            var result = new PaginatedResult<ConnectionListItem>
             {
                 Items = await resultQuery.ToListAsync(cancellationToken),
                 TotalItems = await resultQuery.CountAsync(cancellationToken),

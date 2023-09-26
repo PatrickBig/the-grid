@@ -1,0 +1,11 @@
+﻿<RadzenImage Style="width: 16px; height: 16px;" Path="@("/images/runner-icons/" + ConnectorIcon)"></RadzenImage>
+@Name
+
+@code {
+    [Parameter]
+    [EditorRequired]
+    public string Name { get; set; } = string.Empty;
+
+    [Parameter]
+    public string? ConnectorIcon { get; set; } = "unknown.png";
+}

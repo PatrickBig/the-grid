@@ -20,7 +20,7 @@ namespace TheGrid.Server
         {
             TypeAdapterConfig<Organization, OrganizationDetails>
                 .NewConfig()
-                .Map(dest => dest.OrganizationId, src => src.Id);
+                .Map(dest => dest.Slug, src => src.Id);
         }
     }
 }

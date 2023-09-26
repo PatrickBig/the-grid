@@ -1,24 +1,24 @@
-﻿@page "/DataSources"
+﻿@page "/Connections"
 @using TheGrid.Shared.Models
 
 <PageTitle>connections</PageTitle>
 
 <RadzenText TextStyle="TextStyle.DisplayH2">connections</RadzenText>
 
-<RadzenLink Path="/DataSources/Create">Create new</RadzenLink>
+<RadzenLink Path="/Connections/Create">Create new</RadzenLink>
 
 @if (_items != null)
 {
     <RadzenDataGrid
         Data="_items"
         Count="_totalItems"
-        TItem="DataSourceListItem"
+        TItem="ConnectionListItem"
         AllowSorting>
         <Columns>
-            <RadzenDataGridColumn TItem="DataSourceListItem" Property="@nameof(DataSourceListItem.Name)" Title="Name" />
-            <RadzenDataGridColumn TItem="DataSourceListItem" Property="@nameof(DataSourceListItem.QueryRunnerName)" Title="Runner">
+            <RadzenDataGridColumn TItem="ConnectionListItem" Property="@nameof(ConnectionListItem.Name)" Title="Name" />
+            <RadzenDataGridColumn TItem="ConnectionListItem" Property="@nameof(ConnectionListItem.ConnectorName)" Title="Connector">
                 <Template>
-                    <QueryRunnerDisplay Name="@context.QueryRunnerName" RunnerIcon="@context.QueryRunnerIcon" />
+                    <ConnectorDisplay Name="@context.ConnectorName" ConnectorIcon="@context.ConnectorIcon" />
                 </Template>
             </RadzenDataGridColumn>
         </Columns>
@@ -32,7 +32,7 @@ else
 }
 
 @code {
-    private IEnumerable<DataSourceListItem> _items = Enumerable.Empty<DataSourceListItem>();
+    private IEnumerable<ConnectionListItem> _items = Enumerable.Empty<ConnectionListItem>();
     private int _totalItems;
 
     [CascadingParameter]
@@ -43,10 +43,10 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var response = await HttpClient.GetAsync("/api/v1/DataSources?organization=" + UserOrganization.OrganizationId);
+        var response = await HttpClient.GetAsync("/api/v1/Connections?organization=" + UserOrganization.OrganizationId);
         if (response.IsSuccessStatusCode && response.Content != null)
         {
-            var data = await response.Content.ReadFromJsonAsync<PaginatedResult<DataSourceListItem>>();
+            var data = await response.Content.ReadFromJsonAsync<PaginatedResult<ConnectionListItem>>();
 
             if (data != null)
             {

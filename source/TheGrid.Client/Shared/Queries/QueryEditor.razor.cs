@@ -4,6 +4,7 @@
 
 using BlazorMonaco.Editor;
 using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 using Radzen;
 using System.Net.Http.Json;
 using TheGrid.Client.Extensions;
@@ -17,8 +18,8 @@ namespace TheGrid.Client.Shared.Queries
     public partial class QueryEditor : TheGridComponentBase
     {
         private StandaloneCodeEditor? _editor;
-        private int _totalDataSources;
-        private IEnumerable<DataSourceListItem> _dataSources = Enumerable.Empty<DataSourceListItem>();
+        private int _totalConnections;
+        private IEnumerable<ConnectionListItem> _connections = Enumerable.Empty<ConnectionListItem>();
 
         /// <summary>
         /// Input for the editor component.
@@ -33,14 +34,17 @@ namespace TheGrid.Client.Shared.Queries
         [EditorRequired]
         public EventCallback<QueryEditorInput> QuerySaved { get; set; }
 
+        [Inject]
+        private IJSRuntime JSRuntime { get; set; }
+
         /// <inheritdoc/>
         protected override async Task OnInitializedAsync()
         {
-            await LoadDataSourcesAsync(new LoadDataArgs());
+            await LoadConnectionsAsync(new LoadDataArgs());
 
             if (QueryEditorInput != null)
             {
-                await SetLanguageAsync(QueryEditorInput.DataSourceId);
+                await SetLanguageAsync(QueryEditorInput.ConnectionId);
             }
             else
             {
@@ -55,16 +59,16 @@ namespace TheGrid.Client.Shared.Queries
         /// </summary>
         /// <param name="e">Load data event arguments.</param>
         /// <returns>A <see cref = "Task"/> representing the asynchronous operation.</returns>
-        private async Task LoadDataSourcesAsync(LoadDataArgs e)
+        private async Task LoadConnectionsAsync(LoadDataArgs e)
         {
-            var response = await HttpClient.GetAsync(e.GetQueryUrl("/api/v1/DataSources", new() { { "organization", UserOrganization.OrganizationId } }));
+            var response = await HttpClient.GetAsync(e.GetQueryUrl("/api/v1/Connections", new() { { "organization", UserOrganization.OrganizationId } }));
             if (response.IsSuccessStatusCode && response.Content != null)
             {
-                var data = await response.Content.ReadFromJsonAsync<PaginatedResult<DataSourceListItem>>(cancellationToken: CancellationToken);
+                var data = await response.Content.ReadFromJsonAsync<PaginatedResult<ConnectionListItem>>(cancellationToken: CancellationToken);
                 if (data != null)
                 {
-                    _dataSources = data.Items;
-                    _totalDataSources = data.TotalItems;
+                    _connections = data.Items;
+                    _totalConnections = data.TotalItems;
                 }
             }
             else
@@ -90,27 +94,27 @@ namespace TheGrid.Client.Shared.Queries
             }
         }
 
-        private async Task DataSourceChangedAsync(int? dataSourceId)
+        private async Task ConnectionChangedAsync(int? connectionId)
         {
-            if (dataSourceId != null && QueryEditorInput != null)
+            if (connectionId != null && QueryEditorInput != null)
             {
-                QueryEditorInput.DataSourceId = dataSourceId.Value;
+                QueryEditorInput.ConnectionId = connectionId.Value;
             }
 
-            if (dataSourceId != null)
+            if (connectionId != null)
             {
-                await SetLanguageAsync(dataSourceId.Value);
+                await SetLanguageAsync(connectionId.Value);
             }
         }
 
-        private async Task SetLanguageAsync(int dataSourceId)
+        private async Task SetLanguageAsync(int connectionId)
         {
-            var dataSource = _dataSources.FirstOrDefault(d => d.Id == dataSourceId);
+            var connection = _connections.FirstOrDefault(d => d.Id == connectionId);
 
-            if (_editor != null && dataSource != null)
+            if (_editor != null && connection != null)
             {
                 var model = await _editor.GetModel();
-                await Global.SetModelLanguage(model, dataSource.QueryRunnerEditorLanguage ?? "unknown");
+                await Global.SetModelLanguage(JSRuntime, model, connection.ConnectorEditorLanguage ?? "unknown");
             }
         }
 

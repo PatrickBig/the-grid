@@ -4,6 +4,9 @@
 
 namespace TheGrid.Shared.Models
 {
+    /// <summary>
+    /// Paginated set of query results.
+    /// </summary>
     public class PaginatedQueryResult : PaginatedResult<Dictionary<string, object?>>
     {
         /// <summary>

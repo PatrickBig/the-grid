@@ -1,4 +1,4 @@
-// <copyright file="CreateDataSource.razor.cs" company="BiglerNet">
+// <copyright file="CreateConnection.razor.cs" company="BiglerNet">
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
@@ -6,14 +6,14 @@ using Microsoft.AspNetCore.Components;
 using System.Net.Http.Json;
 using TheGrid.Shared.Models;
 
-namespace TheGrid.Client.Pages.DataSources
+namespace TheGrid.Client.Pages.ConnectionManagement
 {
     /// <summary>
     /// Code behind file for the page to create new connections.
     /// </summary>
-    public partial class CreateDataSource
+    public partial class CreateConnection
     {
-        private readonly CreateDataSourceRequest _input = new();
+        private readonly CreateConnectionRequest _input = new();
         private IEnumerable<Connector>? _queryRunners = null;
         private Connector? _selectedQueryRunner = null;
 
@@ -35,7 +35,7 @@ namespace TheGrid.Client.Pages.DataSources
 
         private void QueryRunnerChanged(string queryRunnerId)
         {
-            _input.ExecutorParameters = new();
+            _input.ConnectionProperties = new();
             _selectedQueryRunner = _queryRunners?.FirstOrDefault(r => r.Id == queryRunnerId);
 
             // Update all of the executor parameters
@@ -43,24 +43,24 @@ namespace TheGrid.Client.Pages.DataSources
             {
                 foreach (var param in _selectedQueryRunner.Parameters)
                 {
-                    _input.ExecutorParameters.Add(param.Name, null);
+                    _input.ConnectionProperties.Add(param.Name, null);
                 }
             }
 
-            _input.QueryRunnerId = queryRunnerId;
+            _input.ConnectorId = queryRunnerId;
         }
 
         private void ParameterValueChanged((string Name, string? Value) x)
         {
-            _input.ExecutorParameters[x.Name] = x.Value;
+            _input.ConnectionProperties[x.Name] = x.Value;
         }
 
-        private async Task CreateDataSourceAsync(CreateDataSourceRequest request)
+        private async Task CreateConnectionAsync(CreateConnectionRequest request)
         {
             request.OrganizationId = UserOrganization.OrganizationId;
-            await HttpClient.PostAsJsonAsync("/api/v1/DataSources", request);
+            await HttpClient.PostAsJsonAsync("/api/v1/Connections", request);
 
-            NavigationManager.NavigateTo("/DataSources");
+            NavigationManager.NavigateTo("/Connections");
         }
     }
 }
