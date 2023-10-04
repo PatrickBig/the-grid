@@ -42,7 +42,6 @@ namespace TheGrid.Shared.Models
     /// Information about a property passed to a connector.
     /// </summary>
     public class ConnectionProperty
-
     {
         /// <summary>
         /// Name of the connector paramter.

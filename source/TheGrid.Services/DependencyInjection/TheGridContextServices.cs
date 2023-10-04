@@ -50,6 +50,8 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddTransient<QueryRunnerDiscoveryService>();
             services.AddTransient<IQueryExecutor, QueryExecutor>();
             services.AddTransient<IQueryRefreshManager, QueryRefreshManager>();
+            services.AddTransient<IVisualizationManager, VisualizationManager>();
+            services.AddTransient<IQueryManager, QueryManager>();
 
             return services;
         }

@@ -21,7 +21,7 @@ namespace TheGrid.Models.Visualizations
     /// <summary>
     /// Chart visualization options.
     /// </summary>
-    public class ChartVisualization : VisualizationOptions
+    public class ChartVisualization : Visualization
     {
         public ChartType Type { get; set; }
     }

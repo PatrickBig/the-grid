@@ -8,6 +8,7 @@ using Radzen;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using TheGrid.Client;
+using TheGrid.Client.HubClients;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -25,6 +26,7 @@ var defaultOptions = new JsonSerializerOptions
 defaultOptions.Converters.Add(new JsonStringEnumConverter());
 
 builder.Services.AddSingleton<JsonSerializerOptions>();
+builder.Services.AddScoped<IQueryRefreshNotificationClient, QueryRefreshNotificationClient>();
 
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 

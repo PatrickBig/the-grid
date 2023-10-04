@@ -35,11 +35,13 @@ namespace TheGrid.Client.Shared.Queries
         public EventCallback<QueryEditorInput> QuerySaved { get; set; }
 
         [Inject]
-        private IJSRuntime JSRuntime { get; set; }
+        private IJSRuntime JSRuntime { get; set; } = null!;
 
         /// <inheritdoc/>
         protected override async Task OnInitializedAsync()
         {
+
+
             await LoadConnectionsAsync(new LoadDataArgs());
 
             if (QueryEditorInput != null)

@@ -8,8 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Net.Mime;
 using System.Runtime.CompilerServices;
-using TheGrid.Connectors.Models;
 using TheGrid.Data;
+using TheGrid.Models;
 using TheGrid.Shared.Models;
 
 namespace TheGrid.Server.Controllers

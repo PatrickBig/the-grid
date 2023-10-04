@@ -1,15 +1,22 @@
-﻿<RadzenStack Orientation="Orientation.Vertical">
+﻿@inherits TheGridComponentBase
+
+<RadzenStack Orientation="Orientation.Vertical">
     <RadzenRow>
-        <RadzenTabs RenderMode="TabRenderMode.Client" Style="height: 100%;">
+        <RadzenTabs @ref="_tabs" RenderMode="TabRenderMode.Server" Style="height: 100%;">
             <Tabs>
-                <RadzenTabsItem Text="Table" Style="height: 100%;">
-                    <TheGrid.Client.Shared.Visualizations.Table QueryId="QueryId" TableVisualization="_tableVisualization" />
-                </RadzenTabsItem>
-                <RadzenTabsItem Text="Bar Chart">
-                    <RadzenChart>
-                
-                    </RadzenChart>
-                </RadzenTabsItem>
+                @if (_visualizations != null)
+                {
+                    for (int i = 0; i < _visualizations.Length; i++)
+                    {
+                        var vis = _visualizations[i];
+                        <RadzenTabsItem Text="@vis.Name" Style="height: 100%;">
+                            @if (vis.VisualizationType == VisualizationType.Table)
+                            {
+                                <TheGrid.Client.Shared.Visualizations.Table QueryId="QueryId" TableVisualization="vis.TableVisualizationOptions" />
+                            }
+                        </RadzenTabsItem>
+                    }
+                }
             </Tabs>
         </RadzenTabs>
     </RadzenRow>
@@ -17,60 +24,3 @@
         <RadzenButton ButtonStyle="ButtonStyle.Light" ButtonType="ButtonType.Button" Click="ShowOptionsDialog">Options</RadzenButton>
     </RadzenRow>
 </RadzenStack>
-
-
-@code {
-    private RadzenDialog? _optionsEditor;
-    /// <summary>
-    /// Identifier for the query to display the visualizations for.
-    /// </summary>
-    [Parameter]
-    [EditorRequired]
-    public int QueryId { get; set; }
-
-    private readonly TableVisualizationOptions _tableVisualization = new()
-        {
-            //Id = 1,
-            Name = "Table",
-            Columns = new()
-            {
-                {
-                    "year",
-                    new TableColumn
-                    {
-                        DisplayName = "Year",
-                        Type = QueryResultColumnType.Integer,
-                        DisplayOrder = 1,
-                    }
-                },
-                {
-                    "month",
-                    new TableColumn
-                    {
-                        DisplayName = "Month",
-                        Type = QueryResultColumnType.Integer,
-                        DisplayOrder = 2,
-                    }
-                },
-                {
-                    "totalsales",
-                    new TableColumn
-                    {
-                        DisplayName = "Total Sales",
-                        Type = QueryResultColumnType.Decimal,
-                        DisplayOrder = 3,
-                    }
-                },
-            }
-        };
-
-
-    [Inject]
-    private DialogService DialogService { get; set; } = null!;
-
-    private async Task ShowOptionsDialog(MouseEventArgs e)
-    {
-        DialogService.Open("Table Options", ds =>
-        @<TheGrid.Client.Shared.Visualizations.TableColumnEditor Options=_tableVisualization />);
-    }
-}

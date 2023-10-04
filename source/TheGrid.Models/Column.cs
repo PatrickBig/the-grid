@@ -3,7 +3,6 @@
 // </copyright>
 
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
 namespace TheGrid.Models
@@ -54,13 +53,6 @@ namespace TheGrid.Models
     /// </summary>
     public class Column
     {
-        /// <summary>
-        /// Primary key for the column.
-        /// </summary>
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Key]
-        public int Id { get; set; }
-
         /// <summary>
         /// Unique ID of the query the column comes from.
         /// </summary>

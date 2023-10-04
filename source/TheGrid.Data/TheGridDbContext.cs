@@ -3,8 +3,8 @@
 // </copyright>
 
 using Microsoft.EntityFrameworkCore;
-using TheGrid.Connectors.Models;
 using TheGrid.Models;
+using TheGrid.Models.Visualizations;
 using TheGrid.Shared.Models;
 
 namespace TheGrid.Data
@@ -49,9 +49,19 @@ namespace TheGrid.Data
         public DbSet<QueryResultRow> QueryResultRows { get; set; }
 
         /// <summary>
-        /// connectors.
+        /// Connectors used to execute queries.
         /// </summary>
         public DbSet<Connector> Connectors { get; set; }
+
+        /// <summary>
+        /// Columns discovered from a query execution.
+        /// </summary>
+        public DbSet<Column> QueryColumns { get; set; }
+
+        /// <summary>
+        /// Visualizations for the queries.
+        /// </summary>
+        public DbSet<Visualization> Visualizations { get; set; }
 
         /// <inheritdoc/>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -73,6 +83,18 @@ namespace TheGrid.Data
             //modelBuilder.Entity<QueryResultRow>().HasIndex(q => q.QueryId);
 
             modelBuilder.Entity<Connector>().Property(r => r.Parameters)
+                .HasColumnType("jsonb");
+
+            modelBuilder.Entity<Column>().HasKey(c => new { c.QueryId, c.Name });
+
+            //modelBuilder.Entity<Visualization>()
+            //    .HasDiscriminator<string>("VisualizationType")
+            //    .HasValue<Visualization>
+            modelBuilder.Entity<TableVisualization>()
+                .HasBaseType<Visualization>();
+
+            modelBuilder.Entity<TableVisualization>()
+                .Property(r => r.Columns)
                 .HasColumnType("jsonb");
 
             base.OnModelCreating(modelBuilder);

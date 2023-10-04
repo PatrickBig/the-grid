@@ -21,7 +21,7 @@
                 Type="@GetTypeForColumnType(kv.Value.Type)"
                 Property="@kv.Key">
                 <Template>
-                    @if (string.IsNullOrEmpty(kv.Value.DisplayFormat) || kv.Value.Type == QueryResultColumnType.Text)
+                    @if (kv.Value.Type == QueryResultColumnType.Text)
                     {
                         @context[kv.Key]
                     }
@@ -33,7 +33,7 @@
                         {
                             if (kv.Value.Type == QueryResultColumnType.DateTime && value is DateTime dateTimeValue)
                             {
-                                @dateTimeValue.ToString(kv.Value.DisplayFormat)
+                                @dateTimeValue.ToString()
                             }
                         }
                     }

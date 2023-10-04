@@ -3,15 +3,14 @@
 // </copyright>
 
 using Asp.Versioning;
-using Mapster;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.Linq.Dynamic.Core;
 using System.Net.Mime;
 using TheGrid.Data;
-using TheGrid.Models;
 using TheGrid.Server.Extensions;
+using TheGrid.Services;
 using TheGrid.Shared.Models;
 
 namespace TheGrid.Server.Controllers
@@ -27,16 +26,19 @@ namespace TheGrid.Server.Controllers
     {
         private readonly TheGridDbContext _db;
         private readonly ILogger<QueriesController> _logger;
+        private readonly IQueryManager _queryManager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="QueriesController"/> class.
         /// </summary>
         /// <param name="db">Database context.</param>
         /// <param name="logger">Logger instance.</param>
-        public QueriesController(TheGridDbContext db, ILogger<QueriesController> logger)
+        /// <param name="queryManager">Query manager.</param>
+        public QueriesController(TheGridDbContext db, ILogger<QueriesController> logger, IQueryManager queryManager)
         {
             _db = db;
             _logger = logger;
+            _queryManager = queryManager;
         }
 
         /// <summary>
@@ -45,32 +47,20 @@ namespace TheGrid.Server.Controllers
         /// <param name="request">Request to create a new query.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>A status code indicating success or failure.</returns>
-        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(CreateQueryResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         [HttpPost]
         public async Task<ActionResult> CreateQuery([FromBody] CreateQueryRequest request, CancellationToken cancellationToken = default)
         {
-            if (await ValidateConnectionAsync(request.ConnectionId))
-            {
-                var query = request.Adapt<Query>();
+            var queryId = await _queryManager.CreateQueryAsync(request.ConnectionId, request.Name, request.Description, request.Command, request.Parameters, cancellationToken);
 
-                await _db.Queries.AddAsync(query, cancellationToken);
-
-                await _db.SaveChangesAsync(cancellationToken);
-
-                return CreatedAtAction(nameof(GetQuery), new { queryId = query.Id }, new CreateQueryResponse { QueryId = query.Id });
-            }
-            else
-            {
-                ModelState.AddModelError(nameof(request.ConnectionId), "No connection was found.");
-                return ValidationProblem(ModelState);
-            }
+            return CreatedAtAction(nameof(GetQuery), new { queryId = queryId }, new CreateQueryResponse { QueryId = queryId });
         }
 
         /// <summary>
         /// Gets information about a single query definition.
         /// </summary>
-        /// <param name="queryId">Unique id of the query being retreived.</param>
+        /// <param name="queryId">Unique id of the query being retrieved.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>Information about a single query definition.</returns>
         [HttpGet("{queryId:int}")]

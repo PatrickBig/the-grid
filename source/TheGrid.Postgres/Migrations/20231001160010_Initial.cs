@@ -1,8 +1,4 @@
-﻿// <copyright file="20230921024442_Initial.cs" company="BiglerNet">
-// Copyright (c) BiglerNet. All rights reserved.
-// </copyright>
-
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TheGrid.Shared.Models;
 
@@ -59,7 +55,7 @@ namespace TheGrid.Postgres.Migrations
                     Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     OrganizationId = table.Column<string>(type: "text", nullable: false),
                     ConnectorId = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
-                    ConnectionProperties = table.Column<Dictionary<string, string>>(type: "hstore", nullable: false),
+                    ConnectionProperties = table.Column<Dictionary<string, string>>(type: "hstore", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -84,12 +80,11 @@ namespace TheGrid.Postgres.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    DataSourceId = table.Column<int>(type: "integer", nullable: false),
-                    ConnectionId = table.Column<int>(type: "integer", nullable: true),
+                    ConnectionId = table.Column<int>(type: "integer", nullable: false),
                     Name = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     Description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
                     Command = table.Column<string>(type: "text", nullable: false),
-                    Tags = table.Column<List<string>>(type: "text[]", nullable: false),
+                    Tags = table.Column<List<string>>(type: "text[]", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -98,24 +93,23 @@ namespace TheGrid.Postgres.Migrations
                         name: "FK_Queries_Connections_ConnectionId",
                         column: x => x.ConnectionId,
                         principalTable: "Connections",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Column",
+                name: "QueryColumns",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     QueryId = table.Column<int>(type: "integer", nullable: false),
                     Name = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    Type = table.Column<int>(type: "integer", nullable: false),
+                    Type = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Column", x => x.Id);
+                    table.PrimaryKey("PK_QueryColumns", x => new { x.QueryId, x.Name });
                     table.ForeignKey(
-                        name: "FK_Column_Queries_QueryId",
+                        name: "FK_QueryColumns_Queries_QueryId",
                         column: x => x.QueryId,
                         principalTable: "Queries",
                         principalColumn: "Id",
@@ -135,7 +129,7 @@ namespace TheGrid.Postgres.Migrations
                     DateQueued = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     DateCompleted = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     StandardOutput = table.Column<string[]>(type: "text[]", nullable: false),
-                    ErrorOutput = table.Column<string>(type: "text", nullable: true),
+                    ErrorOutput = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -149,13 +143,36 @@ namespace TheGrid.Postgres.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Visualizations",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    QueryId = table.Column<int>(type: "integer", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Discriminator = table.Column<string>(type: "text", nullable: false),
+                    Columns = table.Column<Dictionary<string, Models.Visualizations.TableColumn>>(type: "jsonb", nullable: true),
+                    PageSize = table.Column<int>(type: "integer", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Visualizations", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Visualizations_Queries_QueryId",
+                        column: x => x.QueryId,
+                        principalTable: "Queries",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "QueryResultRows",
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     QueryExecutionId = table.Column<long>(type: "bigint", nullable: false),
-                    Data = table.Column<Dictionary<string, object>>(type: "jsonb", nullable: false),
+                    Data = table.Column<Dictionary<string, object>>(type: "jsonb", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -167,11 +184,6 @@ namespace TheGrid.Postgres.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Column_QueryId",
-                table: "Column",
-                column: "QueryId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Connections_ConnectorId",
@@ -197,16 +209,24 @@ namespace TheGrid.Postgres.Migrations
                 name: "IX_QueryResultRows_QueryExecutionId",
                 table: "QueryResultRows",
                 column: "QueryExecutionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Visualizations_QueryId",
+                table: "Visualizations",
+                column: "QueryId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Column");
+                name: "QueryColumns");
 
             migrationBuilder.DropTable(
                 name: "QueryResultRows");
+
+            migrationBuilder.DropTable(
+                name: "Visualizations");
 
             migrationBuilder.DropTable(
                 name: "QueryExecutions");

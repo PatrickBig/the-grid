@@ -27,7 +27,7 @@
                 {
                     foreach (var parameter in _selectedQueryRunner.Parameters.OrderBy(p => p.RenderOrder))
                     {
-                        <DataSourceParameter QueryRunnerParameter="parameter" ValueChanged="ParameterValueChanged" />
+                        <ConnectionPropertyEditor ConnectionProperty="parameter" ValueChanged="ParameterValueChanged" />
                     }
                 }
             </RadzenStack>

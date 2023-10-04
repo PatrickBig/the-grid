@@ -4,9 +4,8 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using TheGrid.Models;
 
-namespace TheGrid.Connectors.Models
+namespace TheGrid.Models
 {
     /// <summary>
     /// Top level resource object.

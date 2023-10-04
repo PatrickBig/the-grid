@@ -107,7 +107,7 @@ namespace TheGrid.Connectors.Integration.Tests
         {
             // Arrange
             var runner = new PostgreSqlConnector(GetConnectionConfiguration());
-            var parameters = new Dictionary<string, object>
+            var parameters = new Dictionary<string, object?>
             {
                 {
                     "@param",

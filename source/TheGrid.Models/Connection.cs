@@ -3,7 +3,6 @@
 // </copyright>
 
 using System.ComponentModel.DataAnnotations;
-using TheGrid.Connectors.Models;
 using TheGrid.Shared.Models;
 
 namespace TheGrid.Models

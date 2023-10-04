@@ -20,7 +20,7 @@ namespace TheGrid.Client.Shared
         protected CancellationToken CancellationToken => (_cancellationTokenSource ??= new()).Token;
 
         /// <summary>
-        /// Notifation service.
+        /// Notification service.
         /// </summary>
         [Inject]
         protected NotificationService NotificationService { get; private set; } = null!;

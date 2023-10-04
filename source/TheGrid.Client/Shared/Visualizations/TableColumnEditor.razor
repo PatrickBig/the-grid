@@ -22,23 +22,12 @@
                             </RadzenColumn>
                         </RadzenRow>
                         <RadzenStack Orientation="Orientation.Vertical">
-                            <RadzenFormField Text="Type">
+                            @* <RadzenFormField Text="Type">
                                 <RadzenDropDown Data="_columnTypes" @bind-Value="@column.Value.Type" />
-                            </RadzenFormField>
+                            </RadzenFormField> *@
                             <RadzenFormField Text="Display Name">
                                 <RadzenTextBox @bind-Value="column.Value.DisplayName" />
                                 <RadzenLengthValidator Max="50" />
-                            </RadzenFormField>
-                            @if (column.Value.Type is not QueryResultColumnType.Text)
-                            {
-                                <RadzenFormField Text="Display Format">
-                                    <RadzenTextBox @bind-Value="column.Value.DisplayFormat" />
-                                    <RadzenLengthValidator Max="50" />
-                                </RadzenFormField>
-                            }
-                            <RadzenFormField Text="Display Template">
-                                <RadzenTextBox @bind-Value="column.Value.DisplayTemplate" Placeholder="@("{{ @" + column.Key + " }}")" />
-                                <RadzenLengthValidator Max="150" />
                             </RadzenFormField>
                         </RadzenStack>
                     }

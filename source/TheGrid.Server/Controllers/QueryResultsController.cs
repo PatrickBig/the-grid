@@ -52,8 +52,9 @@ namespace TheGrid.Server.Controllers
             // Get the latest query execution
             var latestQuery = await _db.QueryExecutions
                 .Include(q => q.Query)
+                .ThenInclude(q => q.Columns)
                 .Where(q => q.QueryId == queryId && q.Status == QueryExecutionStatus.Complete)
-                .OrderByDescending(q => q.DateQueued)
+                .OrderByDescending(q => q.DateCompleted)
                 .SingleAsync(cancellationToken);
 
             var queryBase = _db.QueryResultRows

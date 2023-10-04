@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TheGrid.Data;
+using TheGrid.Models.Visualizations;
 using TheGrid.Shared.Models;
 
 #nullable disable
@@ -25,47 +26,21 @@ namespace TheGrid.Postgres.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "hstore");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("TheGrid.Connectors.Models.Organization", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("DateCreated")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Organizations");
-                });
-
             modelBuilder.Entity("TheGrid.Models.Column", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
                     b.Property<int>("QueryId")
                         .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<int>("Type")
                         .HasColumnType("integer");
 
-                    b.HasKey("Id");
+                    b.HasKey("QueryId", "Name");
 
-                    b.HasIndex("QueryId");
-
-                    b.ToTable("Column");
+                    b.ToTable("QueryColumns");
                 });
 
             modelBuilder.Entity("TheGrid.Models.Connection", b =>
@@ -101,6 +76,23 @@ namespace TheGrid.Postgres.Migrations
                     b.HasIndex("OrganizationId");
 
                     b.ToTable("Connections");
+                });
+
+            modelBuilder.Entity("TheGrid.Models.Organization", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Organizations");
                 });
 
             modelBuilder.Entity("TheGrid.Models.Query", b =>
@@ -201,6 +193,36 @@ namespace TheGrid.Postgres.Migrations
                     b.ToTable("QueryResultRows");
                 });
 
+            modelBuilder.Entity("TheGrid.Models.Visualizations.Visualization", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("QueryId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QueryId");
+
+                    b.ToTable("Visualizations");
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("Visualization");
+
+                    b.UseTphMappingStrategy();
+                });
+
             modelBuilder.Entity("TheGrid.Shared.Models.Connector", b =>
                 {
                     b.Property<string>("Id")
@@ -235,6 +257,20 @@ namespace TheGrid.Postgres.Migrations
                     b.ToTable("Connectors");
                 });
 
+            modelBuilder.Entity("TheGrid.Models.Visualizations.TableVisualization", b =>
+                {
+                    b.HasBaseType("TheGrid.Models.Visualizations.Visualization");
+
+                    b.Property<Dictionary<string, Models.Visualizations.TableColumn>>("Columns")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<int>("PageSize")
+                        .HasColumnType("integer");
+
+                    b.HasDiscriminator().HasValue("TableVisualization");
+                });
+
             modelBuilder.Entity("TheGrid.Models.Column", b =>
                 {
                     b.HasOne("TheGrid.Models.Query", "Query")
@@ -254,8 +290,8 @@ namespace TheGrid.Postgres.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TheGrid.Connectors.Models.Organization", "Organization")
-                        .WithMany("DataSources")
+                    b.HasOne("TheGrid.Models.Organization", "Organization")
+                        .WithMany("Connections")
                         .HasForeignKey("OrganizationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -298,9 +334,20 @@ namespace TheGrid.Postgres.Migrations
                     b.Navigation("QueryExecution");
                 });
 
-            modelBuilder.Entity("TheGrid.Connectors.Models.Organization", b =>
+            modelBuilder.Entity("TheGrid.Models.Visualizations.Visualization", b =>
                 {
-                    b.Navigation("DataSources");
+                    b.HasOne("TheGrid.Models.Query", "Query")
+                        .WithMany()
+                        .HasForeignKey("QueryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Query");
+                });
+
+            modelBuilder.Entity("TheGrid.Models.Organization", b =>
+                {
+                    b.Navigation("Connections");
                 });
 
             modelBuilder.Entity("TheGrid.Models.Query", b =>

@@ -10,7 +10,7 @@ namespace TheGrid.Models.Visualizations
     public class Visualization
     {
         /// <summary>
-        /// Unique identifier for the vizualization.
+        /// Unique identifier for the visualization.
         /// </summary>
         public int Id { get; set; }
 
