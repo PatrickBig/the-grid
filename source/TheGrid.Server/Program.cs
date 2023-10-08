@@ -9,6 +9,7 @@ using TheGrid.Data;
 using TheGrid.Models.Configuration;
 using TheGrid.Server.HealthChecks;
 using TheGrid.Services.Hubs;
+using TheGrid.Shared;
 
 namespace TheGrid.Server
 {
@@ -104,7 +105,7 @@ namespace TheGrid.Server
                 app.MapControllers();
 
                 // Add SignalR hubs
-                app.MapHub<QueryDesignerHub>("/queryrefreshjobs");
+                app.MapHub<QueryDesignerHub>(HubPaths.QueryDesigner);
 
                 app.UseHangfireDashboard();
 

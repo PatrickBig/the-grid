@@ -13,7 +13,7 @@
     Density="Density.Compact"
     ColumnResized="OnColumnResize">
     <Columns>
-        @foreach (var kv in TableVisualization.Columns.OrderBy(c => c.Value.DisplayOrder))
+        @foreach (var kv in TableVisualization.ColumnOptions.OrderBy(c => c.Value.DisplayOrder))
         {
             <RadzenDataGridColumn
                 TItem="Dictionary<string, object>"

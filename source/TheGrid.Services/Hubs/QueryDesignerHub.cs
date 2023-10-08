@@ -11,7 +11,6 @@ namespace TheGrid.Services.Hubs
         public async Task QueryResultsFinishedProcessingAsync(long queryRefreshJobId, int queryId)
         {
             await Clients.All.QueryResultsFinishedProcessing(queryRefreshJobId, queryId);
-            //await Clients.Group("QueryID" + queryId).QueryResultsFinishedProcessing(queryRefreshJobId, queryId);
         }
 
         public async Task VisualizationOptionsUpdated(int queryId)

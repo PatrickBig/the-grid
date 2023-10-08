@@ -27,7 +27,13 @@ namespace TheGrid.Services
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<VisualizationResponse>> GetVisualizationsForQueryAsync(int queryId, CancellationToken cancellationToken = default)
+        public Task<IEnumerable<VisualizationResponse>> GetDashboardVisualizationsAsync(int dashboardId, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc/>
+        public async Task<IEnumerable<VisualizationResponse>> GetQueryVisualizationsAsync(int queryId, CancellationToken cancellationToken = default)
         {
             var visualizations = await _db.Visualizations.Where(v => v.QueryId == queryId).ToListAsync(cancellationToken);
 

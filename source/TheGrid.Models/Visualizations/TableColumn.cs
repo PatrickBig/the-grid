@@ -16,6 +16,11 @@ namespace TheGrid.Models.Visualizations
         public string? DisplayName { get; set; }
 
         /// <summary>
+        /// Display format to use for the value if available. This does nothing when the column type is text.
+        /// </summary>
+        public string? DisplayFormat { get; set; }
+
+        /// <summary>
         /// Used to order the columns in the table.
         /// </summary>
         public int DisplayOrder { get; set; } = 100;

@@ -60,7 +60,7 @@ namespace TheGrid.Client.Shared.Visualizations
 
         private Task OnColumnResize(DataGridColumnResizedEventArgs<Dictionary<string, object?>> args)
         {
-            if (TableVisualization.Columns.TryGetValue(args.Column.Property, out var column))
+            if (TableVisualization.ColumnOptions.TryGetValue(args.Column.Property, out var column))
             {
                 column.Width = args.Width;
             }

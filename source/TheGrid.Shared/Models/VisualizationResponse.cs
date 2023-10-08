@@ -33,7 +33,7 @@ namespace TheGrid.Shared.Models
         public VisualizationType VisualizationType { get; set; }
 
         /// <summary>
-        /// Options for the table visualization.
+        /// Options for the table visualization. This will only be populated if the <see cref="VisualizationType"/> is <see cref="VisualizationType.Table"/>.
         /// </summary>
         public TableVisualizationOptions? TableVisualizationOptions { get; set; }
     }

@@ -54,7 +54,7 @@ namespace TheGrid.Data
         public DbSet<Connector> Connectors { get; set; }
 
         /// <summary>
-        /// Columns discovered from a query execution.
+        /// ColumnOptions discovered from a query execution.
         /// </summary>
         public DbSet<Column> QueryColumns { get; set; }
 
@@ -71,7 +71,7 @@ namespace TheGrid.Data
             //modelBuilder.Entity<Query>().HasIndex(q => q.ConnectionId);
 
             // Probably don't want this one at all
-            //modelBuilder.Entity<Query>().Property(q => q.Columns)
+            //modelBuilder.Entity<Query>().Property(q => q.ColumnOptions)
             //    .HasColumnType("jsonb");
 
             //modelBuilder.Entity<Query>().Property(q => q.Parameters)

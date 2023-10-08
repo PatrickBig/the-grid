@@ -12,7 +12,7 @@ using TheGrid.Models.Visualizations;
 namespace TheGrid.Services
 {
     /// <summary>
-    /// Handles CRUD operations for visualizations.
+    /// Handles CRUD operations for table visualizations.
     /// </summary>
     public class TableVisualizationManager : IVisualizationManager
     {

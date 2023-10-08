@@ -1,16 +1,20 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR.Client;
+using TheGrid.Shared;
 
 namespace TheGrid.Client.HubClients
 {
+    /// <summary>
+    /// SignalR client for the query designer.
+    /// </summary>
     public class QueryDesignerHubClient : SignalRClientBase, IQueryDesignerHubClient
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="QueryDesignerHubClient"/> class.
         /// </summary>
-        /// <param name="navigationManager"></param>
+        /// <param name="navigationManager">Navigation manager.</param>
         public QueryDesignerHubClient(NavigationManager navigationManager)
-            : base(navigationManager, "/queryrefreshjobs")
+            : base(navigationManager, HubPaths.QueryDesigner)
         {
         }
 
