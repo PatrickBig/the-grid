@@ -10,17 +10,17 @@ namespace TheGrid.Server.Controllers
     [ApiVersion("1.0")]
     public class VisualizationsController : ControllerBase
     {
-        private readonly IVisualizationManager _visualizationManager;
+        private readonly IVisualizationInformation _visualizationInformation;
 
-        public VisualizationsController(IVisualizationManager visualizationManager)
+        public VisualizationsController(IVisualizationInformation visualizationManager)
         {
-            _visualizationManager = visualizationManager;
+            _visualizationInformation = visualizationManager;
         }
 
         [HttpGet]
         public async Task<ActionResult> GetList([FromQuery][Required] int queryId, CancellationToken cancellationToken = default)
         {
-            return Ok(await _visualizationManager.GetVisualizationsForQueryAsync(queryId, cancellationToken));
+            return Ok(await _visualizationInformation.GetVisualizationsForQueryAsync(queryId, cancellationToken));
         }
     }
 }

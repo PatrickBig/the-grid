@@ -30,7 +30,7 @@ namespace TheGrid.Services
         }
 
         /// <inheritdoc/>
-        public async Task<long> QueueQueryRefreshAsync(int queryId, CancellationToken cancellationToken = default)
+        public async Task<(long QueryRefreshJobId, string BackgroundProcessingJobId)> QueueQueryRefreshAsync(int queryId, CancellationToken cancellationToken = default)
         {
             _logger.LogTrace("Queuing new refresh job for query ID {queryId}", queryId);
 
@@ -52,7 +52,7 @@ namespace TheGrid.Services
 
             _logger.LogTrace("Refresh job successfully queued. Refresh job ID {jobId}", entry.Id);
 
-            return entry.Id;
+            return (entry.Id, entry.JobId);
         }
 
         public async Task WaitForRefreshAsync(long refreshJobId, CancellationToken cancellationToken = default)

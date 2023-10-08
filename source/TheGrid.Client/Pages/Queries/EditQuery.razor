@@ -4,7 +4,7 @@
 
 <RadzenSplitter Orientation="Orientation.Vertical">
     <RadzenSplitterPane Size="400px;">
-        <QueryEditor QueryEditorInput="_input" QuerySaved="SaveQueryAsync"/>
+        <QueryEditor QueryEditorInput="_input" QuerySaved="SaveQueryAsync" QueryRefreshRequested="QueueRefreshJobAsync" AllowQueryExecution />
     </RadzenSplitterPane>
     <RadzenSplitterPane Size="200px;">
         <Visualizations @ref="_visualizations" QueryId="QueryId" />

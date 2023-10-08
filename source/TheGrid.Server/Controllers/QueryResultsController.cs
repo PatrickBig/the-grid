@@ -55,7 +55,7 @@ namespace TheGrid.Server.Controllers
                 .ThenInclude(q => q.Columns)
                 .Where(q => q.QueryId == queryId && q.Status == QueryExecutionStatus.Complete)
                 .OrderByDescending(q => q.DateCompleted)
-                .SingleAsync(cancellationToken);
+                .FirstAsync(cancellationToken);
 
             var queryBase = _db.QueryResultRows
                 .AsNoTracking()

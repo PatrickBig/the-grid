@@ -66,6 +66,12 @@ namespace TheGrid.Server
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen(options =>
             {
+                // Add SignalR documentation
+                options.AddSignalRSwaggerGen(o =>
+                {
+                    o.ScanAssembly(Assembly.GetAssembly(typeof(TheGrid.Services.IQueryExecutor)));
+                });
+
                 var apiProjectDocumentation = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, apiProjectDocumentation));
 

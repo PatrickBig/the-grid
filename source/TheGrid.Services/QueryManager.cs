@@ -14,18 +14,25 @@ namespace TheGrid.Services
     /// </summary>
     public class QueryManager : IQueryManager
     {
+        private const string _defaultVisualizationName = "Table"; // Should probably start thinking about localization at some point.
+
         private readonly TheGridDbContext _db;
         private readonly ILogger<QueryManager> _logger;
+        private readonly VisualizationManagerFactory _visualizationManagerFactory;
+        private readonly IQueryRefreshManager _queryRefreshManager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="QueryManager"/> class.
         /// </summary>
         /// <param name="db">Database context.</param>
         /// <param name="logger">Logger instance.</param>
-        public QueryManager(TheGridDbContext db, ILogger<QueryManager> logger)
+        /// <param name="tableVisualizationManager">Table visualization manager.</param>
+        public QueryManager(TheGridDbContext db, ILogger<QueryManager> logger, VisualizationManagerFactory tableVisualizationManager, IQueryRefreshManager queryRefreshManager)
         {
             _db = db;
             _logger = logger;
+            _visualizationManagerFactory = tableVisualizationManager;
+            _queryRefreshManager = queryRefreshManager;
         }
 
         /// <inheritdoc/>
@@ -50,10 +57,13 @@ namespace TheGrid.Services
             _logger.LogInformation("Creating default table visualization for {queryId}", query.Id);
 
             // Run an initial refresh job
-            var refreshJobId = BackgroundJob.Enqueue<QueryRefreshManager>(q => q.QueueQueryRefreshAsync(query.Id, default));
+            var (_, backgroundProcessingJobId) = await _queryRefreshManager.QueueQueryRefreshAsync(query.Id, cancellationToken);
+
+            // Create the default visualization
+            await _visualizationManagerFactory.GetVisualizationManager(Shared.Models.VisualizationType.Table).CreateVisualizationAsync(query.Id, _defaultVisualizationName, cancellationToken);
 
             // After the refresh has completed create the default table visualization.
-            BackgroundJob.ContinueJobWith<VisualizationManager>(refreshJobId, v => v.CreateTableVisualizationAsync(query.Id, "Table", default));
+            BackgroundJob.ContinueJobWith<VisualizationOptionsUpdater>(backgroundProcessingJobId, v => v.UpdateVisualizationOptionsForQueryAsync(query.Id, default));
 
             _logger.LogTrace("New query created successfully. Query ID {queryId}", query.Id);
 

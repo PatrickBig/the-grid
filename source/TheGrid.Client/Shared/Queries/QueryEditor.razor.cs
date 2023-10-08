@@ -34,14 +34,21 @@ namespace TheGrid.Client.Shared.Queries
         [EditorRequired]
         public EventCallback<QueryEditorInput> QuerySaved { get; set; }
 
+        [Parameter]
+        public EventCallback QueryRefreshRequested { get; set; }
+
+        /// <summary>
+        /// Set to true to show the button to execute the query and refresh the results.
+        /// </summary>
+        [Parameter]
+        public bool AllowQueryExecution { get; set; }
+
         [Inject]
         private IJSRuntime JSRuntime { get; set; } = null!;
 
         /// <inheritdoc/>
         protected override async Task OnInitializedAsync()
         {
-
-
             await LoadConnectionsAsync(new LoadDataArgs());
 
             if (QueryEditorInput != null)

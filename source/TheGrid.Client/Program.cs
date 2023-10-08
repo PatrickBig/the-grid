@@ -26,7 +26,7 @@ var defaultOptions = new JsonSerializerOptions
 defaultOptions.Converters.Add(new JsonStringEnumConverter());
 
 builder.Services.AddSingleton<JsonSerializerOptions>();
-builder.Services.AddScoped<IQueryRefreshNotificationClient, QueryRefreshNotificationClient>();
+builder.Services.AddScoped<IQueryDesignerHubClient, QueryDesignerHubClient>();
 
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 

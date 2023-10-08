@@ -40,7 +40,7 @@ namespace TheGrid.Server.Controllers
         {
             var jobId = await _queryRefreshManager.QueueQueryRefreshAsync(request.QueryId, cancellationToken);
 
-            return Accepted(new RefreshQueryResultsResponse { QueryExecutionRequestId = jobId });
+            return Accepted(new RefreshQueryResultsResponse { QueryExecutionRequestId = jobId.QueryRefreshJobId });
         }
     }
 }

@@ -23,7 +23,7 @@ namespace TheGrid.Services
     {
         private readonly TheGridDbContext _db;
         private readonly ILogger<QueryExecutor> _logger;
-        private readonly IHubContext<QueryRefreshJobHub, IQueryRefreshNotificationClient> _hubContext;
+        private readonly IHubContext<QueryDesignerHub, IQueryDesignerHub> _hubContext;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="QueryExecutor"/> class.
@@ -31,7 +31,7 @@ namespace TheGrid.Services
         /// <param name="db">Database context.</param>
         /// <param name="logger">Logging instance.</param>
         /// <param name="hubContext">SignalR hub context for notifying clients when a query has refreshed.</param>
-        public QueryExecutor(TheGridDbContext db, ILogger<QueryExecutor> logger, IHubContext<QueryRefreshJobHub, IQueryRefreshNotificationClient> hubContext)
+        public QueryExecutor(TheGridDbContext db, ILogger<QueryExecutor> logger, IHubContext<QueryDesignerHub, IQueryDesignerHub> hubContext)
         {
             _db = db;
             _logger = logger;
@@ -76,6 +76,9 @@ namespace TheGrid.Services
 
                 UpdateColumnDefinitions(queryExecution.Query, results.Columns);
 
+                // Update any table options as needed
+                BackgroundJob.Enqueue<VisualizationOptionsUpdater>(v => v.UpdateVisualizationOptionsForQueryAsync(queryExecution.QueryId, default));
+
                 await _hubContext.Clients.All.QueryResultsFinishedProcessing(queryExecutionId, queryExecution.QueryId);
             }
             catch (Exception ex)
@@ -88,6 +91,39 @@ namespace TheGrid.Services
             finally
             {
                 await _db.SaveChangesAsync(cancellationToken);
+            }
+        }
+
+        private void UpdateColumnDefinitions(Query query, Dictionary<string, QueryResultColumn> resultColumns)
+        {
+            if (query.Columns == null)
+            {
+                throw new ArgumentException("Column information must be present in the query.", nameof(query));
+            }
+
+            var removedColumns = query.Columns.RemoveAll(c => !resultColumns.ContainsKey(c.Name));
+
+            _logger.LogTrace("Removed {totalColumnsRemoved} columns from the query definition that no longer exist.", removedColumns);
+
+            var newColumns = resultColumns.Keys.Except(query.Columns.Select(c => c.Name)).ToList();
+
+            // Add the columns that don't exist
+            foreach (var columnName in newColumns)
+            {
+                var column = resultColumns[columnName];
+
+                var x = new Column
+                {
+                    Name = columnName,
+                    Type = column.Type.Adapt<Models.QueryResultColumnType>(),
+                };
+                query.Columns.Add(x);
+            }
+
+            // Update the type where needed
+            foreach (var column in query.Columns)
+            {
+                column.Type = resultColumns[column.Name].Type.Adapt<Models.QueryResultColumnType>();
             }
         }
 
@@ -119,37 +155,6 @@ namespace TheGrid.Services
             queryExecution.Status = QueryExecutionStatus.InProgress;
 
             await _db.SaveChangesAsync(cancellationToken);
-        }
-
-        private static void UpdateColumnDefinitions(Query query, Dictionary<string, QueryResultColumn> resultColumns)
-        {
-            if (query.Columns == null)
-            {
-                throw new ArgumentException("Column information must be present in the query.", nameof(query));
-            }
-
-            var removedColumns = query.Columns.RemoveAll(c => !resultColumns.ContainsKey(c.Name));
-
-            var newColumns = resultColumns.Keys.Except(query.Columns.Select(c => c.Name)).ToList();
-
-            // Add the columns that don't exist
-            foreach (var columnName in newColumns)
-            {
-                var column = resultColumns[columnName];
-
-                var x = new Column
-                {
-                    Name = columnName,
-                    Type = column.Type.Adapt<Models.QueryResultColumnType>(),
-                };
-                query.Columns.Add(x);
-            }
-
-            // Update the type where needed
-            foreach (var column in query.Columns)
-            {
-                column.Type = resultColumns[column.Name].Type.Adapt<Models.QueryResultColumnType>();
-            }
         }
     }
 }

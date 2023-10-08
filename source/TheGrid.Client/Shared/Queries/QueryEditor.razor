@@ -12,7 +12,7 @@
                 </RadzenFormField>
             </RadzenColumn>
             <RadzenColumn Size="6">
-                <RadzenFormField Text="connection" class="w-100">
+                <RadzenFormField Text="Connection" class="w-100">
                     <RadzenDropDownDataGrid TValue="int?"
                                             Value="@QueryEditorInput.ConnectionId"
                                             ValueChanged="ConnectionChangedAsync"
@@ -63,6 +63,10 @@
         </RadzenRow>
         <RadzenRow>
             <RadzenColumn Size="12">
+                @if (AllowQueryExecution)
+                {
+                    <RadzenButton ButtonStyle="ButtonStyle.Info" ButtonType="ButtonType.Button" Click="QueryRefreshRequested">Refresh</RadzenButton>
+                }
                 <RadzenButton ButtonStyle="ButtonStyle.Secondary" ButtonType="ButtonType.Button">Cancel</RadzenButton>
                 <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit">Save</RadzenButton>
             </RadzenColumn>

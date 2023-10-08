@@ -15,7 +15,7 @@ namespace TheGrid.Services
         /// <param name="queryId">Unique identifier of the query to queue the job for.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>The unique ID of the job that is refreshing the query results.</returns>
-        public Task<long> QueueQueryRefreshAsync(int queryId, CancellationToken cancellationToken = default);
+        public Task<(long QueryRefreshJobId, string BackgroundProcessingJobId)> QueueQueryRefreshAsync(int queryId, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Waits for a query refresh job to be complete.

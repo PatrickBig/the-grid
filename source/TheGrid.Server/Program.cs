@@ -56,7 +56,6 @@ namespace TheGrid.Server
 
             builder.Services.AddSignalR()
                 .AddStackExchangeRedis(redisConnectionString);
-            //.AddStack;
 
             builder.Services.AddResponseCompression(opts =>
             {
@@ -105,7 +104,7 @@ namespace TheGrid.Server
                 app.MapControllers();
 
                 // Add SignalR hubs
-                app.MapHub<QueryRefreshJobHub>("/queryrefreshjobs");
+                app.MapHub<QueryDesignerHub>("/queryrefreshjobs");
 
                 app.UseHangfireDashboard();
 

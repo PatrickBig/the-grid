@@ -3,13 +3,13 @@ using Microsoft.AspNetCore.SignalR.Client;
 
 namespace TheGrid.Client.HubClients
 {
-    public class QueryRefreshNotificationClient : SignalRClientBase, IQueryRefreshNotificationClient
+    public class QueryDesignerHubClient : SignalRClientBase, IQueryDesignerHubClient
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="QueryRefreshNotificationClient"/> class.
+        /// Initializes a new instance of the <see cref="QueryDesignerHubClient"/> class.
         /// </summary>
         /// <param name="navigationManager"></param>
-        public QueryRefreshNotificationClient(NavigationManager navigationManager)
+        public QueryDesignerHubClient(NavigationManager navigationManager)
             : base(navigationManager, "/queryrefreshjobs")
         {
         }
@@ -19,6 +19,14 @@ namespace TheGrid.Client.HubClients
             if (Started)
             {
                 HubConnection.On("QueryResultsFinishedProcessing", action);
+            }
+        }
+
+        public void OnVisualizationOptionsUpdated(Func<int, Task> action)
+        {
+            if (Started)
+            {
+                HubConnection.On("VisualizationOptionsUpdated", action);
             }
         }
     }

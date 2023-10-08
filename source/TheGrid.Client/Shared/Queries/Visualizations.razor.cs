@@ -31,7 +31,7 @@ namespace TheGrid.Client.Shared.Queries
         private DialogService DialogService { get; set; } = null!;
 
         [Inject]
-        private IQueryRefreshNotificationClient QueryRefreshNotificationClient { get; set; } = default!;
+        private IQueryDesignerHubClient QueryRefreshNotificationClient { get; set; } = default!;
 
         public async Task RefreshVisualizationsAsync(bool refreshState = false)
         {
@@ -55,9 +55,13 @@ namespace TheGrid.Client.Shared.Queries
         {
             await RefreshVisualizationsAsync();
 
-            QueryRefreshNotificationClient.OnQueryResultsFinishedProcessing(async (refreshId, queryId) =>
+            QueryRefreshNotificationClient.OnVisualizationOptionsUpdated(async (queryId) =>
             {
-                await Task.Delay(1000);
+                await RefreshVisualizationsAsync(true);
+            });
+
+            QueryRefreshNotificationClient.OnQueryResultsFinishedProcessing(async (queryRefreshJobId, queryId) =>
+            {
                 await RefreshVisualizationsAsync(true);
             });
         }
