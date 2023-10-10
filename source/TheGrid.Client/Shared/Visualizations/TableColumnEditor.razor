@@ -3,39 +3,43 @@
     <RadzenTemplateForm Data="Options" Submit="@((TableVisualizationOptions options) => { DialogService.Close(options); })">
         <RadzenRow>
             <RadzenColumn>
-                <RadzenStack>
-                    @foreach (var column in Options.ColumnOptions.OrderBy(c => c.Value.DisplayOrder))
-                    {
-                        <RadzenRow>
-                            <RadzenColumn>
-                                <RadzenText Text="@column.Key" Style="font-weight: bold;" />
-                            </RadzenColumn>
-                            <RadzenColumn>
-                                <RadzenRow AlignItems="AlignItems.End">
+                <RadzenAccordion>
+                    <Items>
+                        @foreach (var column in Options.ColumnOptions.OrderBy(c => c.Value.DisplayOrder))
+                        {
+                            <RadzenAccordionItem Text="@column.Key">
+                                <RadzenRow>
                                     <RadzenColumn>
-                                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
-                                            <RadzenLabel Text="Visible" />
-                                            <RadzenSwitch @bind-Value="@column.Value.Visible" />
-                                        </RadzenStack>
+                                        <RadzenText Text="@column.Key" Style="font-weight: bold;" />
+                                    </RadzenColumn>
+                                    <RadzenColumn>
+                                        <RadzenRow AlignItems="AlignItems.End">
+                                            <RadzenColumn>
+                                                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
+                                                    <RadzenLabel Text="Visible" />
+                                                    <RadzenSwitch @bind-Value="@column.Value.Visible" />
+                                                </RadzenStack>
+                                            </RadzenColumn>
+                                        </RadzenRow>
                                     </RadzenColumn>
                                 </RadzenRow>
-                            </RadzenColumn>
-                        </RadzenRow>
-                        <RadzenStack Orientation="Orientation.Vertical">
-                            <RadzenFormField Text="Display Name">
-                                <RadzenTextBox @bind-Value="column.Value.DisplayName" />
-                                <RadzenLengthValidator Max="50" />
-                            </RadzenFormField>
-                            <RadzenFormField Text="Display Format">
-                                <RadzenTextBox @bind-Value="column.Value.DisplayFormat" />
-                                <RadzenLengthValidator Max="50" />
-                            </RadzenFormField>
-                            <RadzenFormField Text="Display Order">
-                                <RadzenNumeric @bind-Value="column.Value.DisplayOrder" />
-                            </RadzenFormField>
-                        </RadzenStack>
-                    }
-                </RadzenStack>
+                                <RadzenStack Orientation="Orientation.Vertical">
+                                    <RadzenFormField Text="Display Name">
+                                        <RadzenTextBox @bind-Value="column.Value.DisplayName" />
+                                        <RadzenLengthValidator Max="50" />
+                                    </RadzenFormField>
+                                    <RadzenFormField Text="Display Format">
+                                        <RadzenTextBox @bind-Value="column.Value.DisplayFormat" />
+                                        <RadzenLengthValidator Max="50" />
+                                    </RadzenFormField>
+                                    <RadzenFormField Text="Display Order">
+                                        <RadzenNumeric @bind-Value="column.Value.DisplayOrder" />
+                                    </RadzenFormField>
+                                </RadzenStack>
+                            </RadzenAccordionItem>
+                        }
+                    </Items>
+                </RadzenAccordion>
                 <RadzenButton ButtonType="ButtonType.Submit">Submit</RadzenButton>
             </RadzenColumn>
         </RadzenRow>

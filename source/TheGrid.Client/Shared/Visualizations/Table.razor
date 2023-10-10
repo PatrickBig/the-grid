@@ -15,7 +15,10 @@
     PageSize="15"
     AllowSorting="false"
     Density="Density.Compact"
-    ColumnResized="OnColumnResize">
+    ColumnResized="OnColumnResize"
+    ColumnReordered="OnColumnReorderedAsync"
+    AllowColumnReorder="@(!ReadOnly)"
+    AllowColumnResize="@(!ReadOnly)">
     <Columns>
         @{
             var options = GetOptions();

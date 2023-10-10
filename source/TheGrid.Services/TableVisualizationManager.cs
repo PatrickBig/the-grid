@@ -47,9 +47,28 @@ namespace TheGrid.Services
             return visualization;
         }
 
-        public Task<Visualization> UpdateVisualizationAsync(Visualization visualization, CancellationToken cancellationToken = default)
+        public async Task<Visualization> UpdateVisualizationAsync(Visualization visualization, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            if (visualization is TableVisualization tableVisualization)
+            {
+                var vis = await _db.Visualizations.FindAsync(visualization.Id);
+
+
+                if (vis != null)
+                {
+                    tableVisualization.QueryId = vis.QueryId;
+
+                    //_db.Visualizations.Attach(tableVisualization);
+                    _db.Entry(vis).CurrentValues.SetValues(tableVisualization);
+                    await _db.SaveChangesAsync();
+                }
+
+                return tableVisualization;
+            }
+            else
+            {
+                throw new ArgumentException("Incorrect visualization type.", nameof(visualization));
+            }
         }
     }
 }

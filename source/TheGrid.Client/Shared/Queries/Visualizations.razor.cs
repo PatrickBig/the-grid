@@ -66,11 +66,6 @@ namespace TheGrid.Client.Shared.Queries
             });
         }
 
-        private async Task TableVisualizationUpdatedAsync(TableVisualizationOptions tableVisualizationOptions)
-        {
-
-        }
-
         private async Task ShowOptionsDialog(MouseEventArgs e)
         {
             if (_tabs != null && _visualizations != null)
@@ -84,11 +79,20 @@ namespace TheGrid.Client.Shared.Queries
                     {
                         { "Options", visualization.TableVisualizationOptions },
                     };
+
                     var updatedOptions = await DialogService.OpenAsync<Shared.Visualizations.TableColumnEditor>("Table options", options);
 
-                    visualization.TableVisualizationOptions = updatedOptions;
+                    if (updatedOptions != null && updatedOptions is TableVisualizationOptions)
+                    {
+                        visualization.TableVisualizationOptions = updatedOptions;
 
-                    StateHasChanged();
+
+                        // Push the update
+                        await HttpClient.PutAsJsonAsync("/api/v1/Visualizations/" + visualization.Id + "/Table", visualization.TableVisualizationOptions);
+
+                        StateHasChanged();
+                    }
+
                 }
             }
         }

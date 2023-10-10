@@ -187,7 +187,7 @@ namespace TheGrid.Server.Controllers
         /// </summary>
         /// <param name="queryId">Identifier of the query the tags should be added to.</param>
         /// <param name="request">Add tags request.</param>
-        /// <param name="cancellationToken">Canellation token.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>A response message indicating the number of tags modified.</returns>
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(TagsResponse), StatusCodes.Status201Created)]

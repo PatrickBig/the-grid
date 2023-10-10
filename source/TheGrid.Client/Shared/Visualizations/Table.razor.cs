@@ -39,6 +39,9 @@ namespace TheGrid.Client.Shared.Visualizations
         [EditorRequired]
         public TableVisualizationOptions VisualizationOptions { get; set; } = null!;
 
+        [Inject]
+        private ILogger<Table> Logger { get; set; } = default!;
+
         private static Type GetTypeForColumnType(QueryResultColumnType type)
         {
             return type switch
@@ -78,6 +81,11 @@ namespace TheGrid.Client.Shared.Visualizations
             }
 
             _isLoading = false;
+        }
+
+        private async Task OnColumnReorderedAsync(DataGridColumnReorderedEventArgs<Dictionary<string, object?>> e)
+        {
+            Logger.LogInformation("Did a thing");
         }
 
         private Dictionary<string, TableColumnOptions> GetOptions()
