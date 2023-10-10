@@ -2,7 +2,6 @@
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
-using Hangfire;
 using Microsoft.Extensions.Logging;
 using TheGrid.Data;
 using TheGrid.Models;
@@ -57,13 +56,10 @@ namespace TheGrid.Services
             _logger.LogInformation("Creating default table visualization for {queryId}", query.Id);
 
             // Run an initial refresh job
-            var (_, backgroundProcessingJobId) = await _queryRefreshManager.QueueQueryRefreshAsync(query.Id, cancellationToken);
+            await _queryRefreshManager.QueueQueryRefreshAsync(query.Id, cancellationToken);
 
             // Create the default visualization
             await _visualizationManagerFactory.GetVisualizationManager(Shared.Models.VisualizationType.Table).CreateVisualizationAsync(query.Id, _defaultVisualizationName, cancellationToken);
-
-            // After the refresh has completed create the default table visualization.
-            BackgroundJob.ContinueJobWith<VisualizationOptionsUpdater>(backgroundProcessingJobId, v => v.UpdateVisualizationOptionsForQueryAsync(query.Id, default));
 
             _logger.LogTrace("New query created successfully. Query ID {queryId}", query.Id);
 

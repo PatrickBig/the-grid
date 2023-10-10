@@ -15,12 +15,15 @@ namespace TheGrid.Client.Shared.Visualizations
     /// <summary>
     /// Code behind file for the table visualization.
     /// </summary>
-    public partial class Table : TheGridComponentBase
+    public partial class Table : VisualizationComponent
     {
         private IEnumerable<Dictionary<string, object?>>? _data;
         private int _totalItems;
         private bool _isLoading = true;
-        private JsonSerializerOptions _serializerOptions = new JsonSerializerOptions
+        private Dictionary<string, QueryResultColumn>? _columns;
+        private bool _columnOptionsBuilt = false;
+
+        private JsonSerializerOptions _serializerOptions = new()
         {
             WriteIndented = true,
             Converters =
@@ -30,18 +33,11 @@ namespace TheGrid.Client.Shared.Visualizations
         };
 
         /// <summary>
-        /// Identifier for the query to display the visualization for.
-        /// </summary>
-        [Parameter]
-        [EditorRequired]
-        public int QueryId { get; set; }
-
-        /// <summary>
         /// Table visualization options.
         /// </summary>
         [Parameter]
         [EditorRequired]
-        public TableVisualizationOptions TableVisualization { get; set; } = null!;
+        public TableVisualizationOptions VisualizationOptions { get; set; } = null!;
 
         private static Type GetTypeForColumnType(QueryResultColumnType type)
         {
@@ -60,7 +56,7 @@ namespace TheGrid.Client.Shared.Visualizations
 
         private Task OnColumnResize(DataGridColumnResizedEventArgs<Dictionary<string, object?>> args)
         {
-            if (TableVisualization.ColumnOptions.TryGetValue(args.Column.Property, out var column))
+            if (VisualizationOptions.ColumnOptions.TryGetValue(args.Column.Property, out var column))
             {
                 column.Width = args.Width;
             }
@@ -75,11 +71,58 @@ namespace TheGrid.Client.Shared.Visualizations
 
             if (response != null)
             {
+                // Build the columns out for the first fetch
+                _columns = response.Columns;
                 _totalItems = response.TotalItems;
                 _data = response.Items;
             }
 
             _isLoading = false;
+        }
+
+        private Dictionary<string, TableColumnOptions> GetOptions()
+        {
+            // Give whatever we have in the visualization options if the columns from the dataset is not yet available or we already built the options.
+            if (_columns == null || _columnOptionsBuilt)
+            {
+                return VisualizationOptions.ColumnOptions;
+            }
+
+            // At this point our pre-built options are not available. Lets build them.
+
+            // Remove any columns that no longer exist
+            VisualizationOptions.ColumnOptions = VisualizationOptions.ColumnOptions
+                .Where(c => _columns.ContainsKey(c.Key))
+                .ToDictionary(c => c.Key, c => c.Value);
+
+            // Add new columns where needed
+            var newColumns = _columns.Where(c => !VisualizationOptions.ColumnOptions.ContainsKey(c.Key));
+
+            // Get the highest display order value available
+            var lastDisplayOrder = VisualizationOptions.ColumnOptions.Select(c => c.Value.DisplayOrder).DefaultIfEmpty().Max();
+
+            foreach (var column in newColumns)
+            {
+                // Increase the display order size for each column
+                lastDisplayOrder += 1000;
+
+                VisualizationOptions.ColumnOptions.Add(column.Key, new TableColumnOptions
+                {
+                    DisplayName = column.Key,
+                    DisplayOrder = lastDisplayOrder,
+                    Type = column.Value.Type,
+                    Visible = true,
+                });
+            }
+
+            if (!ReadOnly)
+            {
+                // If this isn't a readonly component send an update so the visualization options are saved and can be used again later.
+            }
+
+            _columnOptionsBuilt = true;
+
+            return VisualizationOptions.ColumnOptions;
         }
     }
 }

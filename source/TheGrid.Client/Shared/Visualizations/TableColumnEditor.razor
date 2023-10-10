@@ -1,10 +1,10 @@
 ﻿@if (Options != null)
 {
-    <RadzenTemplateForm Data="Options" Submit="@((TableVisualizationOptions options) => { Submit(options); })">
+    <RadzenTemplateForm Data="Options" Submit="@((TableVisualizationOptions options) => { DialogService.Close(options); })">
         <RadzenRow>
             <RadzenColumn>
                 <RadzenStack>
-                    @foreach (var column in Options.ColumnOptions)
+                    @foreach (var column in Options.ColumnOptions.OrderBy(c => c.Value.DisplayOrder))
                     {
                         <RadzenRow>
                             <RadzenColumn>
@@ -22,16 +22,21 @@
                             </RadzenColumn>
                         </RadzenRow>
                         <RadzenStack Orientation="Orientation.Vertical">
-                            @* <RadzenFormField Text="Type">
-                                <RadzenDropDown Data="_columnTypes" @bind-Value="@column.Value.Type" />
-                            </RadzenFormField> *@
                             <RadzenFormField Text="Display Name">
                                 <RadzenTextBox @bind-Value="column.Value.DisplayName" />
                                 <RadzenLengthValidator Max="50" />
                             </RadzenFormField>
+                            <RadzenFormField Text="Display Format">
+                                <RadzenTextBox @bind-Value="column.Value.DisplayFormat" />
+                                <RadzenLengthValidator Max="50" />
+                            </RadzenFormField>
+                            <RadzenFormField Text="Display Order">
+                                <RadzenNumeric @bind-Value="column.Value.DisplayOrder" />
+                            </RadzenFormField>
                         </RadzenStack>
                     }
                 </RadzenStack>
+                <RadzenButton ButtonType="ButtonType.Submit">Submit</RadzenButton>
             </RadzenColumn>
         </RadzenRow>
     </RadzenTemplateForm>
@@ -42,12 +47,14 @@
 
     private IEnumerable<QueryResultColumnType> _columnTypes = Enum.GetValues(typeof(QueryResultColumnType)).Cast<QueryResultColumnType>();
 
+    [Inject]
+    private DialogService DialogService { get; set; } = default!;
+
     [Parameter]
     [EditorRequired]
     public TableVisualizationOptions? Options { get; set; }
 
-    private void Submit(TableVisualizationOptions options)
-    {
-        
-    }
+    [Parameter]
+    [EditorRequired]
+    public EventCallback<TableVisualizationOptions> OptionsUpdated { get; set; }
 }

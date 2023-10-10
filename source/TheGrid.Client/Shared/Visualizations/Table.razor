@@ -1,4 +1,8 @@
-﻿@inherits TheGridComponentBase
+﻿@inherits VisualizationComponent
+
+@*
+    Do an initial data fetch so we can build the columns and show a somewhat meaningful loading indicator
+*@
 
 <RadzenDataGrid
     Data="_data"
@@ -13,32 +17,44 @@
     Density="Density.Compact"
     ColumnResized="OnColumnResize">
     <Columns>
-        @foreach (var kv in TableVisualization.ColumnOptions.OrderBy(c => c.Value.DisplayOrder))
-        {
-            <RadzenDataGridColumn
-                TItem="Dictionary<string, object>"
-                Title="@(kv.Value.DisplayName ?? kv.Key)"
-                Type="@GetTypeForColumnType(kv.Value.Type)"
-                Property="@kv.Key">
-                <Template>
-                    @if (kv.Value.Type == QueryResultColumnType.Text)
-                    {
-                        @context[kv.Key]
-                    }
-                    else
-                    {
-                        var value = context[kv.Key];
+        @{
+            var options = GetOptions();
 
-                        if (value != null)
+            foreach (var kv in options.Where(c => c.Value.Visible).OrderBy(c => c.Value.DisplayOrder))
+            {
+                <RadzenDataGridColumn
+                    TItem="Dictionary<string, object>"
+                    Title="@(kv.Value.DisplayName ?? kv.Key)"
+                    Type="@GetTypeForColumnType(kv.Value.Type)"
+                    Property="@kv.Key">
+                    <Template>
+                        @if (kv.Value.Type == QueryResultColumnType.Text || kv.Value.DisplayFormat == null)
                         {
-                            if (kv.Value.Type == QueryResultColumnType.DateTime && value is DateTime dateTimeValue)
+                            @context[kv.Key]
+                        }
+                        else
+                        {
+                            var value = context[kv.Key];
+
+                            if (value != null)
                             {
-                                @dateTimeValue.ToString()
+                                if (kv.Value.Type == QueryResultColumnType.DateTime && value is DateTime dateTimeValue)
+                                {
+                                    @dateTimeValue.ToString(kv.Value.DisplayFormat)
+                                }
+                                else if (kv.Value.Type is QueryResultColumnType.Integer or QueryResultColumnType.Long && value is long longValue)
+                                {
+                                    @longValue.ToString(kv.Value.DisplayFormat)
+                                }
+                                else
+                                {
+                                    @value
+                                }
                             }
                         }
-                    }
-                </Template>
-            </RadzenDataGridColumn>
+                    </Template>
+                </RadzenDataGridColumn>
+            }
         }
     </Columns>
 </RadzenDataGrid>

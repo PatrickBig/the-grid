@@ -2,7 +2,6 @@
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
-using TheGrid.Models;
 using TheGrid.Models.Visualizations;
 
 namespace TheGrid.Services
@@ -21,6 +20,8 @@ namespace TheGrid.Services
         /// <returns>The newly created visualization.</returns>
         public Task<Visualization> CreateVisualizationAsync(int queryId, string name, CancellationToken cancellationToken = default);
 
-        public Task UpdateVisualizationOptionsAsync(List<Column> columns, Visualization visualization, CancellationToken cancellationToken = default);
+        public Task<Visualization> UpdateVisualizationAsync(Visualization visualization, CancellationToken cancellationToken = default);
+
+        //public Task UpdateVisualizationOptionsAsync(List<Column> columns, Visualization visualization, CancellationToken cancellationToken = default);
     }
 }

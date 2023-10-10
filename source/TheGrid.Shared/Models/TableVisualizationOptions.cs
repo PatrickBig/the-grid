@@ -35,6 +35,11 @@ namespace TheGrid.Shared.Models
         public int DisplayOrder { get; set; } = 100;
 
         /// <summary>
+        /// The formatting option used to display certain types such as numbers and dates.
+        /// </summary>
+        public string? DisplayFormat { get; set; }
+
+        /// <summary>
         /// If true the column will be visible to the user in the grid.
         /// </summary>
         public bool Visible { get; set; } = true;

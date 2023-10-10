@@ -12,7 +12,7 @@
                         <RadzenTabsItem Text="@vis.Name" Style="height: 100%;">
                             @if (vis.VisualizationType == VisualizationType.Table)
                             {
-                                <TheGrid.Client.Shared.Visualizations.Table QueryId="QueryId" TableVisualization="vis.TableVisualizationOptions" />
+                                <TheGrid.Client.Shared.Visualizations.Table QueryId="QueryId" VisualizationOptions="vis.TableVisualizationOptions" />
                             }
                         </RadzenTabsItem>
                     }

@@ -20,7 +20,7 @@ namespace TheGrid.Connectors
         /// <summary>
         /// Initializes a new instance of the <see cref="PostgreSqlConnector"/> class.
         /// </summary>
-        /// <param name="runnerParameters">Properties used to initate the connection to the PostgreSQL database.</param>
+        /// <param name="runnerParameters">Properties used to initiate the connection to the PostgreSQL database.</param>
         public PostgreSqlConnector(Dictionary<string, string> runnerParameters)
             : base(runnerParameters)
         {

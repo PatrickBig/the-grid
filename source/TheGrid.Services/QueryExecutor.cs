@@ -76,9 +76,6 @@ namespace TheGrid.Services
 
                 UpdateColumnDefinitions(queryExecution.Query, results.Columns);
 
-                // Update any table options as needed
-                BackgroundJob.Enqueue<VisualizationOptionsUpdater>(v => v.UpdateVisualizationOptionsForQueryAsync(queryExecution.QueryId, default));
-
                 await _hubContext.Clients.All.QueryResultsFinishedProcessing(queryExecutionId, queryExecution.QueryId);
             }
             catch (Exception ex)
