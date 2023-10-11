@@ -55,7 +55,7 @@ namespace TheGrid.Server.Controllers
         /// <returns></returns>
         [HttpPut("{visualizationId:int}/Table")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult> UpdateTableVisualization([FromRoute] int visualizationId, [FromBody] TableVisualizationOptions options, CancellationToken cancellationToken = default)
+        public async Task<ActionResult> UpdateTableVisualization([FromRoute] int visualizationId, [FromBody] VisualizationOptions options, CancellationToken cancellationToken = default)
         {
             var vis = options.Adapt<TableVisualization>();
             vis.Id = visualizationId;

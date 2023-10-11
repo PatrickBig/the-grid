@@ -1,5 +1,12 @@
-﻿namespace TheGrid.Models.Configuration
+﻿// <copyright file="SystemOptions.cs" company="BiglerNet">
+// Copyright (c) BiglerNet. All rights reserved.
+// </copyright>
+
+namespace TheGrid.Models.Configuration
 {
+    /// <summary>
+    /// Determines the run mode for the application.
+    /// </summary>
     public enum RunMode
     {
         /// <summary>
@@ -29,14 +36,26 @@
         PostgreSql,
     }
 
+    /// <summary>
+    /// Main system configuration for the application.
+    /// </summary>
     public class SystemOptions
     {
-        private string[] _agentQueues;
+        private string[] _agentQueues = Array.Empty<string>();
 
+        /// <summary>
+        /// Which database provider to use.
+        /// </summary>
         public DatabaseProvider DatabaseProvider { get; set; }
 
+        /// <summary>
+        /// Determines if this instance will run as a server, agent, or mixed.
+        /// </summary>
         public RunMode RunMode { get; set; }
 
+        /// <summary>
+        /// What agent queues will the agent listen to.
+        /// </summary>
         public string[] AgentQueues
         {
             get

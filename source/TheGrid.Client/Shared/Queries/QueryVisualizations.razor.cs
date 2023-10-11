@@ -1,4 +1,4 @@
-// <copyright file="Visualizations.razor.cs" company="BiglerNet">
+// <copyright file="QueryVisualizations.razor.cs" company="BiglerNet">
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
@@ -15,7 +15,7 @@ namespace TheGrid.Client.Shared.Queries
     /// <summary>
     /// Code behind file for the visualization editor.
     /// </summary>
-    public partial class Visualizations : TheGridComponentBase
+    public partial class QueryVisualizations : TheGridComponentBase
     {
         private RadzenTabs? _tabs;
         private VisualizationResponse[]? _visualizations;
@@ -33,6 +33,14 @@ namespace TheGrid.Client.Shared.Queries
         [Inject]
         private IQueryDesignerHubClient QueryRefreshNotificationClient { get; set; } = default!;
 
+        [Inject]
+        private ILogger<QueryVisualizations> Logger { get; set; } = default!;
+
+        /// <summary>
+        /// Refreshes the available visualizations.
+        /// </summary>
+        /// <param name="refreshState">Set to true to force a fresh render.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task RefreshVisualizationsAsync(bool refreshState = false)
         {
             // Get the visualizations
@@ -47,7 +55,6 @@ namespace TheGrid.Client.Shared.Queries
             {
                 StateHasChanged();
             }
-
         }
 
         /// <inheritdoc/>
@@ -80,19 +87,21 @@ namespace TheGrid.Client.Shared.Queries
                         { "Options", visualization.TableVisualizationOptions },
                     };
 
-                    var updatedOptions = await DialogService.OpenAsync<Shared.Visualizations.TableColumnEditor>("Table options", options);
+                    var updatedOptions = await DialogService.OpenAsync<Visualizations.TableOptionsEditor>("Table options", options);
 
-                    if (updatedOptions != null && updatedOptions is TableVisualizationOptions)
+                    if (updatedOptions is TableVisualizationOptions)
                     {
                         visualization.TableVisualizationOptions = updatedOptions;
 
-
                         // Push the update
-                        await HttpClient.PutAsJsonAsync("/api/v1/Visualizations/" + visualization.Id + "/Table", visualization.TableVisualizationOptions);
+                        await HttpClient.PutAsJsonAsync("/api/v1/Visualizations/" + visualization.Id + "/Table", visualization);
 
                         StateHasChanged();
                     }
-
+                    else
+                    {
+                        Logger.LogTrace("Cancelled editing visualization.");
+                    }
                 }
             }
         }

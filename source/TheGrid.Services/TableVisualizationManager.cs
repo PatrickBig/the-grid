@@ -47,20 +47,19 @@ namespace TheGrid.Services
             return visualization;
         }
 
+        /// <inheritdoc/>
         public async Task<Visualization> UpdateVisualizationAsync(Visualization visualization, CancellationToken cancellationToken = default)
         {
             if (visualization is TableVisualization tableVisualization)
             {
-                var vis = await _db.Visualizations.FindAsync(visualization.Id);
+                var originalVisualization = await _db.Visualizations.FindAsync(new object?[] { visualization.Id }, cancellationToken: cancellationToken);
 
-
-                if (vis != null)
+                if (originalVisualization != null)
                 {
-                    tableVisualization.QueryId = vis.QueryId;
+                    tableVisualization.QueryId = originalVisualization.QueryId;
 
-                    //_db.Visualizations.Attach(tableVisualization);
-                    _db.Entry(vis).CurrentValues.SetValues(tableVisualization);
-                    await _db.SaveChangesAsync();
+                    _db.Entry(originalVisualization).CurrentValues.SetValues(tableVisualization);
+                    await _db.SaveChangesAsync(cancellationToken);
                 }
 
                 return tableVisualization;

@@ -66,30 +66,14 @@ namespace TheGrid.Data
         /// <inheritdoc/>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            //modelBuilder.Entity<Connection>().HasIndex(d => d.OrganizationId);
-
-            //modelBuilder.Entity<Query>().HasIndex(q => q.ConnectionId);
-
-            // Probably don't want this one at all
-            //modelBuilder.Entity<Query>().Property(q => q.ColumnOptions)
-            //    .HasColumnType("jsonb");
-
-            //modelBuilder.Entity<Query>().Property(q => q.Parameters)
-            //    .HasColumnType("jsonb");
-
             modelBuilder.Entity<QueryResultRow>().Property(r => r.Data)
                 .HasColumnType("jsonb");
-
-            //modelBuilder.Entity<QueryResultRow>().HasIndex(q => q.QueryId);
 
             modelBuilder.Entity<Connector>().Property(r => r.Parameters)
                 .HasColumnType("jsonb");
 
             modelBuilder.Entity<Column>().HasKey(c => new { c.QueryId, c.Name });
 
-            //modelBuilder.Entity<Visualization>()
-            //    .HasDiscriminator<string>("VisualizationType")
-            //    .HasValue<Visualization>
             modelBuilder.Entity<TableVisualization>()
                 .HasBaseType<Visualization>();
 

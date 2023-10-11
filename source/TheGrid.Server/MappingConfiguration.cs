@@ -23,13 +23,14 @@ namespace TheGrid.Server
                 .NewConfig()
                 .Map(dest => dest.Slug, src => src.Id);
 
-            TypeAdapterConfig<TableVisualizationOptions, TableVisualization>
-                .NewConfig()
-                .Map(dest => dest.Columns, src => src.ColumnOptions);
-
             TypeAdapterConfig<TableVisualization, TableVisualizationOptions>
                 .NewConfig()
                 .Map(dest => dest.ColumnOptions, src => src.Columns);
+
+            TypeAdapterConfig<VisualizationOptions, TableVisualization>
+                .NewConfig()
+                .Map(dest => dest, src => src.TableVisualizationOptions)
+                .Map(dest => dest.Columns, src => src.TableVisualizationOptions!.ColumnOptions);
         }
     }
 }

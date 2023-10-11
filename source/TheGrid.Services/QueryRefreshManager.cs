@@ -3,7 +3,6 @@
 // </copyright>
 
 using Hangfire;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using TheGrid.Data;
 using TheGrid.Models;
@@ -53,19 +52,6 @@ namespace TheGrid.Services
             _logger.LogTrace("Refresh job successfully queued. Refresh job ID {jobId}", entry.Id);
 
             return (entry.Id, entry.JobId);
-        }
-
-        public async Task WaitForRefreshAsync(long refreshJobId, CancellationToken cancellationToken = default)
-        {
-            while (true)
-            {
-                if (await _db.QueryExecutions.Where(q => q.Id == refreshJobId && (q.Status == Shared.Models.QueryExecutionStatus.Complete || q.Status == Shared.Models.QueryExecutionStatus.Error)).AnyAsync(cancellationToken: cancellationToken))
-                {
-                    return;
-                }
-
-                await Task.Delay(200, cancellationToken);
-            }
         }
     }
 }

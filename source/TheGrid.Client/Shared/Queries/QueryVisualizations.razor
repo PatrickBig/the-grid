@@ -1,4 +1,5 @@
-﻿@inherits TheGridComponentBase
+﻿@using TheGrid.Client.Extensions;
+@inherits TheGridComponentBase
 
 <RadzenStack Orientation="Orientation.Vertical">
     <RadzenRow>
@@ -9,13 +10,17 @@
                     for (int i = 0; i < _visualizations.Length; i++)
                     {
                         var vis = _visualizations[i];
-                        <RadzenTabsItem Text="@vis.Name" Style="height: 100%;">
+                        <RadzenTabsItem Text="@vis.Name" Style="height: 100%;" Icon="@vis.GetEditorIcon()">
                             @if (vis.VisualizationType == VisualizationType.Table)
                             {
                                 <TheGrid.Client.Shared.Visualizations.Table QueryId="QueryId" VisualizationOptions="vis.TableVisualizationOptions" />
                             }
                         </RadzenTabsItem>
                     }
+
+                    <RadzenTabsItem Text="Create new visualization" Icon="add">
+
+                    </RadzenTabsItem>
                 }
             </Tabs>
         </RadzenTabs>

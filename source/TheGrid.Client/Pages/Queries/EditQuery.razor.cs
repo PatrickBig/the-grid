@@ -16,7 +16,7 @@ namespace TheGrid.Client.Pages.Queries
     public partial class EditQuery : TheGridComponentBase
     {
         private QueryEditorInput _input = new();
-        private Visualizations? _visualizations;
+        private QueryVisualizations? _visualizations;
 
         /// <summary>
         /// Identifier of the query to edit.

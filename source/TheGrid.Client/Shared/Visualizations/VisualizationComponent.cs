@@ -6,6 +6,9 @@ using Microsoft.AspNetCore.Components;
 
 namespace TheGrid.Client.Shared.Visualizations
 {
+    /// <summary>
+    /// Code behind file for the visualization component.
+    /// </summary>
     public class VisualizationComponent : TheGridComponentBase
     {
         /// <summary>

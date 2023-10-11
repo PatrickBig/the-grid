@@ -49,6 +49,10 @@
                                 {
                                     @longValue.ToString(kv.Value.DisplayFormat)
                                 }
+                                else if (kv.Value.Type is QueryResultColumnType.Integer && value is int intValue)
+                                {
+                                    @intValue.ToString(kv.Value.DisplayFormat)
+                                }
                                 else
                                 {
                                     @value

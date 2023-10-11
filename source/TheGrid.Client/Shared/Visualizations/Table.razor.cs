@@ -17,13 +17,7 @@ namespace TheGrid.Client.Shared.Visualizations
     /// </summary>
     public partial class Table : VisualizationComponent
     {
-        private IEnumerable<Dictionary<string, object?>>? _data;
-        private int _totalItems;
-        private bool _isLoading = true;
-        private Dictionary<string, QueryResultColumn>? _columns;
-        private bool _columnOptionsBuilt = false;
-
-        private JsonSerializerOptions _serializerOptions = new()
+        private readonly JsonSerializerOptions _serializerOptions = new()
         {
             WriteIndented = true,
             Converters =
@@ -31,6 +25,12 @@ namespace TheGrid.Client.Shared.Visualizations
                 new QueryDataConverter(),
             },
         };
+
+        private IEnumerable<Dictionary<string, object?>>? _data;
+        private int _totalItems;
+        private bool _isLoading = true;
+        private Dictionary<string, QueryResultColumn>? _columns;
+        private bool _columnOptionsBuilt = false;
 
         /// <summary>
         /// Table visualization options.
@@ -83,9 +83,11 @@ namespace TheGrid.Client.Shared.Visualizations
             _isLoading = false;
         }
 
-        private async Task OnColumnReorderedAsync(DataGridColumnReorderedEventArgs<Dictionary<string, object?>> e)
+        private Task OnColumnReorderedAsync(DataGridColumnReorderedEventArgs<Dictionary<string, object?>> e)
         {
-            Logger.LogInformation("Did a thing");
+            Logger.LogInformation("Attempted to move {columnName}", e.Column.Title);
+
+            return Task.CompletedTask;
         }
 
         private Dictionary<string, TableColumnOptions> GetOptions()

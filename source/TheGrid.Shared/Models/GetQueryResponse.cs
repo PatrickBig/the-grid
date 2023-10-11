@@ -3,7 +3,6 @@
 // </copyright>
 
 using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
 using TheGrid.Shared.Attributes;
 
 namespace TheGrid.Shared.Models
@@ -57,21 +56,5 @@ namespace TheGrid.Shared.Models
         /// </summary>
         [Tags]
         public List<string> Tags { get; set; } = new();
-
-        /// <summary>
-        /// Date the results were last refreshed.
-        /// </summary>
-        public DateTime? ResultsRefreshed { get; set; }
-
-        /// <summary>
-        /// Status of the last execution of the query.
-        /// </summary>
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public QueryExecutionStatus Status { get; set; } = QueryExecutionStatus.None;
-
-        /// <summary>
-        /// Last error message from the previous query execution.
-        /// </summary>
-        public string? LastErrorMessage { get; set; }
     }
 }

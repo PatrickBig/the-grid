@@ -40,25 +40,8 @@
                         }
                     </Items>
                 </RadzenAccordion>
-                <RadzenButton ButtonType="ButtonType.Submit">Submit</RadzenButton>
+                <RadzenButton ButtonType="ButtonType.Submit">Save</RadzenButton>
             </RadzenColumn>
         </RadzenRow>
     </RadzenTemplateForm>
-}
-
-
-@code {
-
-    private IEnumerable<QueryResultColumnType> _columnTypes = Enum.GetValues(typeof(QueryResultColumnType)).Cast<QueryResultColumnType>();
-
-    [Inject]
-    private DialogService DialogService { get; set; } = default!;
-
-    [Parameter]
-    [EditorRequired]
-    public TableVisualizationOptions? Options { get; set; }
-
-    [Parameter]
-    [EditorRequired]
-    public EventCallback<TableVisualizationOptions> OptionsUpdated { get; set; }
 }

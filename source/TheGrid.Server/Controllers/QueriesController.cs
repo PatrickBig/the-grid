@@ -69,16 +69,12 @@ namespace TheGrid.Server.Controllers
         {
             var item = await _db.Queries.Select(q => new GetQueryResponse
             {
+                Id = q.Id,
                 Command = q.Command,
                 ConnectionId = q.ConnectionId,
                 ConnectionName = q.Connection!.Name,
                 Name = q.Name,
                 Description = q.Description,
-                Id = q.Id,
-                //LastErrorMessage = q.LastErrorMessage,
-                //Parameters = q.Parameters,
-                //ResultsRefreshed = q.ResultsRefreshed,
-                //Status = q.ResultState,
                 Tags = q.Tags,
             })
                 .SingleOrDefaultAsync(q => q.Id == queryId, cancellationToken);
@@ -116,7 +112,7 @@ namespace TheGrid.Server.Controllers
         /// <param name="sort">Optional sorting information.</param>
         /// <param name="skip" default="0">Number of records to skip for a paginated request.</param>
         /// <param name="take" default="25">Number of records to take for a single request.</param>
-        /// <param name="cancellationToken">Cancelltion token.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>A paginated list of queries.</returns>
         [HttpGet]
         [ProducesResponseType(typeof(PaginatedResult<QueryListItem>), StatusCodes.Status200OK)]
@@ -128,18 +124,20 @@ namespace TheGrid.Server.Controllers
             [FromQuery][Range(1, 200)] int take = 25,
             CancellationToken cancellationToken = default)
         {
-            var baseQuery = _db.Queries
-                .Where(q => q.Connection != null && q.Connection.Organization != null && q.Connection.Organization.Id == organization)
-                .Select(q => new QueryListItem
+            var baseQuery =
+                from q in _db.Queries
+                where q.Connection!.OrganizationId == organization
+                let x = _db.QueryExecutions.Where(v => v.QueryId == q.Id).OrderByDescending(v => v.DateCompleted).FirstOrDefault()
+                select new QueryListItem
                 {
-                    Id = q.Id,
                     Description = q.Description,
-                    //LastErrorMessage = q.LastErrorMessage,
+                    Id = q.Id,
                     Name = q.Name,
-                    //ResultsRefreshed = q.ResultsRefreshed,
-                    //Status = q.ResultState,
                     Tags = q.Tags,
-                });
+                    Status = x == null ? QueryExecutionStatus.None : x.Status,
+                    LastErrorMessage = x.ErrorOutput,
+                    ResultsRefreshed = x.DateCompleted,
+                };
 
             if (sort != null && sort.Any())
             {
@@ -238,11 +236,6 @@ namespace TheGrid.Server.Controllers
             query.Tags = tagsToKeep?.ToList() ?? new List<string>();
 
             return Ok(new TagsResponse { TagsModified = request.Tags.Length });
-        }
-
-        private async Task<bool> ValidateConnectionAsync(int connectionId)
-        {
-            return await _db.Connections.AnyAsync(d => d.Id == connectionId);
         }
     }
 }

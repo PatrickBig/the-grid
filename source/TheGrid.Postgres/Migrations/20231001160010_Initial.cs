@@ -55,7 +55,7 @@ namespace TheGrid.Postgres.Migrations
                     Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     OrganizationId = table.Column<string>(type: "text", nullable: false),
                     ConnectorId = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
-                    ConnectionProperties = table.Column<Dictionary<string, string>>(type: "hstore", nullable: false)
+                    ConnectionProperties = table.Column<Dictionary<string, string>>(type: "hstore", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -84,7 +84,7 @@ namespace TheGrid.Postgres.Migrations
                     Name = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     Description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
                     Command = table.Column<string>(type: "text", nullable: false),
-                    Tags = table.Column<List<string>>(type: "text[]", nullable: false)
+                    Tags = table.Column<List<string>>(type: "text[]", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -103,7 +103,7 @@ namespace TheGrid.Postgres.Migrations
                 {
                     QueryId = table.Column<int>(type: "integer", nullable: false),
                     Name = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    Type = table.Column<int>(type: "integer", nullable: false)
+                    Type = table.Column<int>(type: "integer", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -129,7 +129,7 @@ namespace TheGrid.Postgres.Migrations
                     DateQueued = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     DateCompleted = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     StandardOutput = table.Column<string[]>(type: "text[]", nullable: false),
-                    ErrorOutput = table.Column<string>(type: "text", nullable: true)
+                    ErrorOutput = table.Column<string>(type: "text", nullable: true),
                 },
                 constraints: table =>
                 {
@@ -152,7 +152,7 @@ namespace TheGrid.Postgres.Migrations
                     Name = table.Column<string>(type: "text", nullable: false),
                     Discriminator = table.Column<string>(type: "text", nullable: false),
                     Columns = table.Column<Dictionary<string, Models.Visualizations.TableColumn>>(type: "jsonb", nullable: true),
-                    PageSize = table.Column<int>(type: "integer", nullable: true)
+                    PageSize = table.Column<int>(type: "integer", nullable: true),
                 },
                 constraints: table =>
                 {
@@ -172,7 +172,7 @@ namespace TheGrid.Postgres.Migrations
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     QueryExecutionId = table.Column<long>(type: "bigint", nullable: false),
-                    Data = table.Column<Dictionary<string, object>>(type: "jsonb", nullable: false)
+                    Data = table.Column<Dictionary<string, object>>(type: "jsonb", nullable: false),
                 },
                 constraints: table =>
                 {
