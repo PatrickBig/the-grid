@@ -17,6 +17,7 @@ namespace TheGrid.Client.Pages.Queries
     {
         private QueryEditorInput _input = new();
         private QueryVisualizations? _visualizations;
+        private Dictionary<string, Column>? _columns;
 
         /// <summary>
         /// Identifier of the query to edit.
@@ -37,6 +38,7 @@ namespace TheGrid.Client.Pages.Queries
             var result = await response.Content.ReadFromJsonAsync<GetQueryResponse>();
             if (result != null)
             {
+                _columns = result.Columns;
                 _input = result.Adapt<QueryEditorInput>();
             }
         }

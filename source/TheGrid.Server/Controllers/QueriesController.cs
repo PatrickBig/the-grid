@@ -54,7 +54,7 @@ namespace TheGrid.Server.Controllers
         {
             var queryId = await _queryManager.CreateQueryAsync(request.ConnectionId, request.Name, request.Description, request.Command, request.Parameters, cancellationToken);
 
-            return CreatedAtAction(nameof(GetQuery), new { queryId = queryId }, new CreateQueryResponse { QueryId = queryId });
+            return CreatedAtAction(nameof(GetQuery), new { queryId }, new CreateQueryResponse { QueryId = queryId });
         }
 
         /// <summary>
@@ -64,22 +64,41 @@ namespace TheGrid.Server.Controllers
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>Information about a single query definition.</returns>
         [HttpGet("{queryId:int}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(GetQueryResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         public async Task<ActionResult> GetQuery([Required][Range(1, int.MaxValue)] int queryId, CancellationToken cancellationToken = default)
         {
-            var item = await _db.Queries.Select(q => new GetQueryResponse
-            {
-                Id = q.Id,
-                Command = q.Command,
-                ConnectionId = q.ConnectionId,
-                ConnectionName = q.Connection!.Name,
-                Name = q.Name,
-                Description = q.Description,
-                Tags = q.Tags,
-            })
+            var query = await _db.Queries
+                .Include(q => q.Connection)
+                .Include(q => q.Columns)
                 .SingleOrDefaultAsync(q => q.Id == queryId, cancellationToken);
 
-            return Ok(item);
+            if (query == null)
+            {
+                return NotFound();
+            }
+
+            var response =
+                new GetQueryResponse
+                {
+                    Id = query.Id,
+                    Command = query.Command,
+                    ConnectionId = query.ConnectionId,
+                    ConnectionName = query.Connection!.Name,
+                    Name = query.Name,
+                    Description = query.Description,
+                    Tags = query.Tags,
+                    Columns = query.Columns!.Select(c => new
+                    {
+                        c.Name,
+                        c.Type,
+                    }).ToDictionary(x => x.Name, x => new Column
+                    {
+                        Type = (QueryResultColumnType)x.Type,
+                    }),
+                };
+
+            return Ok(response);
         }
 
         /// <summary>

@@ -2,8 +2,6 @@
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
-using System.Text.Json.Serialization;
-
 namespace TheGrid.Shared.Models
 {
 
@@ -36,11 +34,5 @@ namespace TheGrid.Shared.Models
         /// The width of the column.
         /// </summary>
         public double? Width { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public QueryResultColumnType Type { get; set; }
     }
 }

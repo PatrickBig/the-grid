@@ -53,19 +53,9 @@ namespace TheGrid.Shared.Models
     public class QueryResultColumn
     {
         /// <summary>
-        /// Display name or label for the column.
-        /// </summary>
-        public string? DisplayName { get; set; }
-
-        /// <summary>
         /// Data type for the column.
         /// </summary>
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public QueryResultColumnType Type { get; set; } = QueryResultColumnType.Text;
-
-        /// <summary>
-        /// Order the column should be displayed in.
-        /// </summary>
-        public int DisplayOrder { get; set; }
     }
 }

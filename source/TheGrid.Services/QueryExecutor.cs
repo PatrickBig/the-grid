@@ -109,7 +109,7 @@ namespace TheGrid.Services
             {
                 var column = resultColumns[columnName];
 
-                var x = new Column
+                var x = new TheGrid.Models.Column
                 {
                     Name = columnName,
                     Type = column.Type.Adapt<Models.QueryResultColumnType>(),

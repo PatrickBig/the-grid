@@ -197,7 +197,7 @@ namespace TheGrid.Connectors
             {
                 var field = reader.GetName(i);
                 var type = reader.GetFieldType(i).GetQueryResultColumnTypeForType();
-                columns.Add(field, new QueryResultColumn { Type = type, DisplayName = field });
+                columns.Add(field, new QueryResultColumn { Type = type });
             }
 
             return columns;

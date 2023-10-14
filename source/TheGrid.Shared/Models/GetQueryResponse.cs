@@ -51,6 +51,8 @@ namespace TheGrid.Shared.Models
         /// </summary>
         public Dictionary<string, object>? Parameters { get; set; }
 
+        public Dictionary<string, Column> Columns { get; set; }
+
         /// <summary>
         /// Tags associated to the query.
         /// </summary>

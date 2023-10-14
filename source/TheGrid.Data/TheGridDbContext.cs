@@ -56,7 +56,7 @@ namespace TheGrid.Data
         /// <summary>
         /// ColumnOptions discovered from a query execution.
         /// </summary>
-        public DbSet<Column> QueryColumns { get; set; }
+        public DbSet<Models.Column> QueryColumns { get; set; }
 
         /// <summary>
         /// Visualizations for the queries.
@@ -72,7 +72,7 @@ namespace TheGrid.Data
             modelBuilder.Entity<Connector>().Property(r => r.Parameters)
                 .HasColumnType("jsonb");
 
-            modelBuilder.Entity<Column>().HasKey(c => new { c.QueryId, c.Name });
+            modelBuilder.Entity<TheGrid.Models.Column>().HasKey(c => new { c.QueryId, c.Name });
 
             modelBuilder.Entity<TableVisualization>()
                 .HasBaseType<Visualization>();

@@ -5,7 +5,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Radzen;
-using Radzen.Blazor;
 using System.Net.Http.Json;
 using TheGrid.Client.HubClients;
 using TheGrid.Shared.Models;
@@ -17,8 +16,8 @@ namespace TheGrid.Client.Shared.Queries
     /// </summary>
     public partial class QueryVisualizations : TheGridComponentBase
     {
-        private RadzenTabs? _tabs;
         private VisualizationResponse[]? _visualizations;
+        private int _selectedTabIndex;
 
         /// <summary>
         /// Identifier for the query to display the visualizations for.
@@ -75,9 +74,9 @@ namespace TheGrid.Client.Shared.Queries
 
         private async Task ShowOptionsDialog(MouseEventArgs e)
         {
-            if (_tabs != null && _visualizations != null)
+            if (_visualizations != null)
             {
-                var visualizationIndex = _tabs.SelectedIndex < 0 ? 0 : _tabs.SelectedIndex;
+                var visualizationIndex = _selectedTabIndex < 0 ? 0 : _selectedTabIndex;
                 var visualization = _visualizations[visualizationIndex];
 
                 if (visualization.VisualizationType == VisualizationType.Table && visualization.TableVisualizationOptions != null)

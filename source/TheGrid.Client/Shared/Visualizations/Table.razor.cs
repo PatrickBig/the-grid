@@ -42,6 +42,20 @@ namespace TheGrid.Client.Shared.Visualizations
         [Inject]
         private ILogger<Table> Logger { get; set; } = default!;
 
+        [CascadingParameter]
+        private Dictionary<string, Column>? Columns { get; set; }
+
+        /// <inheritdoc/>
+        protected override void OnInitialized()
+        {
+            if (Columns == null)
+            {
+                throw new InvalidOperationException("Unable to initialize table visualization without column information.");
+            }
+
+            base.OnInitialized();
+        }
+
         private static Type GetTypeForColumnType(QueryResultColumnType type)
         {
             return type switch
@@ -120,7 +134,6 @@ namespace TheGrid.Client.Shared.Visualizations
                 {
                     DisplayName = column.Key,
                     DisplayOrder = lastDisplayOrder,
-                    Type = column.Value.Type,
                     Visible = true,
                 });
             }
@@ -128,6 +141,7 @@ namespace TheGrid.Client.Shared.Visualizations
             if (!ReadOnly)
             {
                 // If this isn't a readonly component send an update so the visualization options are saved and can be used again later.
+
             }
 
             _columnOptionsBuilt = true;

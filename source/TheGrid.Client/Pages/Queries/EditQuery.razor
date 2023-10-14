@@ -1,12 +1,13 @@
 ﻿@page "/Queries/{QueryId:int}"
 @using Mapster;
 @inherits TheGridComponentBase
-
-<RadzenSplitter Orientation="Orientation.Vertical">
-    <RadzenSplitterPane Size="400px;">
-        <QueryEditor QueryEditorInput="_input" QuerySaved="SaveQueryAsync" QueryRefreshRequested="QueueRefreshJobAsync" AllowQueryExecution />
-    </RadzenSplitterPane>
-    <RadzenSplitterPane Size="200px;">
-        <QueryVisualizations @ref="_visualizations" QueryId="QueryId" />
-    </RadzenSplitterPane>
-</RadzenSplitter>
+<CascadingValue Value="_columns">
+    <RadzenSplitter Orientation="Orientation.Vertical">
+        <RadzenSplitterPane Size="400px;">
+            <QueryEditor QueryEditorInput="_input" QuerySaved="SaveQueryAsync" QueryRefreshRequested="QueueRefreshJobAsync" AllowQueryExecution />
+        </RadzenSplitterPane>
+        <RadzenSplitterPane Size="200px;">
+            <QueryVisualizations @ref="_visualizations" QueryId="QueryId" />
+        </RadzenSplitterPane>
+    </RadzenSplitter>
+</CascadingValue>

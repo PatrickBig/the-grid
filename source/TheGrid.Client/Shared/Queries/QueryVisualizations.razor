@@ -3,7 +3,7 @@
 
 <RadzenStack Orientation="Orientation.Vertical">
     <RadzenRow>
-        <RadzenTabs @ref="_tabs" RenderMode="TabRenderMode.Server" Style="height: 100%;">
+        <RadzenTabs RenderMode="TabRenderMode.Server" Style="height: 100%;" @bind-SelectedIndex="_selectedTabIndex">
             <Tabs>
                 @if (_visualizations != null)
                 {
@@ -18,14 +18,17 @@
                         </RadzenTabsItem>
                     }
 
-                    <RadzenTabsItem Text="Create new visualization" Icon="add">
+                    <RadzenTabsItem Text="New visualization" Icon="add">
 
                     </RadzenTabsItem>
                 }
             </Tabs>
         </RadzenTabs>
     </RadzenRow>
-    <RadzenRow>
-        <RadzenButton ButtonStyle="ButtonStyle.Light" ButtonType="ButtonType.Button" Click="ShowOptionsDialog">Options</RadzenButton>
-    </RadzenRow>
+    @if (_visualizations != null && _selectedTabIndex < _visualizations.Length)
+    {
+        <RadzenRow>
+            <RadzenButton ButtonStyle="ButtonStyle.Light" ButtonType="ButtonType.Button" Click="ShowOptionsDialog">Options</RadzenButton>
+        </RadzenRow>
+    }
 </RadzenStack>
