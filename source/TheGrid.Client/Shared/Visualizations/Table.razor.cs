@@ -4,6 +4,7 @@
 
 using Microsoft.AspNetCore.Components;
 using Radzen;
+using Radzen.Blazor;
 using System.Net.Http.Json;
 using System.Text.Json;
 using TheGrid.Client.Extensions;
@@ -26,6 +27,7 @@ namespace TheGrid.Client.Shared.Visualizations
             },
         };
 
+        private RadzenDataGrid<Dictionary<string, object?>>? _grid;
         private IEnumerable<Dictionary<string, object?>>? _data;
         private int _totalItems;
         private bool _isLoading = true;
@@ -37,7 +39,7 @@ namespace TheGrid.Client.Shared.Visualizations
         /// </summary>
         [Parameter]
         [EditorRequired]
-        public TableVisualizationOptions VisualizationOptions { get; set; } = null!;
+        public VisualizationResponse VisualizationOptions { get; set; } = null!;
 
         [Inject]
         private ILogger<Table> Logger { get; set; } = default!;
@@ -51,6 +53,11 @@ namespace TheGrid.Client.Shared.Visualizations
             if (Columns == null)
             {
                 throw new InvalidOperationException("Unable to initialize table visualization without column information.");
+            }
+
+            if (VisualizationOptions.TableVisualizationOptions == null)
+            {
+                throw new InvalidOperationException("Unable to initialize table visualization without table options being available.");
             }
 
             base.OnInitialized();
@@ -73,7 +80,7 @@ namespace TheGrid.Client.Shared.Visualizations
 
         private Task OnColumnResize(DataGridColumnResizedEventArgs<Dictionary<string, object?>> args)
         {
-            if (VisualizationOptions.ColumnOptions.TryGetValue(args.Column.Property, out var column))
+            if (VisualizationOptions.TableVisualizationOptions?.ColumnOptions.TryGetValue(args.Column.Property, out var column) ?? false)
             {
                 column.Width = args.Width;
             }
@@ -97,11 +104,24 @@ namespace TheGrid.Client.Shared.Visualizations
             _isLoading = false;
         }
 
-        private Task OnColumnReorderedAsync(DataGridColumnReorderedEventArgs<Dictionary<string, object?>> e)
+        private async Task OnColumnReorderedAsync(DataGridColumnReorderedEventArgs<Dictionary<string, object?>> e)
         {
             Logger.LogInformation("Attempted to move {columnName}", e.Column.Title);
 
-            return Task.CompletedTask;
+            Logger.LogInformation("Moving column {columnName}, Old index = {oldIndex}, New index = {newIndex}", e.Column.Title, e.OldIndex, e.NewIndex);
+            if (_grid != null)
+            {
+                var columns = _grid.ColumnsCollection;
+                for (int i = 0; i < columns.Count; i++) // var column in columns)
+                {
+                    var column = columns[i];
+                    VisualizationOptions.TableVisualizationOptions.ColumnOptions[column.Property].DisplayOrder = column.GetOrderIndex() ?? 1 * 1000;
+                }
+
+                // Update the options
+                // Push the update
+                await HttpClient.PutAsJsonAsync("/api/v1/Visualizations/" + VisualizationOptions.Id + "/Table", VisualizationOptions);
+            }
         }
 
         private Dictionary<string, TableColumnOptions> GetOptions()
@@ -109,28 +129,28 @@ namespace TheGrid.Client.Shared.Visualizations
             // Give whatever we have in the visualization options if the columns from the dataset is not yet available or we already built the options.
             if (_columns == null || _columnOptionsBuilt)
             {
-                return VisualizationOptions.ColumnOptions;
+                return VisualizationOptions.TableVisualizationOptions.ColumnOptions;
             }
 
             // At this point our pre-built options are not available. Lets build them.
 
             // Remove any columns that no longer exist
-            VisualizationOptions.ColumnOptions = VisualizationOptions.ColumnOptions
+            VisualizationOptions.TableVisualizationOptions.ColumnOptions = VisualizationOptions.TableVisualizationOptions.ColumnOptions
                 .Where(c => _columns.ContainsKey(c.Key))
                 .ToDictionary(c => c.Key, c => c.Value);
 
             // Add new columns where needed
-            var newColumns = _columns.Where(c => !VisualizationOptions.ColumnOptions.ContainsKey(c.Key));
+            var newColumns = _columns.Where(c => !VisualizationOptions.TableVisualizationOptions.ColumnOptions.ContainsKey(c.Key));
 
             // Get the highest display order value available
-            var lastDisplayOrder = VisualizationOptions.ColumnOptions.Select(c => c.Value.DisplayOrder).DefaultIfEmpty().Max();
+            var lastDisplayOrder = VisualizationOptions.TableVisualizationOptions.ColumnOptions.Select(c => c.Value.DisplayOrder).DefaultIfEmpty().Max();
 
             foreach (var column in newColumns)
             {
                 // Increase the display order size for each column
                 lastDisplayOrder += 1000;
 
-                VisualizationOptions.ColumnOptions.Add(column.Key, new TableColumnOptions
+                VisualizationOptions.TableVisualizationOptions.ColumnOptions.Add(column.Key, new TableColumnOptions
                 {
                     DisplayName = column.Key,
                     DisplayOrder = lastDisplayOrder,
@@ -146,7 +166,7 @@ namespace TheGrid.Client.Shared.Visualizations
 
             _columnOptionsBuilt = true;
 
-            return VisualizationOptions.ColumnOptions;
+            return VisualizationOptions.TableVisualizationOptions.ColumnOptions;
         }
     }
 }

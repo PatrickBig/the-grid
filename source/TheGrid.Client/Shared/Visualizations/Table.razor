@@ -1,6 +1,7 @@
 ﻿@inherits VisualizationComponent
 
-<RadzenDataGrid Data="_data"
+<RadzenDataGrid @ref="_grid"
+                Data="_data"
                 TItem="Dictionary<string, object>"
                 Count="_totalItems"
                 LoadData="OnLoadDataAsync"
