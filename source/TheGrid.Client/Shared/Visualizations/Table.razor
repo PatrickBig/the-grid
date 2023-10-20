@@ -27,7 +27,8 @@
                     <RadzenDataGridColumn TItem="Dictionary<string, object>"
                                           Title="@(kv.Value.DisplayName ?? kv.Key)"
                                           Type="@GetTypeForColumnType(valueType)"
-                                          Property="@kv.Key">
+                                          Property="@kv.Key"
+                                          Width="@GetWidth(kv.Value)">
                         <Template>
                             @if (valueType == QueryResultColumnType.Text || kv.Value.DisplayFormat == null)
                             {

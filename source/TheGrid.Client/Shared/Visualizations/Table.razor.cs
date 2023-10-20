@@ -16,7 +16,7 @@ namespace TheGrid.Client.Shared.Visualizations
     /// <summary>
     /// Code behind file for the table visualization.
     /// </summary>
-    public partial class Table : VisualizationComponent
+    public partial class Table : VisualizationComponent, IAsyncDisposable
     {
         private readonly JsonSerializerOptions _serializerOptions = new()
         {
@@ -33,6 +33,7 @@ namespace TheGrid.Client.Shared.Visualizations
         private bool _isLoading = true;
         private Dictionary<string, QueryResultColumn>? _columns;
         private bool _columnOptionsBuilt = false;
+        private bool _optionsNeedUpdate = false;
 
         /// <summary>
         /// Table visualization options.
@@ -85,6 +86,8 @@ namespace TheGrid.Client.Shared.Visualizations
                 column.Width = args.Width;
             }
 
+            _optionsNeedUpdate = true;
+
             return Task.CompletedTask;
         }
 
@@ -112,15 +115,14 @@ namespace TheGrid.Client.Shared.Visualizations
             if (_grid != null)
             {
                 var columns = _grid.ColumnsCollection;
-                for (int i = 0; i < columns.Count; i++) // var column in columns)
+                for (int i = 0; i < columns.Count; i++)
                 {
                     var column = columns[i];
-                    VisualizationOptions.TableVisualizationOptions.ColumnOptions[column.Property].DisplayOrder = column.GetOrderIndex() ?? 1 * 1000;
+                    VisualizationOptions.TableVisualizationOptions!.ColumnOptions[column.Property].DisplayOrder = column.GetOrderIndex() ?? 1 * 1000;
                 }
 
                 // Update the options
-                // Push the update
-                await HttpClient.PutAsJsonAsync("/api/v1/Visualizations/" + VisualizationOptions.Id + "/Table", VisualizationOptions);
+                await UpdateOptionsAsync();
             }
         }
 
@@ -129,13 +131,13 @@ namespace TheGrid.Client.Shared.Visualizations
             // Give whatever we have in the visualization options if the columns from the dataset is not yet available or we already built the options.
             if (_columns == null || _columnOptionsBuilt)
             {
-                return VisualizationOptions.TableVisualizationOptions.ColumnOptions;
+                return VisualizationOptions.TableVisualizationOptions!.ColumnOptions;
             }
 
             // At this point our pre-built options are not available. Lets build them.
 
             // Remove any columns that no longer exist
-            VisualizationOptions.TableVisualizationOptions.ColumnOptions = VisualizationOptions.TableVisualizationOptions.ColumnOptions
+            VisualizationOptions.TableVisualizationOptions!.ColumnOptions = VisualizationOptions.TableVisualizationOptions.ColumnOptions
                 .Where(c => _columns.ContainsKey(c.Key))
                 .ToDictionary(c => c.Key, c => c.Value);
 
@@ -158,15 +160,37 @@ namespace TheGrid.Client.Shared.Visualizations
                 });
             }
 
-            if (!ReadOnly)
-            {
-                // If this isn't a readonly component send an update so the visualization options are saved and can be used again later.
-
-            }
+            // If this isn't a readonly component send an update so the visualization options are saved and can be used again later.
+            _optionsNeedUpdate = true;
 
             _columnOptionsBuilt = true;
 
             return VisualizationOptions.TableVisualizationOptions.ColumnOptions;
+        }
+
+        private async Task UpdateOptionsAsync()
+        {
+            // Update the options
+            await HttpClient.PutAsJsonAsync("/api/v1/Visualizations/" + VisualizationOptions.Id + "/Table", VisualizationOptions);
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            if (_optionsNeedUpdate && !ReadOnly)
+            {
+                // Update the options
+                await HttpClient.PutAsJsonAsync("/api/v1/Visualizations/" + VisualizationOptions.Id + "/Table", VisualizationOptions);
+            }
+        }
+
+        private static string? GetWidth(TableColumnOptions column)
+        {
+            if (column.Width != null)
+            {
+                return column.Width.ToString() + "px";
+            }
+
+            return null;
         }
     }
 }

@@ -1,0 +1,34 @@
+﻿@if (Visualization != null && Columns != null)
+{
+    <RadzenTemplateForm Data="Visualization" Submit="@((VisualizationResponse options) => { DialogService.Close(options); })">
+        <RadzenRow>
+            <RadzenColumn>
+                <RadzenStack>
+                    <RadzenFormField Text="Visualization name">
+                        <RadzenTextBox @bind-Value="@Visualization.Name" />
+                        <RadzenLengthValidator Max="50" Min="3" />
+                        <RadzenRequiredValidator />
+                    </RadzenFormField>
+                </RadzenStack>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow>
+            <RadzenColumn>
+                <CascadingValue Value="Columns">
+                    @if (Visualization.VisualizationType == VisualizationType.Table && Visualization.TableVisualizationOptions != null)
+                    {
+                        <TableOptionsEditor Options="Visualization.TableVisualizationOptions" />
+                    }
+                </CascadingValue>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow>
+            <RadzenColumn>
+                <RadzenStack AlignItems="AlignItems.End" Orientation="Orientation.Horizontal">
+                    <RadzenButton ButtonType="ButtonType.Button" ButtonStyle="ButtonStyle.Secondary" Click="@(() => DialogService.Close())">Cancel</RadzenButton>
+                    <RadzenButton ButtonType="ButtonType.Submit" ButtonStyle="ButtonStyle.Primary">Save</RadzenButton>
+                </RadzenStack>
+            </RadzenColumn>
+        </RadzenRow>
+    </RadzenTemplateForm>
+}

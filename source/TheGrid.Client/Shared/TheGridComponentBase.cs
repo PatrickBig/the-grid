@@ -17,7 +17,18 @@ namespace TheGrid.Client.Shared
         /// <summary>
         /// Cancellation token.
         /// </summary>
-        protected CancellationToken CancellationToken => (_cancellationTokenSource ??= new()).Token;
+        protected CancellationToken CancellationToken
+        {
+            get
+            {
+                if (_cancellationTokenSource == null)
+                {
+                    _cancellationTokenSource = new CancellationTokenSource();
+                }
+
+                return _cancellationTokenSource.Token;
+            }
+        }
 
         /// <summary>
         /// Notification service.

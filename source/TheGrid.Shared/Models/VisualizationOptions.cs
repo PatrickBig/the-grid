@@ -2,6 +2,7 @@
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace TheGrid.Shared.Models
@@ -19,6 +20,8 @@ namespace TheGrid.Shared.Models
         /// <summary>
         /// Name of the visualization.
         /// </summary>
+        [Required]
+        [StringLength(50, MinimumLength = 3)]
         public string Name { get; set; } = string.Empty;
 
         /// <summary>

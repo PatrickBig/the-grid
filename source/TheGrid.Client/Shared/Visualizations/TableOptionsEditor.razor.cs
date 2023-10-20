@@ -2,8 +2,6 @@
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
-using Microsoft.AspNetCore.Components;
-using Radzen;
 using TheGrid.Shared.Models;
 
 namespace TheGrid.Client.Shared.Visualizations
@@ -20,7 +18,7 @@ namespace TheGrid.Client.Shared.Visualizations
         [EditorRequired]
         public TableVisualizationOptions? Options { get; set; }
 
-        [Inject]
-        private DialogService DialogService { get; set; } = default!;
+        [CascadingParameter]
+        private Dictionary<string, Column>? Columns { get; set; }
     }
 }

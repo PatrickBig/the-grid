@@ -2,7 +2,6 @@
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Radzen;
 using System.Net.Http.Json;
@@ -34,6 +33,9 @@ namespace TheGrid.Client.Shared.Queries
 
         [Inject]
         private ILogger<QueryVisualizations> Logger { get; set; } = default!;
+
+        [CascadingParameter]
+        private Dictionary<string, Column>? Columns { get; set; }
 
         /// <summary>
         /// Refreshes the available visualizations.
@@ -79,18 +81,19 @@ namespace TheGrid.Client.Shared.Queries
                 var visualizationIndex = _selectedTabIndex < 0 ? 0 : _selectedTabIndex;
                 var visualization = _visualizations[visualizationIndex];
 
-                if (visualization.VisualizationType == VisualizationType.Table && visualization.TableVisualizationOptions != null)
+                if (visualization.VisualizationType == VisualizationType.Table && visualization.TableVisualizationOptions != null && Columns != null)
                 {
                     var options = new Dictionary<string, object>
                     {
-                        { "Options", visualization.TableVisualizationOptions },
+                        { nameof(Visualizations.VisualizationEditor.Visualization), visualization },
+                        { nameof(Visualizations.VisualizationEditor.Columns), Columns },
                     };
 
-                    var updatedOptions = await DialogService.OpenAsync<Visualizations.TableOptionsEditor>("Table options", options);
+                    var updatedOptions = await DialogService.OpenAsync<Visualizations.VisualizationEditor>("Visualization options", options);
 
-                    if (updatedOptions is TableVisualizationOptions)
+                    if (updatedOptions is VisualizationResponse)
                     {
-                        visualization.TableVisualizationOptions = updatedOptions;
+                        visualization = updatedOptions;
 
                         // Push the update
                         await HttpClient.PutAsJsonAsync("/api/v1/Visualizations/" + visualization.Id + "/Table", visualization);
