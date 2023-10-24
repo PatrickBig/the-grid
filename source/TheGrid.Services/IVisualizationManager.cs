@@ -20,8 +20,12 @@ namespace TheGrid.Services
         /// <returns>The newly created visualization.</returns>
         public Task<Visualization> CreateVisualizationAsync(int queryId, string name, CancellationToken cancellationToken = default);
 
+        /// <summary>
+        /// Updates an existing visualization.
+        /// </summary>
+        /// <param name="visualization">Visualization to update.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>The updated visualization.</returns>
         public Task<Visualization> UpdateVisualizationAsync(Visualization visualization, CancellationToken cancellationToken = default);
-
-        //public Task UpdateVisualizationOptionsAsync(List<Column> columns, Visualization visualization, CancellationToken cancellationToken = default);
     }
 }

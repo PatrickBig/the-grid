@@ -24,17 +24,14 @@ namespace TheGrid.Server.Controllers
     public class OrganizationsController : ControllerBase
     {
         private readonly TheGridDbContext _db;
-        private readonly ILogger<OrganizationsController> _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="OrganizationsController"/> class.
         /// </summary>
         /// <param name="db">Database context.</param>
-        /// <param name="logger">Logger.</param>
-        public OrganizationsController(TheGridDbContext db, ILogger<OrganizationsController> logger)
+        public OrganizationsController(TheGridDbContext db)
         {
             _db = db;
-            _logger = logger;
         }
 
         /// <summary>
@@ -61,7 +58,7 @@ namespace TheGrid.Server.Controllers
             {
                 Id = request.Slug,
                 Name = request.Name,
-            }; //request.Adapt<Organization>();
+            };
 
             await _db.Organizations.AddAsync(dto, cancellationToken);
 
@@ -92,6 +89,22 @@ namespace TheGrid.Server.Controllers
         }
 
         /// <summary>
+        /// Lists the available organizations in the system.
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>A list of organizations in the system.</returns>
+        [HttpGet]
+        public async IAsyncEnumerable<OrganizationDetails> Get([EnumeratorCancellation] CancellationToken cancellationToken = default)
+        {
+            var organizations = _db.Organizations.ProjectToType<OrganizationDetails>().OrderBy(o => o.Name).AsAsyncEnumerable();
+
+            await foreach (var organization in organizations.WithCancellation(cancellationToken))
+            {
+                yield return organization;
+            }
+        }
+
+        /// <summary>
         /// Updates details about an organization.
         /// </summary>
         /// <param name="slug">Id of the organization to update.</param>
@@ -115,22 +128,6 @@ namespace TheGrid.Server.Controllers
             await _db.SaveChangesAsync(cancellationToken);
 
             return Ok();
-        }
-
-        /// <summary>
-        /// Lists the available organizations in the system.
-        /// </summary>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>A list of organizations in the system.</returns>
-        [HttpGet]
-        public async IAsyncEnumerable<OrganizationDetails> Get([EnumeratorCancellation] CancellationToken cancellationToken = default)
-        {
-            var organizations = _db.Organizations.ProjectToType<OrganizationDetails>().OrderBy(o => o.Name).AsAsyncEnumerable();
-
-            await foreach (var organization in organizations.WithCancellation(cancellationToken))
-            {
-                yield return organization;
-            }
         }
     }
 }

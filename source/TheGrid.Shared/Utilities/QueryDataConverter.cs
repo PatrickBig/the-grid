@@ -31,7 +31,7 @@ namespace TheGrid.Shared.Utilities
         /// <inheritdoc/>
         public override void Write(Utf8JsonWriter writer, object? value, JsonSerializerOptions options)
         {
-            JsonSerializer.Serialize(writer, value, value.GetType(), options);
+            JsonSerializer.Serialize(writer, value, value?.GetType() ?? typeof(object), options);
         }
     }
 }

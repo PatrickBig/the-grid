@@ -1,21 +1,34 @@
+// <copyright file="QueryDataConverterTests.cs" company="BiglerNet">
+// Copyright (c) BiglerNet. All rights reserved.
+// </copyright>
+
 using System.Text.Json;
 using TheGrid.Shared.Utilities;
 using Xunit.Abstractions;
 
 namespace TheGrid.Shared.Unit.Tests
 {
+    /// <summary>
+    /// Tests for the <see cref="QueryDataConverter"/> class.
+    /// </summary>
     public class QueryDataConverterTests
     {
-        private readonly Random _random = new();
-        private ITestOutputHelper _output;
+        private readonly ITestOutputHelper _output;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="QueryDataConverterTests"/> class.
+        /// </summary>
+        /// <param name="output">Test output helper.</param>
         public QueryDataConverterTests(ITestOutputHelper output)
         {
             _output = output;
         }
 
+        /// <summary>
+        /// Tests the ability to deserialize test data.
+        /// </summary>
         [Fact]
-        public void Test1()
+        public void TestQueryDataDeserializer_Test()
         {
             // Arrange
             var serializerOptions = new JsonSerializerOptions
@@ -27,7 +40,7 @@ namespace TheGrid.Shared.Unit.Tests
                 },
             };
 
-            var jsonData = File.ReadAllText("TestData\\testquerydata-success-data.json");
+            var jsonData = File.ReadAllText("TestData\\test-query-data-success-data.json");
 
             // Act
             var obj = JsonSerializer.Deserialize<TestQueryData>(jsonData, serializerOptions);
@@ -39,7 +52,14 @@ namespace TheGrid.Shared.Unit.Tests
             {
                 foreach (var kv in row)
                 {
-                    _output.WriteLine("Column: " + kv.Key + ", Value: " + kv.Value + ", Type: " + kv.Value.GetType().ToString());
+                    if (kv.Value != null)
+                    {
+                        _output.WriteLine("Column: " + kv.Key + ", Value: " + kv.Value + ", Type: " + kv.Value.GetType().ToString());
+                    }
+                    else
+                    {
+                        _output.WriteLine("Column: " + kv.Key + ", Value: " + kv.Value + ", Type: unknown");
+                    }
                 }
             }
         }

@@ -1,8 +1,7 @@
-// <copyright file="DataSourceParameter.razor.cs" company="BiglerNet">
+// <copyright file="ConnectionPropertyEditor.razor.cs" company="BiglerNet">
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
-using Microsoft.AspNetCore.Components;
 using TheGrid.Shared.Models;
 
 namespace TheGrid.Client.Shared.ConnectionManagement

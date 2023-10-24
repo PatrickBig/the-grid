@@ -25,19 +25,16 @@ namespace TheGrid.Server.Controllers
     public class QueriesController : ControllerBase
     {
         private readonly TheGridDbContext _db;
-        private readonly ILogger<QueriesController> _logger;
         private readonly IQueryManager _queryManager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="QueriesController"/> class.
         /// </summary>
         /// <param name="db">Database context.</param>
-        /// <param name="logger">Logger instance.</param>
         /// <param name="queryManager">Query manager.</param>
-        public QueriesController(TheGridDbContext db, ILogger<QueriesController> logger, IQueryManager queryManager)
+        public QueriesController(TheGridDbContext db, IQueryManager queryManager)
         {
             _db = db;
-            _logger = logger;
             _queryManager = queryManager;
         }
 
@@ -116,7 +113,6 @@ namespace TheGrid.Server.Controllers
             originalQuery.Command = request.Command;
             originalQuery.Name = request.Name;
             originalQuery.Description = request.Description;
-            //originalQuery.Parameters = request.Parameters;
             originalQuery.ConnectionId = request.ConnectionId;
 
             await _db.SaveChangesAsync(cancellationToken);
@@ -252,7 +248,7 @@ namespace TheGrid.Server.Controllers
             // Only add tags that are not already part of the query
             var tagsToKeep = query.Tags.Except(request.Tags, StringComparer.OrdinalIgnoreCase);
 
-            query.Tags = tagsToKeep?.ToList() ?? new List<string>();
+            query.Tags = tagsToKeep.ToList();
 
             return Ok(new TagsResponse { TagsModified = request.Tags.Length });
         }

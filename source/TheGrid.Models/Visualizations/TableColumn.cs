@@ -4,7 +4,6 @@
 
 namespace TheGrid.Models.Visualizations
 {
-
     /// <summary>
     /// Configuration for each column in the table.
     /// </summary>

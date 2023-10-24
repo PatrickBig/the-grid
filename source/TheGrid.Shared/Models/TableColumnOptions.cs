@@ -4,7 +4,6 @@
 
 namespace TheGrid.Shared.Models
 {
-
     /// <summary>
     /// Options for an individual column in a table visualization.
     /// </summary>

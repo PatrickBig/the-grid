@@ -3,7 +3,6 @@
 // </copyright>
 
 using BlazorMonaco.Editor;
-using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using Radzen;
 using System.Net.Http.Json;
@@ -34,6 +33,9 @@ namespace TheGrid.Client.Shared.Queries
         [EditorRequired]
         public EventCallback<QueryEditorInput> QuerySaved { get; set; }
 
+        /// <summary>
+        /// Event that is fired when requesting a query refresh.
+        /// </summary>
         [Parameter]
         public EventCallback QueryRefreshRequested { get; set; }
 

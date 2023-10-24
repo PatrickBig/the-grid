@@ -26,6 +26,7 @@ namespace TheGrid.Services
         /// <param name="db">Database context.</param>
         /// <param name="logger">Logger instance.</param>
         /// <param name="tableVisualizationManager">Table visualization manager.</param>
+        /// <param name="queryRefreshManager">Query refresh manager.</param>
         public QueryManager(TheGridDbContext db, ILogger<QueryManager> logger, VisualizationManagerFactory tableVisualizationManager, IQueryRefreshManager queryRefreshManager)
         {
             _db = db;

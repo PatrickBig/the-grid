@@ -17,6 +17,7 @@ namespace TheGrid.Services
         /// <param name="queryId">Unique ID of the query to get visualizations for.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>All available visualizations for a query.</returns>
+        /// <exception cref="KeyNotFoundException">Thrown if the query does not exist.</exception>
         public Task<IEnumerable<VisualizationResponse>> GetQueryVisualizationsAsync(int queryId, CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -25,6 +26,7 @@ namespace TheGrid.Services
         /// <param name="dashboardId">Unique ID of the dashboard to get visualizations for.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>All available visualizations for a dashboard.</returns>
+        /// <exception cref="KeyNotFoundException">Thrown if the dashboard does not exist.</exception>
         public Task<IEnumerable<VisualizationResponse>> GetDashboardVisualizationsAsync(int dashboardId, CancellationToken cancellationToken = default);
     }
 }

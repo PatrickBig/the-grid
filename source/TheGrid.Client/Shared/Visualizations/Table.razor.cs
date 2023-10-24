@@ -2,7 +2,6 @@
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
-using Microsoft.AspNetCore.Components;
 using Radzen;
 using Radzen.Blazor;
 using System.Net.Http.Json;
@@ -10,6 +9,7 @@ using System.Text.Json;
 using TheGrid.Client.Extensions;
 using TheGrid.Shared.Models;
 using TheGrid.Shared.Utilities;
+#nullable disable
 
 namespace TheGrid.Client.Shared.Visualizations
 {
@@ -27,11 +27,11 @@ namespace TheGrid.Client.Shared.Visualizations
             },
         };
 
-        private RadzenDataGrid<Dictionary<string, object?>>? _grid;
-        private IEnumerable<Dictionary<string, object?>>? _data;
+        private RadzenDataGrid<Dictionary<string, object>> _grid;
+        private IEnumerable<Dictionary<string, object>> _data;
         private int _totalItems;
         private bool _isLoading = true;
-        private Dictionary<string, QueryResultColumn>? _columns;
+        private Dictionary<string, QueryResultColumn> _columns;
         private bool _columnOptionsBuilt = false;
         private bool _optionsNeedUpdate = false;
 
@@ -46,7 +46,17 @@ namespace TheGrid.Client.Shared.Visualizations
         private ILogger<Table> Logger { get; set; } = default!;
 
         [CascadingParameter]
-        private Dictionary<string, Column>? Columns { get; set; }
+        private Dictionary<string, Column> Columns { get; set; }
+
+        /// <inheritdoc/>
+        public async ValueTask DisposeAsync()
+        {
+            if (_optionsNeedUpdate && !ReadOnly)
+            {
+                // Update the options
+                await HttpClient.PutAsJsonAsync("/api/v1/Visualizations/" + VisualizationOptions.Id + "/Table", VisualizationOptions);
+            }
+        }
 
         /// <inheritdoc/>
         protected override void OnInitialized()
@@ -79,7 +89,17 @@ namespace TheGrid.Client.Shared.Visualizations
             };
         }
 
-        private Task OnColumnResize(DataGridColumnResizedEventArgs<Dictionary<string, object?>> args)
+        private static string GetWidth(TableColumnOptions column)
+        {
+            if (column.Width != null)
+            {
+                return column.Width.ToString() + "px";
+            }
+
+            return null;
+        }
+
+        private Task OnColumnResize(DataGridColumnResizedEventArgs<Dictionary<string, object>> args)
         {
             if (VisualizationOptions.TableVisualizationOptions?.ColumnOptions.TryGetValue(args.Column.Property, out var column) ?? false)
             {
@@ -107,7 +127,7 @@ namespace TheGrid.Client.Shared.Visualizations
             _isLoading = false;
         }
 
-        private async Task OnColumnReorderedAsync(DataGridColumnReorderedEventArgs<Dictionary<string, object?>> e)
+        private async Task OnColumnReorderedAsync(DataGridColumnReorderedEventArgs<Dictionary<string, object>> e)
         {
             Logger.LogInformation("Attempted to move {columnName}", e.Column.Title);
 
@@ -172,25 +192,6 @@ namespace TheGrid.Client.Shared.Visualizations
         {
             // Update the options
             await HttpClient.PutAsJsonAsync("/api/v1/Visualizations/" + VisualizationOptions.Id + "/Table", VisualizationOptions);
-        }
-
-        public async ValueTask DisposeAsync()
-        {
-            if (_optionsNeedUpdate && !ReadOnly)
-            {
-                // Update the options
-                await HttpClient.PutAsJsonAsync("/api/v1/Visualizations/" + VisualizationOptions.Id + "/Table", VisualizationOptions);
-            }
-        }
-
-        private static string? GetWidth(TableColumnOptions column)
-        {
-            if (column.Width != null)
-            {
-                return column.Width.ToString() + "px";
-            }
-
-            return null;
         }
     }
 }

@@ -35,6 +35,12 @@ namespace TheGrid.Services
         /// <inheritdoc/>
         public async Task<IEnumerable<VisualizationResponse>> GetQueryVisualizationsAsync(int queryId, CancellationToken cancellationToken = default)
         {
+            // Ensure the query exists so the correct error can be thrown
+            if (!await _db.Queries.AnyAsync(q => q.Id == queryId, cancellationToken))
+            {
+                throw new KeyNotFoundException("No query was located with the given ID.");
+            }
+
             var visualizations = await _db.Visualizations.Where(v => v.QueryId == queryId).ToListAsync(cancellationToken);
 
             var response = new List<VisualizationResponse>();

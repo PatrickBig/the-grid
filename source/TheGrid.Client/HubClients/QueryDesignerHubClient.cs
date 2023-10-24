@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿// <copyright file="QueryDesignerHubClient.cs" company="BiglerNet">
+// Copyright (c) BiglerNet. All rights reserved.
+// </copyright>
+
 using Microsoft.AspNetCore.SignalR.Client;
 using TheGrid.Shared;
 
@@ -18,6 +21,7 @@ namespace TheGrid.Client.HubClients
         {
         }
 
+        /// <inheritdoc/>
         public void OnQueryResultsFinishedProcessing(Func<long, int, Task> action)
         {
             if (Started)
@@ -26,6 +30,7 @@ namespace TheGrid.Client.HubClients
             }
         }
 
+        /// <inheritdoc/>
         public void OnVisualizationOptionsUpdated(Func<int, Task> action)
         {
             if (Started)
