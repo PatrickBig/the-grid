@@ -56,6 +56,8 @@ namespace TheGrid.Client.Shared.Visualizations
                 // Update the options
                 await HttpClient.PutAsJsonAsync("/api/v1/Visualizations/" + VisualizationOptions.Id + "/Table", VisualizationOptions);
             }
+
+            GC.SuppressFinalize(this);
         }
 
         /// <inheritdoc/>
@@ -167,14 +169,14 @@ namespace TheGrid.Client.Shared.Visualizations
             // Get the highest display order value available
             var lastDisplayOrder = VisualizationOptions.TableVisualizationOptions.ColumnOptions.Select(c => c.Value.DisplayOrder).DefaultIfEmpty().Max();
 
-            foreach (var column in newColumns)
+            foreach (var columnName in newColumns.Select(c => c.Key))
             {
                 // Increase the display order size for each column
                 lastDisplayOrder += 1000;
 
-                VisualizationOptions.TableVisualizationOptions.ColumnOptions.Add(column.Key, new TableColumnOptions
+                VisualizationOptions.TableVisualizationOptions.ColumnOptions.Add(columnName, new TableColumnOptions
                 {
-                    DisplayName = column.Key,
+                    DisplayName = columnName,
                     DisplayOrder = lastDisplayOrder,
                     Visible = true,
                 });
