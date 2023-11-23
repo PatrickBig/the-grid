@@ -24,10 +24,4 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\TheGrid.Models\TheGrid.Models.csproj" />
 	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="DependencyInjection\" />
-	  <Folder Include="Migrations\" />
-	</ItemGroup>
-
 </Project>
