@@ -11,4 +11,7 @@ dotnet_diagnostic.SA1101.severity = none
 dotnet_diagnostic.SA1309.severity = none
 dotnet_diagnostic.SA1623.severity = none
 
+# Remove this when https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3687 gets resolved.
+dotnet_diagnostic.SA1010.severity = none
+
 spelling_exclusion_path = .\exclusion.dic

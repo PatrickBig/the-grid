@@ -30,7 +30,7 @@ namespace TheGrid.Server
 
             services.AddLazyCache();
 
-            // Add hangfire
+            // Add Hangfire
             services.AddHangfire(configuration =>
             {
                 configuration.UseRedisStorage(redis);

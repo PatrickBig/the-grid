@@ -4,6 +4,7 @@
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Npgsql;
 using TheGrid.Data;
 using TheGrid.Models.Configuration;
 using TheGrid.Services;
@@ -15,6 +16,8 @@ namespace Microsoft.Extensions.DependencyInjection
     /// </summary>
     public static class TheGridContextServices
     {
+        private const string _connectionStringName = "Database";
+
         /// <summary>
         /// Adds the database context for the system based on configuration.
         /// </summary>
@@ -29,9 +32,16 @@ namespace Microsoft.Extensions.DependencyInjection
 
             if (dataOptions?.DatabaseProvider == DatabaseProvider.PostgreSql)
             {
+                // Create the data source
+                var connectionString = configuration.GetConnectionString(_connectionStringName) ?? throw new ArgumentException("No connection string was found for Database");
+                var builder = new NpgsqlDataSourceBuilder(connectionString)
+                    .EnableDynamicJson();
+
+                var src = builder.Build();
+
                 services.AddDbContext<TheGridDbContext>(o =>
                 {
-                    o.UseNpgsql(configuration.GetConnectionString("Database"));
+                    o.UseNpgsql(src);
                 });
             }
 

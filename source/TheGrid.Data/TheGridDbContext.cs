@@ -12,17 +12,12 @@ namespace TheGrid.Data
     /// <summary>
     /// Primary database context for solution. Provides data access layer to objects.
     /// </summary>
-    public class TheGridDbContext : DbContext
+    /// <remarks>
+    /// Initializes a new instance of the <see cref="TheGridDbContext"/> class.
+    /// </remarks>
+    /// <param name="options">Options for the database context.</param>
+    public class TheGridDbContext(DbContextOptions<TheGridDbContext> options) : DbContext(options)
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TheGridDbContext"/> class.
-        /// </summary>
-        /// <param name="options">Options for the database context.</param>
-        public TheGridDbContext(DbContextOptions<TheGridDbContext> options)
-            : base(options)
-        {
-        }
-
         /// <summary>
         /// Connections to various data sources.
         /// </summary>
