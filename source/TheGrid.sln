@@ -19,8 +19,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheGrid.Models", "TheGrid.M
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{50B36448-6A56-4689-83ED-34194592DA39}"
 	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		Directory.build.props = Directory.build.props
 		Dockerfile = Dockerfile
 		..\README.md = ..\README.md
+		stylecop.json = stylecop.json
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheGrid.Data", "TheGrid.Data\TheGrid.Data.csproj", "{4D758B6C-5410-4CDB-A58E-0CBA7D19988B}"
