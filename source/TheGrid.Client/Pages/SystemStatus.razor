@@ -1,0 +1,75 @@
+﻿@page "/SystemStatus"
+@using Humanizer
+
+<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End">
+    <RadzenCheckBox TValue="bool" Value="_autoRefresh" ValueChanged="AutoRefreshChanged" Name="AutoRefresh"/>
+    <RadzenLabel Text="Refresh every 10 seconds" Component="AutoRefresh" />
+</RadzenStack>
+@if (_status != null)
+{
+    <RadzenRow>
+        <RadzenColumn>
+            <ValueCard Title="Database size">
+                @_status.DatabaseSize?.Bytes().ToString()
+            </ValueCard>
+            <ValueCard Title="Cache size">
+                @_status.QueryResultCacheSize?.Bytes().ToString()
+            </ValueCard>
+        </RadzenColumn>
+        <RadzenColumn>
+            <ValueCard Title="Agents">
+                @_status.JobStatistics.Agents
+            </ValueCard>
+            <ValueCard Title="Enqueued">
+                @_status.JobStatistics.Enqueued
+            </ValueCard>
+        </RadzenColumn>
+        <RadzenColumn>
+            <ValueCard Title="Scheduled">
+                @_status.JobStatistics.Scheduled
+            </ValueCard>
+            <ValueCard Title="Processing">
+                @_status.JobStatistics.Processing
+            </ValueCard>
+        </RadzenColumn>
+        <RadzenColumn>
+            <ValueCard Title="Succeeded">
+                @_status.JobStatistics.Succeeded
+            </ValueCard>
+            <ValueCard Title="Failed">
+                @_status.JobStatistics.Failed
+            </ValueCard>
+        </RadzenColumn>
+    </RadzenRow>
+
+    <RadzenDataGrid @ref=_dataGrid Data="_status.Agents">
+        <Columns>
+            <RadzenDataGridColumn TItem="JobAgent" Property="@(nameof(JobAgent.Name))" Title="Agent" />
+            <RadzenDataGridColumn TItem="JobAgent" Property="@(nameof(JobAgent.WorkersCount))" Title="Workers" Width="8em"/>
+            <RadzenDataGridColumn TItem="JobAgent" Property="@(nameof(JobAgent.Queues))" Title="Queues">
+                <Template>
+                    @foreach (var queue in context.Queues)
+                    {
+                        <RadzenBadge BadgeStyle="BadgeStyle.Info" Text="@queue" class="rz-mr-2" />
+                    }
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="JobAgent" Property="@(nameof(JobAgent.StartedAt))" Title="Started">
+                <Template>
+                    <RelativeDate Value="@context.StartedAt" />
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="JobAgent" Property="@(nameof(JobAgent.LastHeartbeat))" Title="Last heartbeat">
+                <Template>
+                    <RelativeDate Value="@context.LastHeartbeat" />
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+}
+else
+{
+    <RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+        <RadzenProgressBarCircular ProgressBarStyle="ProgressBarStyle.Primary" ShowValue=false Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Large" />
+    </RadzenStack>
+}

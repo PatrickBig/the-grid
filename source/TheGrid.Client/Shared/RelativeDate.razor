@@ -1,0 +1,3 @@
+﻿@using Humanizer
+
+<span @ref="_element" @onmouseenter=@(_ => ShowTooltip(_element))>@Value?.Humanize()</span>

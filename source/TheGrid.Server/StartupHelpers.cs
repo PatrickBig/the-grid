@@ -30,6 +30,12 @@ namespace TheGrid.Server
 
             services.AddLazyCache();
 
+            services.AddStackExchangeRedisCache(c =>
+            {
+                c.Configuration = configuration.GetConnectionString("Redis");
+                c.InstanceName = "TheGrid";
+            });
+
             // Add Hangfire
             services.AddHangfire(configuration =>
             {
@@ -52,6 +58,8 @@ namespace TheGrid.Server
                 o.GroupNameFormat = "'v'VVV";
                 o.SubstituteApiVersionInUrl = true;
             });
+
+            services.AddResponseCaching();
 
             services.AddControllers(o =>
             {

@@ -101,6 +101,8 @@ public static class Program
 
             app.MapControllers();
 
+            app.UseResponseCaching();
+
             // Add SignalR hubs
             app.MapHub<QueryDesignerHub>(HubPaths.QueryDesigner);
 
