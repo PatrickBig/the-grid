@@ -2,8 +2,12 @@
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
+using Hangfire;
+using Mapster;
 using Microsoft.AspNetCore.Mvc;
+using TheGrid.Data;
 using TheGrid.Services;
+using TheGrid.Shared.Models;
 
 namespace TheGrid.Server.Controllers
 {
@@ -15,14 +19,17 @@ namespace TheGrid.Server.Controllers
     public class SystemController : ControllerBase
     {
         private readonly QueryRunnerDiscoveryService _queryRunnerDiscoveryService;
+        private readonly IDatabaseStatus _databaseStatus;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SystemController"/> class.
         /// </summary>
         /// <param name="queryRunnerDiscoveryService">Service to discover connectors.</param>
-        public SystemController(QueryRunnerDiscoveryService queryRunnerDiscoveryService)
+        /// <param name="databaseStatus">Database status provider.</param>
+        public SystemController(QueryRunnerDiscoveryService queryRunnerDiscoveryService, IDatabaseStatus databaseStatus)
         {
             _queryRunnerDiscoveryService = queryRunnerDiscoveryService;
+            _databaseStatus = databaseStatus;
         }
 
         /// <summary>
@@ -37,6 +44,44 @@ namespace TheGrid.Server.Controllers
             await _queryRunnerDiscoveryService.RefreshQueryRunnersAsync();
 
             return Ok();
+        }
+
+        /// <summary>
+        /// Gets the status of the system.
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Information about the current system status.</returns>
+        [HttpGet]
+        [Route("Status")]
+        [ProducesResponseType<SystemStatusResponse>(StatusCodes.Status200OK)]
+        [ResponseCache(Duration = 10)]
+        public async Task<ActionResult<SystemStatusResponse>> Get(CancellationToken cancellationToken = default)
+        {
+            var databaseStatus = await _databaseStatus.GetDatabaseStatusAsync(cancellationToken);
+
+            var monitoringApi = JobStorage.Current.GetMonitoringApi();
+            var statistics = monitoringApi.GetStatistics();
+
+            var result = databaseStatus.Adapt<SystemStatusResponse>();
+
+            result.JobStatistics.Enqueued = statistics.Enqueued;
+            result.JobStatistics.Scheduled = statistics.Scheduled;
+            result.JobStatistics.Processing = statistics.Processing;
+            result.JobStatistics.Succeeded = statistics.Succeeded;
+            result.JobStatistics.Failed = statistics.Failed;
+            result.JobStatistics.Agents = statistics.Servers;
+
+            result.Queues = monitoringApi.Queues().Select(q => q.Name).ToList();
+            result.Agents = monitoringApi.Servers().Select(s => new JobAgent
+            {
+                LastHeartbeat = s.Heartbeat,
+                Name = s.Name,
+                Queues = s.Queues,
+                WorkersCount = s.WorkersCount,
+                StartedAt = s.StartedAt,
+            }).ToList();
+
+            return Ok(result);
         }
     }
 }

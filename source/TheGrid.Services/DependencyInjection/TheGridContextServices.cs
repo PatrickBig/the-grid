@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Npgsql;
 using TheGrid.Data;
 using TheGrid.Models.Configuration;
+using TheGrid.Postgres;
 using TheGrid.Services;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -43,6 +44,8 @@ namespace Microsoft.Extensions.DependencyInjection
                 {
                     o.UseNpgsql(src);
                 });
+
+                services.AddTransient<IDatabaseStatus, PostgresDatabaseStatus>();
             }
 
             return services;
