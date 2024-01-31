@@ -2,7 +2,6 @@
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 using Mapster;
-using Microsoft.AspNetCore.Components;
 using System.Net.Http.Json;
 using TheGrid.Client.Shared;
 using TheGrid.Client.Shared.Queries;
@@ -16,7 +15,6 @@ namespace TheGrid.Client.Pages.Queries
     public partial class EditQuery : TheGridComponentBase
     {
         private QueryEditorInput _input = new();
-        private QueryVisualizations? _visualizations;
         private Dictionary<string, Column>? _columns;
 
         /// <summary>
@@ -26,7 +24,7 @@ namespace TheGrid.Client.Pages.Queries
         public int QueryId { get; set; }
 
         [Inject]
-        private NavigationManager NavigationManager { get; set; } = null!;
+        private NavigationManager NavigationManager { get; set; } = default!;
 
         [Inject]
         private ILogger<EditQuery> Logger { get; set; } = default!;

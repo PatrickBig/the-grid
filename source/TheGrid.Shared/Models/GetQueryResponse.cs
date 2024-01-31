@@ -26,7 +26,7 @@ namespace TheGrid.Shared.Models
         /// <summary>
         /// Name of the connection.
         /// </summary>
-        public string ConnectionName { get; set; } = null!;
+        public string ConnectionName { get; set; } = default!;
 
         /// <summary>
         /// Name of the query.

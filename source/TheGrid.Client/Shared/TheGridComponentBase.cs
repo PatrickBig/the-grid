@@ -34,19 +34,19 @@ namespace TheGrid.Client.Shared
         /// Notification service.
         /// </summary>
         [Inject]
-        protected NotificationService NotificationService { get; private set; } = null!;
+        protected NotificationService NotificationService { get; private set; } = default!;
 
         /// <summary>
         /// Organization for the current user.
         /// </summary>
         [CascadingParameter]
-        protected UserOrganization UserOrganization { get; set; } = null!;
+        protected UserOrganization UserOrganization { get; set; } = default!;
 
         /// <summary>
         /// Http client.
         /// </summary>
         [Inject]
-        protected HttpClient HttpClient { get; set; } = null!;
+        protected HttpClient HttpClient { get; set; } = default!;
 
         /// <summary>
         /// Disposes of the cancellation token.

@@ -1,17 +1,17 @@
 ﻿@inherits FormComponent<bool>
 
-<RadzenButton @ref="_buttonReference" ButtonStyle="ButtonStyle.Light" Icon="@(Value ? "visibility" : "visibility_off")" Click="ToggleVisibility" MouseEnter="@(args => ShowVisbilityHint(args))" />
+<RadzenButton @ref="_buttonReference" ButtonStyle="ButtonStyle.Light" Icon="@(Value ? "visibility" : "visibility_off")" Click="ToggleVisibility" MouseEnter="@(args => ShowVisibilityHint(args))" />
 
 @code {
-    private RadzenButton _buttonReference = null!;
+    private RadzenButton _buttonReference = default!;
 
     [Inject]
-    private TooltipService TooltipService { get; set; } = null!;
+    private TooltipService TooltipService { get; set; } = default!;
 
     [Inject]
-    private ILogger<VisibilityToggle> Logger { get; set; } = null!;
+    private ILogger<VisibilityToggle> Logger { get; set; } = default!;
 
-    private void ShowVisbilityHint(ElementReference elementReference, TooltipOptions? tooltipOptions = null)
+    private void ShowVisibilityHint(ElementReference elementReference)
     {
         try
         {
@@ -19,7 +19,7 @@
         }
         catch(Exception ex)
         {
-            Logger.LogError(ex, "Unable to show tooltip for visibility toggler");
+            Logger.LogError(ex, "Unable to show tooltip for visibility toggle");
         }
 
     }
@@ -27,7 +27,7 @@
     private Task ToggleVisibility(MouseEventArgs e)
     {
         Value = !Value;
-        ShowVisbilityHint(_buttonReference.Element, null);
+        ShowVisibilityHint(_buttonReference.Element);
 
         StateHasChanged();
 

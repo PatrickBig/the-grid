@@ -19,7 +19,7 @@ namespace TheGrid.Client.Pages.Queries
         private readonly QueryEditorInput _input = new();
 
         [Inject]
-        private NavigationManager NavigationManager { get; set; } = null!;
+        private NavigationManager NavigationManager { get; set; } = default!;
 
         private async Task SaveQueryAsync(QueryEditorInput input)
         {

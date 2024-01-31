@@ -1,4 +1,8 @@
-﻿namespace TheGrid.Models
+﻿// <copyright file="DatabaseStatus.cs" company="BiglerNet">
+// Copyright (c) BiglerNet. All rights reserved.
+// </copyright>
+
+namespace TheGrid.Models
 {
     /// <summary>
     /// Status of the database engine.

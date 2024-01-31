@@ -30,7 +30,7 @@
                             <RadzenDropDownDataGridColumn Property="@nameof(ConnectionListItem.Name)" Title="Name" />
                             <RadzenDropDownDataGridColumn Property="@nameof(ConnectionListItem.ConnectorId)" Title="Connector">
                                 <Template Context="data">
-                                    @if (data is ConnectionListItem item && item != null)
+                                    @if (data is ConnectionListItem item)
                                     {
                                         <ConnectorDisplay Name="@item.ConnectorName" ConnectorIcon="@item.ConnectorIcon" />
                                     }
@@ -38,7 +38,7 @@
                             </RadzenDropDownDataGridColumn>
                         </Columns>
                         <ValueTemplate>
-                            @if (connection is ConnectionListItem item && item != null)
+                            @if (connection is ConnectionListItem item)
                             {
                                 @item.Name @:-
                                 <ConnectorDisplay Name="@item.ConnectorName" ConnectorIcon="@item.ConnectorIcon" />

@@ -2,7 +2,6 @@
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
-using Microsoft.AspNetCore.Components;
 using System.Net.Http.Json;
 using TheGrid.Shared.Models;
 
@@ -18,13 +17,13 @@ namespace TheGrid.Client.Pages.ConnectionManagement
         private Connector? _selectedQueryRunner = null;
 
         [CascadingParameter]
-        private UserOrganization UserOrganization { get; set; } = null!;
+        private UserOrganization UserOrganization { get; set; } = default!;
 
         [Inject]
-        private HttpClient HttpClient { get; set; } = null!;
+        private HttpClient HttpClient { get; set; } = default!;
 
         [Inject]
-        private NavigationManager NavigationManager { get; set; } = null!;
+        private NavigationManager NavigationManager { get; set; } = default!;
 
         /// <inheritdoc/>
         protected override async Task OnInitializedAsync()

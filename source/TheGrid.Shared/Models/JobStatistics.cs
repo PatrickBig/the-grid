@@ -1,10 +1,12 @@
-﻿// <copyright file="SystemStatusResponse.cs" company="BiglerNet">
+﻿// <copyright file="JobStatistics.cs" company="BiglerNet">
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
 namespace TheGrid.Shared.Models
 {
-
+    /// <summary>
+    /// Statistics for job execution.
+    /// </summary>
     public class JobStatistics
     {
         /// <summary>
@@ -37,5 +39,4 @@ namespace TheGrid.Shared.Models
         /// </summary>
         public long Agents { get; set; }
     }
-
 }

@@ -40,15 +40,15 @@ namespace TheGrid.Connectors
             var missingParameters = new List<string>();
             var requiredParameters = this.GetRunnerParameterDefinitions().Where(p => p.Required);
 
-            foreach (var parameter in requiredParameters)
+            foreach (var parameter in requiredParameters.Select(p => p.Name))
             {
-                if (!runnerParameters.TryGetValue(parameter.Name, out var parameterValue) || string.IsNullOrEmpty(parameterValue))
+                if (!runnerParameters.TryGetValue(parameter, out var parameterValue) || string.IsNullOrEmpty(parameterValue))
                 {
-                    missingParameters.Add(parameter.Name);
+                    missingParameters.Add(parameter);
                 }
             }
 
-            if (missingParameters.Any())
+            if (missingParameters.Count != 0)
             {
                 throw new ConnectorParameterException("Required parameters were missing.", missingParameters);
             }
