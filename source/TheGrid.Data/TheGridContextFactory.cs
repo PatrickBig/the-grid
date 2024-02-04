@@ -24,6 +24,7 @@ namespace TheGrid.Data
             var configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", optional: true)
                 .AddJsonFile(apiProjectProvider, "appsettings.json", false, true)
+                .AddUserSecrets("f842def4-b7a6-4f02-b454-b2a2cd44f846")
                 .AddEnvironmentVariables()
                 .Build();
 
@@ -39,6 +40,14 @@ namespace TheGrid.Data
                 builder.UseNpgsql(connectionString);
 #else
                 builder.UseNpgsql(connectionString, o => o.MigrationsAssembly("TheGrid.Postgres"));
+#endif
+            }
+            else if (dataConfig?.DatabaseProvider == DatabaseProvider.Sqlite)
+            {
+#if INITIAL_MIGRATION
+                builder.UseSqlite(connectionString);
+#else
+                builder.UseSqlite(connectionString, o => o.MigrationsAssembly("TheGrid.Sqlite"));
 #endif
             }
             else

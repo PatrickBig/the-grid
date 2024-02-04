@@ -45,13 +45,13 @@ namespace TheGrid.Server.Controllers
         [HttpPost]
         public async Task<ActionResult<CreateConnectionResponse>> Post([FromBody] CreateConnectionRequest request, CancellationToken cancellationToken = default)
         {
-            if (!(await _db.Organizations.AnyAsync(d => d.Id == request.OrganizationId, cancellationToken)))
+            if (!await _db.Organizations.AnyAsync(d => d.Id == request.OrganizationId, cancellationToken))
             {
                 ModelState.AddModelError(nameof(request.OrganizationId), "No organization was found.");
                 return ValidationProblem(ModelState);
             }
 
-            if (!(await _db.Connectors.AnyAsync(d => d.Id == request.ConnectorId, cancellationToken: cancellationToken)))
+            if (!await _db.Connectors.AnyAsync(d => d.Id == request.ConnectorId, cancellationToken: cancellationToken))
             {
                 ModelState.AddModelError(nameof(request.ConnectorId), "Invalid connector ID specified.");
                 return ValidationProblem(ModelState);

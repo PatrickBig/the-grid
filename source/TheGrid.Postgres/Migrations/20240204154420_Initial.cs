@@ -1,10 +1,9 @@
-﻿// <copyright file="20231001160010_Initial.cs" company="BiglerNet">
+﻿// <copyright file="20240204154420_Initial.cs" company="BiglerNet">
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using TheGrid.Shared.Models;
 
 #nullable disable
 
@@ -16,16 +15,13 @@ namespace TheGrid.Postgres.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AlterDatabase()
-                .Annotation("Npgsql:PostgresExtension:hstore", ",,");
-
             migrationBuilder.CreateTable(
                 name: "Connectors",
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
-                    Parameters = table.Column<List<ConnectionProperty>>(type: "jsonb", nullable: false),
+                    Parameters = table.Column<string>(type: "text", nullable: false),
                     SupportsConnectionTest = table.Column<bool>(type: "boolean", nullable: false),
                     SupportsSchemaDiscovery = table.Column<bool>(type: "boolean", nullable: false),
                     Disabled = table.Column<bool>(type: "boolean", nullable: false),
@@ -59,7 +55,7 @@ namespace TheGrid.Postgres.Migrations
                     Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     OrganizationId = table.Column<string>(type: "text", nullable: false),
                     ConnectorId = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
-                    ConnectionProperties = table.Column<Dictionary<string, string>>(type: "hstore", nullable: false),
+                    ConnectionProperties = table.Column<string>(type: "text", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -154,8 +150,8 @@ namespace TheGrid.Postgres.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     QueryId = table.Column<int>(type: "integer", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
-                    Discriminator = table.Column<string>(type: "text", nullable: false),
-                    Columns = table.Column<Dictionary<string, Models.Visualizations.TableColumn>>(type: "jsonb", nullable: true),
+                    Discriminator = table.Column<string>(type: "character varying(21)", maxLength: 21, nullable: false),
+                    Columns = table.Column<string>(type: "text", nullable: true),
                     PageSize = table.Column<int>(type: "integer", nullable: true),
                 },
                 constraints: table =>
@@ -176,7 +172,7 @@ namespace TheGrid.Postgres.Migrations
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     QueryExecutionId = table.Column<long>(type: "bigint", nullable: false),
-                    Data = table.Column<Dictionary<string, object>>(type: "jsonb", nullable: false),
+                    Data = table.Column<string>(type: "text", nullable: false),
                 },
                 constraints: table =>
                 {

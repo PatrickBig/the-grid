@@ -22,7 +22,7 @@ namespace TheGrid.Server.Controllers
         /// <summary>
         /// Initializes a new instance of the <see cref="QueryResultRefreshController"/> class.
         /// </summary>
-        /// <param name="queryRefreshManager">Query refresh manageer.</param>
+        /// <param name="queryRefreshManager">Query refresh manager.</param>
         public QueryResultRefreshController(IQueryRefreshManager queryRefreshManager)
         {
             _queryRefreshManager = queryRefreshManager;

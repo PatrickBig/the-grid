@@ -30,8 +30,13 @@ namespace TheGrid.Services
 
             logger.LogTrace("Located {runnerCount} runners to make available to the system.", runners.Count());
 
-            // Disable all runners
-            await db.Connectors.ExecuteUpdateAsync(s => s.SetProperty(r => r.Disabled, true));
+            // Disable all runners. Ideally this would be done using .ExecuteUpdateAsync however some DB providers don't yet support it.
+            foreach (var connector in db.Connectors)
+            {
+                connector.Disabled = true;
+            }
+
+            await db.SaveChangesAsync();
 
             foreach (var runner in runners)
             {

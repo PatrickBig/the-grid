@@ -31,6 +31,14 @@ namespace TheGrid.Models.Configuration
     public enum DatabaseProvider
     {
         /// <summary>
+        /// SQLite database provider.
+        /// </summary>
+        /// <remarks>
+        /// It is not recommended to use SQLite for production use.
+        /// </remarks>
+        Sqlite,
+
+        /// <summary>
         /// PostgreSQL database provider.
         /// </summary>
         PostgreSql,
