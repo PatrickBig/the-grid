@@ -11,7 +11,7 @@ using TheGrid.Data;
 namespace TheGrid.Sqlite.Migrations
 {
     [DbContext(typeof(TheGridDbContext))]
-    [Migration("20240204153814_Initial")]
+    [Migration("20240208033448_Initial")]
     partial class Initial
     {
         /// <inheritdoc />

@@ -13,7 +13,7 @@ using TheGrid.Data;
 namespace TheGrid.Postgres.Migrations
 {
     [DbContext(typeof(TheGridDbContext))]
-    [Migration("20240204154420_Initial")]
+    [Migration("20240208034128_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
