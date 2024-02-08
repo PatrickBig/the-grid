@@ -1,4 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿// <copyright file="MockedDbFixture.cs" company="BiglerNet">
+// Copyright (c) BiglerNet. All rights reserved.
+// </copyright>
+
+using Microsoft.EntityFrameworkCore;
 using NSubstitute;
 using TheGrid.Data;
 using TheGrid.Shared.Models;

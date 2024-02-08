@@ -25,7 +25,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\TheGrid.Data\TheGrid.Data.csproj" />
     <ProjectReference Include="..\..\TheGrid.Services\TheGrid.Services.csproj" />
-    <ProjectReference Include="..\TheGrid.Tests.Shared\TheGrid.Tests.Shared.csproj" />
+    <ProjectReference Include="..\TheGrid.TestHelpers\TheGrid.TestHelpers.csproj" />
   </ItemGroup>
 
 </Project>

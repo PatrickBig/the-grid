@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheGrid.Shared", "TheGrid.S
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{774D035D-7A8F-49C0-A577-0B4B540B7A24}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheGrid.Connectors.Integration.Tests", "tests\TheGrid.Connectors.Integration.Tests\TheGrid.Connectors.Integration.Tests.csproj", "{51B382DE-C79C-4ABB-A6C6-5B41BAC9919B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheGrid.Tests.Connectors", "tests\TheGrid.Tests.Connectors\TheGrid.Tests.Connectors.csproj", "{51B382DE-C79C-4ABB-A6C6-5B41BAC9919B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheGrid.Services", "TheGrid.Services\TheGrid.Services.csproj", "{E921BA7C-5938-4FB7-B48F-F25305D4D433}"
 EndProject
@@ -34,13 +34,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheGrid.Postgres", "TheGrid
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheGrid.Client", "TheGrid.Client\TheGrid.Client.csproj", "{52AA27C8-FBD6-42DE-A472-C2600F7EA08E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheGrid.Shared.Unit.Tests", "tests\TheGrid.Shared.Unit.Tests\TheGrid.Shared.Unit.Tests.csproj", "{4EBC77E3-BDCF-4D80-AB11-17F8FCBD5D25}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheGrid.Tests.Shared", "tests\TheGrid.Tests.Shared\TheGrid.Tests.Shared.csproj", "{4EBC77E3-BDCF-4D80-AB11-17F8FCBD5D25}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheGrid.Services.Tests", "tests\TheGrid.Services.Tests\TheGrid.Services.Tests.csproj", "{D1DCFB8E-5164-4957-ABED-00B8450F4531}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheGrid.Tests.Services", "tests\TheGrid.Tests.Services\TheGrid.Tests.Services.csproj", "{D1DCFB8E-5164-4957-ABED-00B8450F4531}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheGrid.Tests.Shared", "tests\TheGrid.Tests.Shared\TheGrid.Tests.Shared.csproj", "{A84355B3-4445-486B-A82B-A47283F262C2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheGrid.TestHelpers", "tests\TheGrid.TestHelpers\TheGrid.TestHelpers.csproj", "{A84355B3-4445-486B-A82B-A47283F262C2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TheGrid.Sqlite", "TheGrid.Sqlite\TheGrid.Sqlite.csproj", "{6D451C39-FE6D-45AC-B492-62B4B0B6CC21}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheGrid.Sqlite", "TheGrid.Sqlite\TheGrid.Sqlite.csproj", "{6D451C39-FE6D-45AC-B492-62B4B0B6CC21}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

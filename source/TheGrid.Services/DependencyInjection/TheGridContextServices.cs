@@ -6,8 +6,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Npgsql;
 using TheGrid.Data;
-using TheGrid.Data.Providers.Postgres;
 using TheGrid.Models.Configuration;
+using TheGrid.Postgres;
 using TheGrid.Services;
 
 namespace Microsoft.Extensions.DependencyInjection

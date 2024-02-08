@@ -16,6 +16,11 @@ namespace TheGrid.Services.Tests
         private readonly TheGridDbContext _db;
         private readonly ILogger<QueryRunnerDiscoveryService> _logger;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="QueryRunnerDiscoveryServiceTests"/> class.
+        /// </summary>
+        /// <param name="inMemoryDatabaseFixture"></param>
+        /// <param name="testOutputHelper"></param>
         public QueryRunnerDiscoveryServiceTests(InMemoryDatabaseFixture inMemoryDatabaseFixture, ITestOutputHelper testOutputHelper)
         {
             _db = inMemoryDatabaseFixture.Db;
@@ -25,40 +30,20 @@ namespace TheGrid.Services.Tests
         [Fact]
         public async Task RefreshQueryRunnersAsync_Test()
         {
-            //var data = new List<Connector>
-            //{
-            //    new Connector
-            //    {
-            //        Disabled = false,
-            //        EditorLanguage = "psql",
-            //        Id = "TestDbConnector",
-            //        Name = "Test DB",
-            //        SupportsConnectionTest = true,
-            //    },
-            //}.AsQueryable();
-
-            //var mockSet = Substitute.For<DbSet<Connector>, IQueryable<Connector>>();
-
-            //((IQueryable<Connector>)mockSet).Provider.Returns(data.Provider);
-            //((IQueryable<Connector>)mockSet).Expression.Returns(data.Expression);
-            //((IQueryable<Connector>)mockSet).ElementType.Returns(data.ElementType);
-            //((IQueryable<Connector>)mockSet).GetEnumerator().Returns(data.GetEnumerator());
-
-            //var mockContext = Substitute.For<ITheGridDbContext>();
-            //mockContext.Connectors.Returns(mockSet);
-
-            //mockSet.WhenForAnyArgs(m => m.ExecuteUpdateAsync<Connector>(default, default));
-
             var builder = new DbContextOptionsBuilder<TheGridDbContext>()
                 .UseInMemoryDatabase("TheGrid")
                 .Options;
 
             var context = new TheGridDbContext(builder);
 
-
             var queryRunner = new QueryRunnerDiscoveryService(context, _logger);
 
             await queryRunner.RefreshQueryRunnersAsync();
+
+            // Check the runners
+            var runners = await _db.Connectors.ToListAsync();
+
+            Assert.NotEmpty(runners);
         }
     }
 }
