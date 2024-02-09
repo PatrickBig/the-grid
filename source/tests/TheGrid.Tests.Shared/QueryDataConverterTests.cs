@@ -40,7 +40,7 @@ namespace TheGrid.Shared.Unit.Tests
                 },
             };
 
-            var jsonData = File.ReadAllText("TestData\\test-query-data-success-data.json");
+            var jsonData = File.ReadAllText(Path.Join("TestData", "test-query-data-success-data.json"));
 
             // Act
             var obj = JsonSerializer.Deserialize<TestQueryData>(jsonData, serializerOptions);
