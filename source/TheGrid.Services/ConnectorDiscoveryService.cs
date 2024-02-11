@@ -82,7 +82,7 @@ namespace TheGrid.Services
             {
                 var details = new Connector
                 {
-                    Id = connectorType.FullName ?? throw new NullReferenceException("Unable to determine type for connector."),
+                    Id = connectorType.FullName ?? throw new InvalidOperationException("Unable to determine type for connector."),
                 };
 
                 var connectorInformation = connectorType.GetCustomAttribute<ConnectorAttribute>(false);
