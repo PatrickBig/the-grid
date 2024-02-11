@@ -20,16 +20,16 @@ namespace TheGrid.Connectors
         /// <summary>
         /// Initializes a new instance of the <see cref="PostgreSqlConnector"/> class.
         /// </summary>
-        /// <param name="runnerParameters">Properties used to initiate the connection to the PostgreSQL database.</param>
-        public PostgreSqlConnector(Dictionary<string, string> runnerParameters)
-            : base(runnerParameters)
+        /// <param name="connectorParameters">Properties used to initiate the connection to the PostgreSQL database.</param>
+        public PostgreSqlConnector(Dictionary<string, string> connectorParameters)
+            : base(connectorParameters)
         {
         }
 
         /// <inheritdoc/>
         public async Task<DatabaseSchema> GetSchemaAsync(CancellationToken cancellationToken = default)
         {
-            await using var connection = GetConnection(RunnerParameters);
+            await using var connection = GetConnection(ConnectorParameters);
 
             await connection.OpenAsync(cancellationToken);
 
@@ -115,7 +115,7 @@ namespace TheGrid.Connectors
         /// <inheritdoc/>
         public override async Task<QueryResult> GetDataAsync(string query, Dictionary<string, object?>? queryParameters, CancellationToken cancellationToken = default)
         {
-            await using var connection = GetConnection(RunnerParameters);
+            await using var connection = GetConnection(ConnectorParameters);
 
             await connection.OpenAsync(cancellationToken);
 
@@ -165,7 +165,7 @@ namespace TheGrid.Connectors
         /// <inheritdoc/>
         public async Task<bool> TestConnectionAsync(CancellationToken cancellationToken = default)
         {
-            await using var connection = GetConnection(RunnerParameters);
+            await using var connection = GetConnection(ConnectorParameters);
 
             await connection.OpenAsync(cancellationToken);
 

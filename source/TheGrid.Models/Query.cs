@@ -9,7 +9,7 @@ using TheGrid.Shared.Attributes;
 namespace TheGrid.Models
 {
     /// <summary>
-    /// Represents a query that can be executed by a runner.
+    /// Represents a query that can be executed by a connector.
     /// </summary>
     public class Query : ITags
     {

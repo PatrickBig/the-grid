@@ -56,11 +56,11 @@ namespace TheGrid.Services
             await UpdateQueryExecutionRecordStatusAsync(queryExecution, cancellationToken);
 
             // Create the connector
-            var runner = GetConnector(queryExecution.Query);
+            var connector = GetConnector(queryExecution.Query);
 
             try
             {
-                var results = await runner.GetDataAsync(queryExecution.Query.Command, null, cancellationToken);
+                var results = await connector.GetDataAsync(queryExecution.Query.Command, null, cancellationToken);
 
                 foreach (var row in results.Rows)
                 {
@@ -128,15 +128,15 @@ namespace TheGrid.Services
         {
             _logger.LogTrace("Creating connector for type: {connectorId}", query.Connection?.ConnectorId);
 
-            var runnerAssembly = Assembly.GetAssembly(typeof(IConnector));
+            var connectorAssembly = Assembly.GetAssembly(typeof(IConnector));
 
             if (query.Connection == null)
             {
                 throw new InvalidOperationException("Connection for query cannot be null");
             }
 
-            var runnerType = runnerAssembly?.GetType(query.Connection.ConnectorId) ?? throw new ArgumentException("No runner found.");
-            return Activator.CreateInstance(runnerType, query.Connection.ConnectionProperties) as IConnector ?? throw new InvalidCastException("Unable to create connector instance from type.");
+            var connectorType = connectorAssembly?.GetType(query.Connection.ConnectorId) ?? throw new ArgumentException("No connector found.");
+            return Activator.CreateInstance(connectorType, query.Connection.ConnectionProperties) as IConnector ?? throw new InvalidCastException("Unable to create connector instance from type.");
         }
 
         /// <summary>

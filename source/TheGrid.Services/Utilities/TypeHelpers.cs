@@ -20,7 +20,7 @@ namespace TheGrid.Services
         /// <returns>True or false.</returns>
         public static bool ImplementsInterface<T>(this Type type)
         {
-            return type.GetInterfaces().Any(i => i == typeof(T));
+            return Array.Exists(type.GetInterfaces(), i => i == typeof(T));
         }
 
         /// <summary>
@@ -28,7 +28,7 @@ namespace TheGrid.Services
         /// </summary>
         /// <typeparam name="T">The type to check.</typeparam>
         /// <returns>A list of types.</returns>
-        /// <exception cref="ArgumentNullException">Thrown if the assembly is null.</exception>
+        /// <exception cref="InvalidOperationException">Thrown if the assembly is null.</exception>
         public static IEnumerable<T> GetEnumerableOfType<T>()
             where T : class, IConnector
         {
@@ -36,18 +36,24 @@ namespace TheGrid.Services
 
             if (assembly == null)
             {
-                throw new ArgumentNullException(nameof(assembly), "Unable to locate assembly.");
+                throw new InvalidOperationException("Unable to locate assembly.");
             }
             else
             {
-                foreach (var type in GetTargetTypes<T>(assembly))
-                {
-                    var instance = (T?)Activator.CreateInstance(type);
+                return GetEnumerableOfTypeIterator<T>(assembly);
+            }
+        }
 
-                    if (instance != null)
-                    {
-                        yield return instance;
-                    }
+        private static IEnumerable<T> GetEnumerableOfTypeIterator<T>(Assembly assembly)
+            where T : class, IConnector
+        {
+            foreach (var type in GetTargetTypes<T>(assembly))
+            {
+                var instance = (T?)Activator.CreateInstance(type);
+
+                if (instance != null)
+                {
+                    yield return instance;
                 }
             }
         }

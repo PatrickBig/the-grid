@@ -210,6 +210,10 @@ namespace TheGrid.Sqlite.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("ConnectorIcon")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("Disabled")
                         .HasColumnType("INTEGER");
 
@@ -221,10 +225,6 @@ namespace TheGrid.Sqlite.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Parameters")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("RunnerIcon")
                         .IsRequired()
                         .HasColumnType("TEXT");
 

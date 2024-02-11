@@ -11,21 +11,21 @@
                     <RadzenLengthValidator Component="Name" Max="100" Popup/>
                 </RadzenFormField>
                 <RadzenFormField Text="connector" Variant="Variant.Outlined">
-                    <RadzenDropDown Name="QueryRunnerId" TValue="string" ValueChanged="QueryRunnerChanged" Value="_input.ConnectorId" Context="x" Data="_queryRunners" ValueProperty="@nameof(Connector.Id)" TextProperty="@nameof(Connector.Name)">
+                    <RadzenDropDown Name="ConnectorId" TValue="string" ValueChanged="ConnectorChanged" Value="_input.ConnectorId" Context="x" Data="_connectors" ValueProperty="@nameof(Connector.Id)" TextProperty="@nameof(Connector.Name)">
                         <Template>
                             @{
-                                if (x is Connector runner)
+                                if (x is Connector connector)
                                 {
-                                    <ConnectorDisplay Name="@runner.Name" ConnectorIcon="@runner.RunnerIcon" />
+                                    <ConnectorDisplay Name="@connector.Name" ConnectorIcon="@connector.ConnectorIcon" />
                                 }
                             }
                         </Template>
                     </RadzenDropDown>
-                    <RadzenRequiredValidator Component="QueryRunnerId" Text="A connector must be selected" Popup />
+                    <RadzenRequiredValidator Component="ConnectorId" Text="A connector must be selected" Popup />
                 </RadzenFormField>
-                @if (_selectedQueryRunner != null)
+                @if (_selectedConnector != null)
                 {
-                    foreach (var parameter in _selectedQueryRunner.Parameters.OrderBy(p => p.RenderOrder))
+                    foreach (var parameter in _selectedConnector.Parameters.OrderBy(p => p.RenderOrder))
                     {
                         <ConnectionPropertyEditor ConnectionProperty="parameter" ValueChanged="ParameterValueChanged" />
                     }

@@ -60,7 +60,7 @@ namespace Microsoft.Extensions.DependencyInjection
         public static IServiceCollection AddTheGridBackendServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.Configure<SystemOptions>(configuration.GetSection(nameof(SystemOptions)));
-            services.AddTransient<QueryRunnerDiscoveryService>();
+            services.AddTransient<ConnectorDiscoveryService>();
             services.AddTransient<IQueryExecutor, QueryExecutor>();
             services.AddTransient<IQueryRefreshManager, QueryRefreshManager>();
             services.AddTransient<IVisualizationInformation, VisualizationInformation>();

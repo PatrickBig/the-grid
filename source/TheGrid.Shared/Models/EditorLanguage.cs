@@ -7,7 +7,7 @@ namespace TheGrid.Shared.Models
     /// <summary>
     /// Identifies the language used for the query editor.
     /// </summary>
-    public class EditorLanguage
+    public static class EditorLanguage
     {
         /// <summary>
         /// ABAP.

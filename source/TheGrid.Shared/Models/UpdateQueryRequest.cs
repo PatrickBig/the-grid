@@ -31,7 +31,7 @@ namespace TheGrid.Shared.Models
         public string? Description { get; set; }
 
         /// <summary>
-        /// Command / statement to execute by the runner.
+        /// Command / statement to execute by the connector.
         /// </summary>
         public string Command { get; set; } = string.Empty;
 

@@ -110,7 +110,7 @@ namespace TheGrid.Server.Controllers
                     Id = d.Id,
                     Name = d.Name,
                     ConnectorId = d.ConnectorId,
-                    ConnectorIcon = d.Connector!.RunnerIcon,
+                    ConnectorIcon = d.Connector!.ConnectorIcon,
                     ConnectorName = d.Connector.Name,
                     ConnectorEditorLanguage = d.Connector.EditorLanguage,
                 });

@@ -13,8 +13,8 @@ namespace TheGrid.Client.Pages.ConnectionManagement
     public partial class CreateConnection
     {
         private readonly CreateConnectionRequest _input = new();
-        private IEnumerable<Connector>? _queryRunners = null;
-        private Connector? _selectedQueryRunner = null;
+        private IEnumerable<Connector>? _connectors = null;
+        private Connector? _selectedConnector = null;
 
         [CascadingParameter]
         private UserOrganization UserOrganization { get; set; } = default!;
@@ -28,25 +28,25 @@ namespace TheGrid.Client.Pages.ConnectionManagement
         /// <inheritdoc/>
         protected override async Task OnInitializedAsync()
         {
-            var response = await HttpClient.GetAsync("/api/v1/QueryRunners");
-            _queryRunners = await response.Content.ReadFromJsonAsync<IEnumerable<Connector>>();
+            var response = await HttpClient.GetAsync("/api/v1/Connectors");
+            _connectors = await response.Content.ReadFromJsonAsync<IEnumerable<Connector>>();
         }
 
-        private void QueryRunnerChanged(string queryRunnerId)
+        private void ConnectorChanged(string connectorId)
         {
             _input.ConnectionProperties = new();
-            _selectedQueryRunner = _queryRunners?.FirstOrDefault(r => r.Id == queryRunnerId);
+            _selectedConnector = _connectors?.FirstOrDefault(r => r.Id == connectorId);
 
             // Update all of the executor parameters
-            if (_selectedQueryRunner != null)
+            if (_selectedConnector != null)
             {
-                foreach (var param in _selectedQueryRunner.Parameters)
+                foreach (var parameter in _selectedConnector.Parameters)
                 {
-                    _input.ConnectionProperties.Add(param.Name, null);
+                    _input.ConnectionProperties.Add(parameter.Name, null);
                 }
             }
 
-            _input.ConnectorId = queryRunnerId;
+            _input.ConnectorId = connectorId;
         }
 
         private void ParameterValueChanged((string Name, string? Value) x)

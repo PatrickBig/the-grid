@@ -226,6 +226,10 @@ namespace TheGrid.Postgres.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("text");
 
+                    b.Property<string>("ConnectorIcon")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<bool>("Disabled")
                         .HasColumnType("boolean");
 
@@ -237,10 +241,6 @@ namespace TheGrid.Postgres.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Parameters")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("RunnerIcon")
                         .IsRequired()
                         .HasColumnType("text");
 
