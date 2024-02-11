@@ -1,16 +1,16 @@
-﻿// <copyright file="TypeHelpers.cs" company="BiglerNet">
+﻿// <copyright file="TypeExtensions.cs" company="BiglerNet">
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
 using System.Reflection;
 using TheGrid.Connectors;
 
-namespace TheGrid.Services
+namespace TheGrid.Services.Extensions
 {
     /// <summary>
     /// Type helpers.
     /// </summary>
-    public static class TypeHelpers
+    public static class TypeExtensions
     {
         /// <summary>
         /// Checks if the type implements the requested interface.
