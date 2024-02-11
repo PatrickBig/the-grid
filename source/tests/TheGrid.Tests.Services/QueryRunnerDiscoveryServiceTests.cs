@@ -1,4 +1,4 @@
-// <copyright file="UnitTest1.cs" company="BiglerNet">
+// <copyright file="QueryRunnerDiscoveryServiceTests.cs" company="BiglerNet">
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
@@ -30,17 +30,17 @@ namespace TheGrid.Services.Tests
             _logger = XUnitLogger.CreateLogger<QueryRunnerDiscoveryService>(testOutputHelper);
         }
 
+        /// <summary>
+        /// Tests the ability to refresh runners in the database.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
         public async Task RefreshQueryRunnersAsync_Test()
         {
-            var builder = new DbContextOptionsBuilder<TheGridDbContext>()
-                .UseInMemoryDatabase("TheGrid")
-                .Options;
+            // Arrange
+            var queryRunner = new QueryRunnerDiscoveryService(_db, _logger);
 
-            var context = new TheGridDbContext(builder);
-
-            var queryRunner = new QueryRunnerDiscoveryService(context, _logger);
-
+            // Act
             await queryRunner.RefreshQueryRunnersAsync();
 
             // Check the runners
