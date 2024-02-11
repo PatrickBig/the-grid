@@ -30,8 +30,8 @@ namespace TheGrid.Services
 
             logger.LogTrace("Located {runnerCount} runners to make available to the system.", runners.Count());
 
-            // Disable all runners. Ideally this would be done using .ExecuteUpdateAsync however some DB providers don't yet support it.
-            foreach (var connector in db.Connectors)
+            // Disable all runners. Ideally this would be done using .ExecuteUpdateAsync however some DB providers do not yet support it.
+            foreach (var connector in await db.Connectors.ToListAsync())
             {
                 connector.Disabled = true;
             }
@@ -65,8 +65,7 @@ namespace TheGrid.Services
             else
             {
                 var queryRunnerTypes = assembly.GetTypes()
-                    .Where(t => t.IsClass && !t.IsAbstract && t.GetInterfaces()
-                    .Any(i => i == typeof(IConnector)));
+                    .Where(t => t.IsClass && !t.IsAbstract && Array.Exists(t.GetInterfaces(), i => i == typeof(IConnector)));
 
                 foreach (var type in queryRunnerTypes)
                 {
@@ -110,8 +109,8 @@ namespace TheGrid.Services
 
                 var runnerInterfaces = runner.GetInterfaces();
 
-                details.SupportsConnectionTest = runnerInterfaces.Any(i => i == typeof(IConnectionTest));
-                details.SupportsSchemaDiscovery = runnerInterfaces.Any(i => i == typeof(ISchemaDiscovery));
+                details.SupportsConnectionTest = Array.Exists(runnerInterfaces, i => i == typeof(IConnectionTest));
+                details.SupportsSchemaDiscovery = Array.Exists(runnerInterfaces, i => i == typeof(ISchemaDiscovery));
 
                 yield return details;
             }

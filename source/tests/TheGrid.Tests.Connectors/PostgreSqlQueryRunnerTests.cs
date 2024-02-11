@@ -191,7 +191,7 @@ namespace TheGrid.Connectors.Integration.Tests
         public async Task TestConnection_Fails_Test()
         {
             // Arrange
-            var connectionInformation = GetConnectionConfiguration("badhost");
+            var connectionInformation = GetConnectionConfiguration("bad host");
             var runner = new PostgreSqlConnector(connectionInformation);
 
             // Act & assert
