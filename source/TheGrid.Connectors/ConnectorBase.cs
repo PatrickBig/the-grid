@@ -14,18 +14,18 @@ namespace TheGrid.Connectors
         /// <summary>
         /// Initializes a new instance of the <see cref="ConnectorBase"/> class.
         /// </summary>
-        /// <param name="runnerParameters">Parameters used by the connector to execute the query.</param>
-        protected ConnectorBase(Dictionary<string, string> runnerParameters)
+        /// <param name="connectorParameters">Parameters used by the connector to execute the query.</param>
+        protected ConnectorBase(Dictionary<string, string> connectorParameters)
         {
-            RunnerParameters = runnerParameters;
+            ConnectorParameters = connectorParameters;
 
-            ValidateParameters(runnerParameters);
+            ValidateParameters(connectorParameters);
         }
 
         /// <summary>
         /// Parameters used by the connector to execute queries. Typically contains connection string information.
         /// </summary>
-        protected Dictionary<string, string> RunnerParameters { get; set; }
+        protected Dictionary<string, string> ConnectorParameters { get; set; }
 
         /// <inheritdoc/>
         public abstract Task<QueryResult> GetDataAsync(string query, Dictionary<string, object?>? queryParameters, CancellationToken cancellationToken = default);
@@ -33,16 +33,16 @@ namespace TheGrid.Connectors
         /// <summary>
         /// Performs basic validation on connection parameters and throws an exception if needed.
         /// </summary>
-        /// <param name="runnerParameters">Parameters used to connect to a connection for the runner.</param>
+        /// <param name="connectorParameters">Parameters used to connect to a connection for the connector.</param>
         /// <exception cref="ConnectorParameterException">Thrown if query parameters were invalid.</exception>
-        protected void ValidateParameters(Dictionary<string, string> runnerParameters)
+        protected void ValidateParameters(Dictionary<string, string> connectorParameters)
         {
             var missingParameters = new List<string>();
-            var requiredParameters = this.GetRunnerParameterDefinitions().Where(p => p.Required);
+            var requiredParameters = this.GetConnectorParameterDefinitions().Where(p => p.Required);
 
             foreach (var parameter in requiredParameters.Select(p => p.Name))
             {
-                if (!runnerParameters.TryGetValue(parameter, out var parameterValue) || string.IsNullOrEmpty(parameterValue))
+                if (!connectorParameters.TryGetValue(parameter, out var parameterValue) || string.IsNullOrEmpty(parameterValue))
                 {
                     missingParameters.Add(parameter);
                 }

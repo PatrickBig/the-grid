@@ -30,9 +30,9 @@ namespace TheGrid.Shared.Models
         public string OrganizationId { get; set; } = string.Empty;
 
         /// <summary>
-        /// ID of the connector used to execute queries. This must be a valid runner ID.
+        /// ID of the connector used to execute queries. This must be a valid connector ID.
         /// </summary>
-        /// <example>TheGrid.QueryRunners.PostgreSqlQueryRunner</example>
+        /// <example>TheGrid.QueryRunners.PostgreSqlConnector</example>
         [Required]
         [StringLength(250)]
         public string ConnectorId { get; set; } = string.Empty;

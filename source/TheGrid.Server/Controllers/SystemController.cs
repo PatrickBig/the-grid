@@ -18,17 +18,17 @@ namespace TheGrid.Server.Controllers
     [ApiController]
     public class SystemController : ControllerBase
     {
-        private readonly QueryRunnerDiscoveryService _queryRunnerDiscoveryService;
+        private readonly ConnectorDiscoveryService _connectorDiscoveryService;
         private readonly IDatabaseStatus _databaseStatus;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SystemController"/> class.
         /// </summary>
-        /// <param name="queryRunnerDiscoveryService">Service to discover connectors.</param>
+        /// <param name="connectorDiscoveryService">Service to discover connectors.</param>
         /// <param name="databaseStatus">Database status provider.</param>
-        public SystemController(QueryRunnerDiscoveryService queryRunnerDiscoveryService, IDatabaseStatus databaseStatus)
+        public SystemController(ConnectorDiscoveryService connectorDiscoveryService, IDatabaseStatus databaseStatus)
         {
-            _queryRunnerDiscoveryService = queryRunnerDiscoveryService;
+            _connectorDiscoveryService = connectorDiscoveryService;
             _databaseStatus = databaseStatus;
         }
 
@@ -37,11 +37,11 @@ namespace TheGrid.Server.Controllers
         /// </summary>
         /// <returns>A result code indicating the outcome of the operation.</returns>
         [HttpGet]
-        [Route("DiscoverQueryRunners")]
+        [Route("DiscoverConnectors")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult> DiscoverQueryRunners()
+        public async Task<ActionResult> DiscoverConnectors()
         {
-            await _queryRunnerDiscoveryService.RefreshQueryRunnersAsync();
+            await _connectorDiscoveryService.RefreshConnectorsAsync();
 
             return Ok();
         }

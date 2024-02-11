@@ -1,4 +1,4 @@
-﻿// <copyright file="QueryRunnersController.cs" company="BiglerNet">
+﻿// <copyright file="ConnectorsController.cs" company="BiglerNet">
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
@@ -17,15 +17,15 @@ namespace TheGrid.Server.Controllers
     [ApiController]
     [Produces(MediaTypeNames.Application.Json)]
     [ApiVersion("1.0")]
-    public class QueryRunnersController : ControllerBase
+    public class ConnectorsController : ControllerBase
     {
         private readonly TheGridDbContext _db;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="QueryRunnersController"/> class.
+        /// Initializes a new instance of the <see cref="ConnectorsController"/> class.
         /// </summary>
         /// <param name="db">Database context.</param>
-        public QueryRunnersController(TheGridDbContext db)
+        public ConnectorsController(TheGridDbContext db)
         {
             _db = db;
         }
@@ -38,8 +38,8 @@ namespace TheGrid.Server.Controllers
         [HttpGet]
         public async Task<ActionResult> Get(CancellationToken cancellationToken = default)
         {
-            var runners = await _db.Connectors.ToListAsync(cancellationToken);
-            return Ok(runners);
+            var connectors = await _db.Connectors.ToListAsync(cancellationToken);
+            return Ok(connectors);
         }
     }
 }

@@ -10,7 +10,7 @@ namespace TheGrid.Connectors
     public interface IConnector
     {
         /// <summary>
-        /// Runs a query using the runner properties.
+        /// Runs a query using the connector properties.
         /// </summary>
         /// <param name="query">Query to be executed.</param>
         /// <param name="queryParameters">Parameters to pass to the query.</param>

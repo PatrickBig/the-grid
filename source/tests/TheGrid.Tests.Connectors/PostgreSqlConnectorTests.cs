@@ -1,4 +1,4 @@
-// <copyright file="PostgreSqlQueryRunnerTests.cs" company="BiglerNet">
+// <copyright file="PostgreSqlConnectorTests.cs" company="BiglerNet">
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
@@ -10,7 +10,7 @@ namespace TheGrid.Connectors.Integration.Tests
     /// <summary>
     /// Tests for the <see cref="PostgreSqlConnector"/>.
     /// </summary>
-    public class PostgreSqlQueryRunnerTests : IDisposable
+    public class PostgreSqlConnectorTests : IDisposable
     {
         private static readonly string _connectionString = "Host=localhost;Username=postgres;Password=test;Database=test";
         private readonly ITestOutputHelper _output;
@@ -19,10 +19,10 @@ namespace TheGrid.Connectors.Integration.Tests
         private readonly string _testTableName;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PostgreSqlQueryRunnerTests"/> class.
+        /// Initializes a new instance of the <see cref="PostgreSqlConnectorTests"/> class.
         /// </summary>
         /// <param name="output">Test output helper.</param>
-        public PostgreSqlQueryRunnerTests(ITestOutputHelper output)
+        public PostgreSqlConnectorTests(ITestOutputHelper output)
         {
             _output = output;
 
@@ -56,10 +56,10 @@ namespace TheGrid.Connectors.Integration.Tests
         public async Task RunQueryAsync_Has_Columns_Test()
         {
             // Arrange
-            var runner = new PostgreSqlConnector(GetConnectionConfiguration());
+            var connector = new PostgreSqlConnector(GetConnectionConfiguration());
 
             // Act
-            var results = await runner.GetDataAsync("SELECT * FROM " + _testTableName, null);
+            var results = await connector.GetDataAsync("SELECT * FROM " + _testTableName, null);
 
             // Assert
             Assert.NotNull(results);
@@ -81,10 +81,10 @@ namespace TheGrid.Connectors.Integration.Tests
         public async Task RunQueryAsync_Has_Rows_Test()
         {
             // Arrange
-            var runner = new PostgreSqlConnector(GetConnectionConfiguration());
+            var connector = new PostgreSqlConnector(GetConnectionConfiguration());
 
             // Act
-            var results = await runner.GetDataAsync("SELECT * FROM " + _testTableName, null);
+            var results = await connector.GetDataAsync("SELECT * FROM " + _testTableName, null);
 
             // Assert
             Assert.NotNull(results);
@@ -106,7 +106,7 @@ namespace TheGrid.Connectors.Integration.Tests
         public async Task RunQueryAsync_Params_Test()
         {
             // Arrange
-            var runner = new PostgreSqlConnector(GetConnectionConfiguration());
+            var connector = new PostgreSqlConnector(GetConnectionConfiguration());
             var parameters = new Dictionary<string, object?>
             {
                 {
@@ -116,7 +116,7 @@ namespace TheGrid.Connectors.Integration.Tests
             };
 
             // Act
-            var results = await runner.GetDataAsync("SELECT * FROM " + _testTableName + " where bool_field = @param", parameters);
+            var results = await connector.GetDataAsync("SELECT * FROM " + _testTableName + " where bool_field = @param", parameters);
 
             // Assert
             Assert.NotNull(results);
@@ -138,9 +138,9 @@ namespace TheGrid.Connectors.Integration.Tests
         public async Task DiscoverSchema_Test()
         {
             // Arrange
-            var runner = new PostgreSqlConnector(GetConnectionConfiguration());
+            var connector = new PostgreSqlConnector(GetConnectionConfiguration());
 
-            var schema = await runner.GetSchemaAsync();
+            var schema = await connector.GetSchemaAsync();
 
             _output.WriteLine($"Discovered schema: {schema.DatabaseName}");
 
@@ -175,10 +175,10 @@ namespace TheGrid.Connectors.Integration.Tests
         public async Task TestConnection_Test()
         {
             // Arrange
-            var runner = new PostgreSqlConnector(GetConnectionConfiguration());
+            var connector = new PostgreSqlConnector(GetConnectionConfiguration());
 
             // Act
-            var result = await runner.TestConnectionAsync();
+            var result = await connector.TestConnectionAsync();
 
             Assert.True(result);
         }
@@ -192,10 +192,10 @@ namespace TheGrid.Connectors.Integration.Tests
         {
             // Arrange
             var connectionInformation = GetConnectionConfiguration("bad host");
-            var runner = new PostgreSqlConnector(connectionInformation);
+            var connector = new PostgreSqlConnector(connectionInformation);
 
             // Act & assert
-            await Assert.ThrowsAnyAsync<Exception>(async () => await runner.TestConnectionAsync());
+            await Assert.ThrowsAnyAsync<Exception>(async () => await connector.TestConnectionAsync());
         }
 
         /// <summary>

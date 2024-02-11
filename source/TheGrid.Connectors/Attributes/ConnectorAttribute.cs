@@ -30,7 +30,7 @@ namespace TheGrid.Connectors.Attributes
         public string? EditorLanguage { get; set; }
 
         /// <summary>
-        /// Icon used in the user interface for the runner.
+        /// Icon used in the user interface for the connector.
         /// </summary>
         public string? IconFileName { get; set; } = "undefined.png";
     }
