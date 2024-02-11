@@ -15,6 +15,15 @@ namespace TheGrid.Shared.Unit.Tests
     {
         private readonly ITestOutputHelper _output;
 
+        private readonly JsonSerializerOptions _serializerOptions = new()
+        {
+            WriteIndented = true,
+            Converters =
+            {
+                new QueryDataConverter(),
+            },
+        };
+
         /// <summary>
         /// Initializes a new instance of the <see cref="QueryDataConverterTests"/> class.
         /// </summary>
@@ -31,19 +40,10 @@ namespace TheGrid.Shared.Unit.Tests
         public void TestQueryDataDeserializer_Test()
         {
             // Arrange
-            var serializerOptions = new JsonSerializerOptions
-            {
-                WriteIndented = true,
-                Converters =
-                {
-                    new QueryDataConverter(),
-                },
-            };
-
-            var jsonData = File.ReadAllText("TestData\\test-query-data-success-data.json");
+            var jsonData = File.ReadAllText(Path.Join("TestData", "test-query-data-success-data.json"));
 
             // Act
-            var obj = JsonSerializer.Deserialize<TestQueryData>(jsonData, serializerOptions);
+            var obj = JsonSerializer.Deserialize<TestQueryData>(jsonData, _serializerOptions);
 
             // Assert
             Assert.NotNull(obj);

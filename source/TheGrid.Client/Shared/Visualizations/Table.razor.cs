@@ -40,7 +40,7 @@ namespace TheGrid.Client.Shared.Visualizations
         /// </summary>
         [Parameter]
         [EditorRequired]
-        public VisualizationResponse VisualizationOptions { get; set; } = null!;
+        public VisualizationResponse VisualizationOptions { get; set; } = default!;
 
         [Inject]
         private ILogger<Table> Logger { get; set; } = default!;

@@ -46,7 +46,7 @@ namespace TheGrid.Client.Shared.Queries
         public bool AllowQueryExecution { get; set; }
 
         [Inject]
-        private IJSRuntime JSRuntime { get; set; } = null!;
+        private IJSRuntime JSRuntime { get; set; } = default!;
 
         /// <inheritdoc/>
         protected override async Task OnInitializedAsync()
@@ -63,6 +63,15 @@ namespace TheGrid.Client.Shared.Queries
             }
 
             await base.OnInitializedAsync();
+        }
+
+        private static StandaloneEditorConstructionOptions EditorConstructionOptions(StandaloneCodeEditor editor)
+        {
+            return new StandaloneEditorConstructionOptions
+            {
+                AutomaticLayout = true,
+                Language = "unknown",
+            };
         }
 
         /// <summary>
@@ -127,15 +136,6 @@ namespace TheGrid.Client.Shared.Queries
                 var model = await _editor.GetModel();
                 await Global.SetModelLanguage(JSRuntime, model, connection.ConnectorEditorLanguage ?? "unknown");
             }
-        }
-
-        private StandaloneEditorConstructionOptions EditorConstructionOptions(StandaloneCodeEditor editor)
-        {
-            return new StandaloneEditorConstructionOptions
-            {
-                AutomaticLayout = true,
-                Language = "unknown",
-            };
         }
     }
 }

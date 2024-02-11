@@ -16,22 +16,10 @@ namespace TheGrid.Services
     /// <summary>
     /// Used to get information about connectors.
     /// </summary>
-    public class QueryRunnerDiscoveryService
+    /// <param name="db">Database context.</param>
+    /// <param name="logger">Logger instance.</param>
+    public class QueryRunnerDiscoveryService(TheGridDbContext db, ILogger<QueryRunnerDiscoveryService> logger)
     {
-        private readonly TheGridDbContext _db;
-        private readonly ILogger<QueryRunnerDiscoveryService> _logger;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="QueryRunnerDiscoveryService"/> class.
-        /// </summary>
-        /// <param name="db">Database context.</param>
-        /// <param name="logger">Logger instance.</param>
-        public QueryRunnerDiscoveryService(TheGridDbContext db, ILogger<QueryRunnerDiscoveryService> logger)
-        {
-            _db = db;
-            _logger = logger;
-        }
-
         /// <summary>
         /// Discovers all connectors and updates them in the database.
         /// </summary>
@@ -40,26 +28,53 @@ namespace TheGrid.Services
         {
             var runners = DiscoverQueryRunners();
 
-            // Disable all runners
-            await _db.Connectors.ExecuteUpdateAsync(s => s.SetProperty(r => r.Disabled, true));
+            logger.LogTrace("Located {runnerCount} runners to make available to the system.", runners.Count());
+
+            // Disable all runners. Ideally this would be done using .ExecuteUpdateAsync however some DB providers do not yet support it.
+            foreach (var connector in await db.Connectors.ToListAsync())
+            {
+                connector.Disabled = true;
+            }
+
+            await db.SaveChangesAsync();
 
             foreach (var runner in runners)
             {
-                if (await _db.Connectors.Where(r => r.Id == runner.Id).AnyAsync())
+                if (await db.Connectors.Where(r => r.Id == runner.Id).AnyAsync())
                 {
-                    _db.Connectors.Update(runner);
+                    db.Connectors.Update(runner);
                 }
                 else
                 {
                     // Insert
-                    await _db.Connectors.AddAsync(runner);
+                    await db.Connectors.AddAsync(runner);
                 }
             }
 
-            await _db.SaveChangesAsync();
+            await db.SaveChangesAsync();
         }
 
-        private static IEnumerable<Connector> DiscoverQueryRunners()
+        private static IEnumerable<Type> GetQueryRunnerTypes()
+        {
+            var assembly = Assembly.GetAssembly(typeof(IConnector));
+
+            if (assembly == null)
+            {
+                throw new InvalidOperationException("Unable to locate assembly.");
+            }
+            else
+            {
+                var queryRunnerTypes = assembly.GetTypes()
+                    .Where(t => t.IsClass && !t.IsAbstract && Array.Exists(t.GetInterfaces(), i => i == typeof(IConnector)));
+
+                foreach (var type in queryRunnerTypes)
+                {
+                    yield return type;
+                }
+            }
+        }
+
+        private IEnumerable<Connector> DiscoverQueryRunners()
         {
             var queryRunners = GetQueryRunnerTypes();
 
@@ -83,40 +98,21 @@ namespace TheGrid.Services
                     details.RunnerIcon = queryRunnerInformation.IconFileName ?? "unknown.png";
                 }
 
+                logger.LogInformation("Located new runner: {runnerName}", details.Name);
+
                 var parameters = runner.GetCustomAttributes<ConnectorParameterAttribute>(true);
 
-                foreach (ConnectorParameterAttribute attribute in parameters.Cast<ConnectorParameterAttribute>())
+                foreach (ConnectorParameterAttribute attribute in parameters)
                 {
                     details.Parameters.Add(attribute.Adapt<ConnectionProperty>());
                 }
 
                 var runnerInterfaces = runner.GetInterfaces();
 
-                details.SupportsConnectionTest = runnerInterfaces.Any(i => i == typeof(IConnectionTest));
-                details.SupportsSchemaDiscovery = runnerInterfaces.Any(i => i == typeof(ISchemaDiscovery));
+                details.SupportsConnectionTest = Array.Exists(runnerInterfaces, i => i == typeof(IConnectionTest));
+                details.SupportsSchemaDiscovery = Array.Exists(runnerInterfaces, i => i == typeof(ISchemaDiscovery));
 
                 yield return details;
-            }
-        }
-
-        private static IEnumerable<Type> GetQueryRunnerTypes()
-        {
-            var assembly = Assembly.GetAssembly(typeof(IConnector));
-
-            if (assembly == null)
-            {
-                throw new ArgumentNullException(nameof(assembly), "Unable to locate assembly.");
-            }
-            else
-            {
-                var queryRunnerTypes = assembly.GetTypes()
-                    .Where(t => t.IsClass && !t.IsAbstract && t.GetInterfaces()
-                    .Any(i => i == typeof(IConnector)));
-
-                foreach (var type in queryRunnerTypes)
-                {
-                    yield return type;
-                }
             }
         }
     }

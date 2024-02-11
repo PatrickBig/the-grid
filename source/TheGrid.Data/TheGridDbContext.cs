@@ -21,51 +21,53 @@ namespace TheGrid.Data
         /// <summary>
         /// Connections to various data sources.
         /// </summary>
-        public DbSet<Connection> Connections { get; set; }
+        public virtual DbSet<Connection> Connections { get; set; }
 
         /// <summary>
         /// Organizations.
         /// </summary>
-        public DbSet<Organization> Organizations { get; set; }
+        public virtual DbSet<Organization> Organizations { get; set; }
 
         /// <summary>
         /// Queries that can be executed by the context.
         /// </summary>
-        public DbSet<Query> Queries { get; set; }
+        public virtual DbSet<Query> Queries { get; set; }
 
         /// <summary>
         /// Execution history of queries.
         /// </summary>
-        public DbSet<QueryExecution> QueryExecutions { get; set; }
+        public virtual DbSet<QueryExecution> QueryExecutions { get; set; }
 
         /// <summary>
         /// Results from a query execution.
         /// </summary>
-        public DbSet<QueryResultRow> QueryResultRows { get; set; }
+        public virtual DbSet<QueryResultRow> QueryResultRows { get; set; }
 
         /// <summary>
         /// Connectors used to execute queries.
         /// </summary>
-        public DbSet<Connector> Connectors { get; set; }
+        public virtual DbSet<Connector> Connectors { get; set; }
 
         /// <summary>
         /// ColumnOptions discovered from a query execution.
         /// </summary>
-        public DbSet<Models.Column> QueryColumns { get; set; }
+        public virtual DbSet<Models.Column> QueryColumns { get; set; }
 
         /// <summary>
         /// Visualizations for the queries.
         /// </summary>
-        public DbSet<Visualization> Visualizations { get; set; }
+        public virtual DbSet<Visualization> Visualizations { get; set; }
 
         /// <inheritdoc/>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<QueryResultRow>().Property(r => r.Data)
-                .HasColumnType("jsonb");
+            modelBuilder.Entity<QueryResultRow>()
+                .Property(r => r.Data)
+                .HasConversion<JsonColumnConverter<Dictionary<string, object?>>>();
 
-            modelBuilder.Entity<Connector>().Property(r => r.Parameters)
-                .HasColumnType("jsonb");
+            modelBuilder.Entity<Connector>()
+                .Property(r => r.Parameters)
+                .HasConversion<JsonColumnConverter<List<ConnectionProperty>>>();
 
             modelBuilder.Entity<TheGrid.Models.Column>().HasKey(c => new { c.QueryId, c.Name });
 
@@ -74,7 +76,11 @@ namespace TheGrid.Data
 
             modelBuilder.Entity<TableVisualization>()
                 .Property(r => r.Columns)
-                .HasColumnType("jsonb");
+                .HasConversion<JsonColumnConverter<Dictionary<string, TableColumn>>>();
+
+            modelBuilder.Entity<Connection>()
+                .Property(c => c.ConnectionProperties)
+                .HasConversion<JsonColumnConverter<Dictionary<string, string?>>>();
 
             base.OnModelCreating(modelBuilder);
         }

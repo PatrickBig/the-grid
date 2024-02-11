@@ -102,21 +102,7 @@ namespace TheGrid.Connectors
                 }
 
                 // Add attributes
-                if (reader.GetFieldValue<string>(reader.GetOrdinal("is_nullable")).Equals("YES", StringComparison.OrdinalIgnoreCase))
-                {
-                    column.Attributes.Add("Nullable", null);
-                }
-
-                var maxCharacters = reader.GetFieldValue<int?>(reader.GetOrdinal("character_maximum_length"));
-                if (maxCharacters != null)
-                {
-                    column.Attributes.Add("Max Length", maxCharacters.ToString());
-                }
-
-                if (reader.GetFieldValue<string>(reader.GetOrdinal("is_identity")).Equals("YES", StringComparison.OrdinalIgnoreCase))
-                {
-                    column.Attributes.Add("Identity", null);
-                }
+                column.Attributes = GetColumnAttributes(reader);
 
                 currentTable.Fields.Add(column);
             }
@@ -141,7 +127,7 @@ namespace TheGrid.Connectors
             // Run the query
             await using (var command = new NpgsqlCommand(query, connection))
             {
-                if (queryParameters != null && queryParameters.Any())
+                if (queryParameters != null && queryParameters.Count != 0)
                 {
                     foreach (var parameter in queryParameters.Where(p => p.Value != null))
                     {
@@ -186,6 +172,28 @@ namespace TheGrid.Connectors
             await using var command = new NpgsqlCommand("select 1", connection);
 
             return true;
+        }
+
+        private static Dictionary<string, string?> GetColumnAttributes(NpgsqlDataReader reader)
+        {
+            var attributes = new Dictionary<string, string?>();
+            if (reader.GetFieldValue<string>(reader.GetOrdinal("is_nullable")).Equals("YES", StringComparison.OrdinalIgnoreCase))
+            {
+                attributes.Add("Nullable", null);
+            }
+
+            var maxCharacters = reader.GetFieldValue<int?>(reader.GetOrdinal("character_maximum_length"));
+            if (maxCharacters != null)
+            {
+                attributes.Add("Max Length", maxCharacters.ToString());
+            }
+
+            if (reader.GetFieldValue<string>(reader.GetOrdinal("is_identity")).Equals("YES", StringComparison.OrdinalIgnoreCase))
+            {
+                attributes.Add("Identity", null);
+            }
+
+            return attributes;
         }
 
         private static Dictionary<string, QueryResultColumn> GetColumns(NpgsqlDataReader reader)

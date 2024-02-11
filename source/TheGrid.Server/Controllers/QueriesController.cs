@@ -154,7 +154,7 @@ namespace TheGrid.Server.Controllers
                     ResultsRefreshed = x.DateCompleted,
                 };
 
-            if (sort != null && sort.Any())
+            if (sort != null && sort.Length != 0)
             {
                 baseQuery = baseQuery.OrderBy(sort.GetSortStatement());
             }

@@ -1,7 +1,7 @@
 ﻿@page "/Connections"
 @using TheGrid.Shared.Models
 
-<PageTitle>connections</PageTitle>
+<PageTitle>Connections</PageTitle>
 
 <RadzenText TextStyle="TextStyle.DisplayH2">connections</RadzenText>
 
@@ -29,34 +29,4 @@ else
     <div class="rz-m-12">
         <RadzenProgressBar Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
     </div>
-}
-
-@code {
-    private IEnumerable<ConnectionListItem> _items = Enumerable.Empty<ConnectionListItem>();
-    private int _totalItems;
-
-    [CascadingParameter]
-    private UserOrganization UserOrganization { get; set; } = null!;
-
-    [Inject]
-    private HttpClient HttpClient { get; set; } = null!;
-
-    protected override async Task OnInitializedAsync()
-    {
-        var response = await HttpClient.GetAsync("/api/v1/Connections?organization=" + UserOrganization.OrganizationId);
-        if (response.IsSuccessStatusCode && response.Content != null)
-        {
-            var data = await response.Content.ReadFromJsonAsync<PaginatedResult<ConnectionListItem>>();
-
-            if (data != null)
-            {
-                _items = data.Items;
-                _totalItems = data.TotalItems;
-            }
-        }
-        else
-        {
-            
-        }
-    }
 }

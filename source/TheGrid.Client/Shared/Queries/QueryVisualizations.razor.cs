@@ -26,7 +26,7 @@ namespace TheGrid.Client.Shared.Queries
         public int QueryId { get; set; }
 
         [Inject]
-        private DialogService DialogService { get; set; } = null!;
+        private DialogService DialogService { get; set; } = default!;
 
         [Inject]
         private IQueryDesignerHubClient QueryRefreshNotificationClient { get; set; } = default!;

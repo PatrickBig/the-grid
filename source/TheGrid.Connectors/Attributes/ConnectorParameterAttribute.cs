@@ -15,7 +15,7 @@ namespace TheGrid.Connectors.Attributes
         /// <summary>
         /// Initializes a new instance of the <see cref="ConnectorParameterAttribute"/> class.
         /// </summary>
-        /// <param name="name">Name used to render the label for the control. May only contain letters, numbers, spaces, underscores, and hypens.</param>
+        /// <param name="name">Name used to render the label for the control. May only contain letters, numbers, spaces, underscores, and hyphens.</param>
         /// <param name="propertyType">Type of the property.</param>
         public ConnectorParameterAttribute(string name, ConnectionPropertyType propertyType)
         {
@@ -24,14 +24,14 @@ namespace TheGrid.Connectors.Attributes
 
             if (!name.All(c => char.IsLetterOrDigit(c) || c == ' ' || c == '_' || c == '-'))
             {
-                throw new ArgumentException("May only contain letters, numbers, spaces, underscores, and hypens.", nameof(name));
+                throw new ArgumentException("May only contain letters, numbers, spaces, underscores, and hyphens.", nameof(name));
             }
         }
 
         /// <summary>
         /// Name used to render the label for the control.
         /// </summary>
-        public string Name { get; } = string.Empty;
+        public string Name { get; }
 
         /// <summary>
         /// Used to identity the order the property should be rendered in.

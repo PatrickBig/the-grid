@@ -62,9 +62,9 @@ namespace TheGrid.Connectors.Integration.Tests
             var results = await runner.GetDataAsync("SELECT * FROM " + _testTableName, null);
 
             // Assert
-            Assert.True(results != null);
-            Assert.True(results.Columns != null);
-            Assert.True(results.Columns.Any());
+            Assert.NotNull(results);
+            Assert.NotNull(results.Columns);
+            Assert.NotEmpty(results.Columns);
 
             _output.WriteLine("Found the following columns:");
             foreach (var column in results.Columns)
@@ -87,9 +87,9 @@ namespace TheGrid.Connectors.Integration.Tests
             var results = await runner.GetDataAsync("SELECT * FROM " + _testTableName, null);
 
             // Assert
-            Assert.True(results != null);
-            Assert.True(results.Rows != null);
-            Assert.True(results.Rows.Any());
+            Assert.NotNull(results);
+            Assert.NotNull(results.Rows);
+            Assert.NotEmpty(results.Rows);
 
             _output.WriteLine("Found the following rows:");
             foreach (var row in results.Rows)
@@ -119,9 +119,9 @@ namespace TheGrid.Connectors.Integration.Tests
             var results = await runner.GetDataAsync("SELECT * FROM " + _testTableName + " where bool_field = @param", parameters);
 
             // Assert
-            Assert.True(results != null);
-            Assert.True(results.Rows != null);
-            Assert.True(results.Rows.Any());
+            Assert.NotNull(results);
+            Assert.NotNull(results.Rows);
+            Assert.NotEmpty(results.Rows);
 
             _output.WriteLine("Found the following rows:");
             foreach (var row in results.Rows)
@@ -191,7 +191,7 @@ namespace TheGrid.Connectors.Integration.Tests
         public async Task TestConnection_Fails_Test()
         {
             // Arrange
-            var connectionInformation = GetConnectionConfiguration("badhost");
+            var connectionInformation = GetConnectionConfiguration("bad host");
             var runner = new PostgreSqlConnector(connectionInformation);
 
             // Act & assert

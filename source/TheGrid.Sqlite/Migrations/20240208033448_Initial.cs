@@ -1,14 +1,12 @@
-﻿// <copyright file="20231001160010_Initial.cs" company="BiglerNet">
+﻿// <copyright file="20240208033448_Initial.cs" company="BiglerNet">
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
 using Microsoft.EntityFrameworkCore.Migrations;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using TheGrid.Shared.Models;
 
 #nullable disable
 
-namespace TheGrid.Postgres.Migrations
+namespace TheGrid.Sqlite.Migrations
 {
     /// <inheritdoc />
     public partial class Initial : Migration
@@ -16,21 +14,18 @@ namespace TheGrid.Postgres.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AlterDatabase()
-                .Annotation("Npgsql:PostgresExtension:hstore", ",,");
-
             migrationBuilder.CreateTable(
                 name: "Connectors",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "text", nullable: false),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    Parameters = table.Column<List<ConnectionProperty>>(type: "jsonb", nullable: false),
-                    SupportsConnectionTest = table.Column<bool>(type: "boolean", nullable: false),
-                    SupportsSchemaDiscovery = table.Column<bool>(type: "boolean", nullable: false),
-                    Disabled = table.Column<bool>(type: "boolean", nullable: false),
-                    EditorLanguage = table.Column<string>(type: "text", nullable: true),
-                    RunnerIcon = table.Column<string>(type: "text", nullable: false),
+                    Id = table.Column<string>(type: "TEXT", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    Parameters = table.Column<string>(type: "TEXT", nullable: false),
+                    SupportsConnectionTest = table.Column<bool>(type: "INTEGER", nullable: false),
+                    SupportsSchemaDiscovery = table.Column<bool>(type: "INTEGER", nullable: false),
+                    Disabled = table.Column<bool>(type: "INTEGER", nullable: false),
+                    EditorLanguage = table.Column<string>(type: "TEXT", nullable: true),
+                    RunnerIcon = table.Column<string>(type: "TEXT", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -41,9 +36,9 @@ namespace TheGrid.Postgres.Migrations
                 name: "Organizations",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "text", nullable: false),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    DateCreated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Id = table.Column<string>(type: "TEXT", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    DateCreated = table.Column<DateTime>(type: "TEXT", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -54,12 +49,12 @@ namespace TheGrid.Postgres.Migrations
                 name: "Connections",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    OrganizationId = table.Column<string>(type: "text", nullable: false),
-                    ConnectorId = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
-                    ConnectionProperties = table.Column<Dictionary<string, string>>(type: "hstore", nullable: false),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
+                    OrganizationId = table.Column<string>(type: "TEXT", nullable: false),
+                    ConnectorId = table.Column<string>(type: "TEXT", maxLength: 250, nullable: false),
+                    ConnectionProperties = table.Column<string>(type: "TEXT", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -82,13 +77,13 @@ namespace TheGrid.Postgres.Migrations
                 name: "Queries",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    ConnectionId = table.Column<int>(type: "integer", nullable: false),
-                    Name = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    Description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
-                    Command = table.Column<string>(type: "text", nullable: false),
-                    Tags = table.Column<List<string>>(type: "text[]", nullable: false),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ConnectionId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
+                    Description = table.Column<string>(type: "TEXT", maxLength: 500, nullable: true),
+                    Command = table.Column<string>(type: "TEXT", nullable: false),
+                    Tags = table.Column<string>(type: "TEXT", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -105,9 +100,9 @@ namespace TheGrid.Postgres.Migrations
                 name: "QueryColumns",
                 columns: table => new
                 {
-                    QueryId = table.Column<int>(type: "integer", nullable: false),
-                    Name = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    Type = table.Column<int>(type: "integer", nullable: false),
+                    QueryId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
+                    Type = table.Column<int>(type: "INTEGER", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -124,16 +119,16 @@ namespace TheGrid.Postgres.Migrations
                 name: "QueryExecutions",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    JobId = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
-                    QueryId = table.Column<int>(type: "integer", nullable: false),
-                    Status = table.Column<int>(type: "integer", nullable: false),
-                    ExpirationDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    DateQueued = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    DateCompleted = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    StandardOutput = table.Column<string[]>(type: "text[]", nullable: false),
-                    ErrorOutput = table.Column<string>(type: "text", nullable: true),
+                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    JobId = table.Column<string>(type: "TEXT", maxLength: 200, nullable: true),
+                    QueryId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Status = table.Column<int>(type: "INTEGER", nullable: false),
+                    ExpirationDate = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    DateQueued = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    DateCompleted = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    StandardOutput = table.Column<string>(type: "TEXT", nullable: false),
+                    ErrorOutput = table.Column<string>(type: "TEXT", nullable: true),
                 },
                 constraints: table =>
                 {
@@ -150,13 +145,13 @@ namespace TheGrid.Postgres.Migrations
                 name: "Visualizations",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    QueryId = table.Column<int>(type: "integer", nullable: false),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    Discriminator = table.Column<string>(type: "text", nullable: false),
-                    Columns = table.Column<Dictionary<string, Models.Visualizations.TableColumn>>(type: "jsonb", nullable: true),
-                    PageSize = table.Column<int>(type: "integer", nullable: true),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    QueryId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    Discriminator = table.Column<string>(type: "TEXT", maxLength: 21, nullable: false),
+                    Columns = table.Column<string>(type: "TEXT", nullable: true),
+                    PageSize = table.Column<int>(type: "INTEGER", nullable: true),
                 },
                 constraints: table =>
                 {
@@ -173,10 +168,10 @@ namespace TheGrid.Postgres.Migrations
                 name: "QueryResultRows",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    QueryExecutionId = table.Column<long>(type: "bigint", nullable: false),
-                    Data = table.Column<Dictionary<string, object>>(type: "jsonb", nullable: false),
+                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    QueryExecutionId = table.Column<long>(type: "INTEGER", nullable: false),
+                    Data = table.Column<string>(type: "TEXT", nullable: false),
                 },
                 constraints: table =>
                 {
