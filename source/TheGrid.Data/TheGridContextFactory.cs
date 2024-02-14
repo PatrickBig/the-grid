@@ -18,7 +18,7 @@ namespace TheGrid.Data
         /// <inheritdoc/>
         public TheGridDbContext CreateDbContext(string[] args)
         {
-            var parentDirectory = Directory.GetParent(Directory.GetCurrentDirectory())?.FullName ?? throw new NullReferenceException("Unable to determine parent directory");
+            var parentDirectory = Directory.GetParent(Directory.GetCurrentDirectory())?.FullName ?? throw new InvalidOperationException("Unable to determine parent directory");
             var apiProjectProvider = new PhysicalFileProvider(Path.Combine(parentDirectory, "TheGrid.Server"));
 
             var configuration = new ConfigurationBuilder()
