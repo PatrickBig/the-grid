@@ -2,7 +2,6 @@
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
-using Microsoft.AspNetCore.Components;
 using Radzen;
 
 namespace TheGrid.Client.Shared
@@ -51,16 +50,25 @@ namespace TheGrid.Client.Shared
         /// <summary>
         /// Disposes of the cancellation token.
         /// </summary>
-        public virtual void Dispose()
+        public void Dispose()
         {
-            if (_cancellationTokenSource != null)
+            Dispose(true);
+
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Disposes of the cancellation token.
+        /// </summary>
+        /// <param name="disposing">Set to true to perform cleanup.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing && _cancellationTokenSource != null)
             {
                 _cancellationTokenSource.Cancel();
                 _cancellationTokenSource.Dispose();
                 _cancellationTokenSource = null;
             }
-
-            GC.SuppressFinalize(this);
         }
     }
 }
