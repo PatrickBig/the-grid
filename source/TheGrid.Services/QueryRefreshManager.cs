@@ -23,6 +23,7 @@ namespace TheGrid.Services
         /// </summary>
         /// <param name="db">Database context.</param>
         /// <param name="logger">Logger instance.</param>
+        /// <param name="backgroundJobClient">Background job client.</param>
         public QueryRefreshManager(TheGridDbContext db, ILogger<QueryRefreshManager> logger, IBackgroundJobClient backgroundJobClient)
         {
             _db = db;

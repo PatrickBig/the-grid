@@ -43,8 +43,12 @@ namespace TheGrid.Tests.Services
         public async Task QueueQueryRefreshAsync_Test()
         {
             // Arrange
+            var expectedJobId = Guid.NewGuid().ToString();
+
             var backgroundJobClient = Substitute.For<IBackgroundJobClient>();
-            backgroundJobClient.Enqueue<IQueryExecutor>().Returns(Guid.NewGuid().ToString());
+
+            backgroundJobClient.Enqueue<IQueryExecutor>(e => e.RefreshQueryResultsAsync(default, default)).ReturnsForAnyArgs(expectedJobId);
+
             var queryRefreshManager = new QueryRefreshManager(_db, _logger, backgroundJobClient);
 
             // Add a query
@@ -61,7 +65,8 @@ namespace TheGrid.Tests.Services
             var response = await queryRefreshManager.QueueQueryRefreshAsync(query.Id, default);
 
             // Assert
-            _logger.LogInformation("Yeah: " + response.QueryRefreshJobId);
+            Assert.Equal(expectedJobId, response.BackgroundProcessingJobId);
+            Assert.True(response.QueryRefreshJobId > 0);
         }
     }
 }
