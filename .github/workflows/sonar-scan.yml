@@ -90,6 +90,6 @@ jobs:
       - name: Create code coverage report
         run: |
           dotnet tool update -g dotnet-reportgenerator-globaltool
-          reportgenerator -reports:test/coverage.xml -targetdir:CodeCoverage -reporttypes:'MarkdownSummaryGithub,Cobertura'
+          reportgenerator -reports:test/coverage.xml -targetdir:CodeCoverage -reporttypes:'MarkdownSummaryGithub'
       - name: Write to Job Summary
         run: cat CodeCoverage/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
