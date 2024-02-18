@@ -12,4 +12,8 @@
     <ItemGroup>
         <AdditionalFiles Include="$(MSBuildThisFileDirectory)stylecop.json" Link="%(Filename)%(Extension)" />
     </ItemGroup>
+	
+	<PropertyGroup>
+		<RunSettingsFilePath>$(MSBuildThisFileDirectory)\CodeCoverage.runsettings</RunSettingsFilePath>
+	</PropertyGroup>
 </Project>
