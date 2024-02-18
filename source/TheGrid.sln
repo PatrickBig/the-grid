@@ -20,6 +20,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{50B36448-6A56-4689-83ED-34194592DA39}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		CodeCoverage.runsettings = CodeCoverage.runsettings
 		Directory.build.props = Directory.build.props
 		Dockerfile = Dockerfile
 		..\README.md = ..\README.md
@@ -40,7 +41,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheGrid.Tests.Services", "t
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheGrid.Sqlite", "TheGrid.Sqlite\TheGrid.Sqlite.csproj", "{6D451C39-FE6D-45AC-B492-62B4B0B6CC21}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TheGrid.TestHelpers", "tests\TheGrid.TestHelpers\TheGrid.TestHelpers.csproj", "{FD4623D8-C262-4612-8EE7-D07F2C24B78C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheGrid.TestHelpers", "tests\TheGrid.TestHelpers\TheGrid.TestHelpers.csproj", "{FD4623D8-C262-4612-8EE7-D07F2C24B78C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

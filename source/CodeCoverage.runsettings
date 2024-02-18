@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ModulePaths>
+    <Exclude>
+        <ModulePath>TheGrid.Tests.*.dll</ModulePath>
+        <ModulePath>TheGrid.TestHelpers.dll</ModulePath>
+        <ModulePath>Hangfire.Core.dll</ModulePath>
+        <ModulePath>Meziantou.Extensions.Logging.Xunit.dll</ModulePath>
+        <!-- Add more ModulePath nodes here. -->
+    </Exclude>
+</ModulePaths>
