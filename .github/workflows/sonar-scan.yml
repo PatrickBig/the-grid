@@ -69,7 +69,7 @@ jobs:
           dotnet build ./source/TheGrid.sln
       - name: Run tests
         run: |
-          dotnet-coverage collect "dotnet test ./source/TheGrid.sln --logger trx --results-directory ./test/testresults"  -f xml -o ./test/coverage.xml
+          dotnet-coverage collect "dotnet test ./source/TheGrid.sln --logger trx --results-directory ./test/testresults"  -f xml  -o ./test/coverage.xml
       - name: Publish test results
         uses: EnricoMi/publish-unit-test-result-action@v2
         with:
@@ -83,6 +83,6 @@ jobs:
           ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
       - name: Create code coverage report
         run: |
-          reportgenerator -reports:test/coverage.xml -targetdir:CodeCoverage -reporttypes:'MarkdownSummaryGithub'
+          reportgenerator -reports:test/coverage.xml -targetdir:CodeCoverage -reporttypes:'MarkdownSummaryGithub' -assemblyfilters:"-Hangfire.Core*;-Meziantou.Extensions.Logging.Xunit.dll;-coverlet*"
       - name: Write to Job Summary
         run: cat CodeCoverage/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
