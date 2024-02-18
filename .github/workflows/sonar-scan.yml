@@ -70,6 +70,12 @@ jobs:
       - name: Run tests
         run: |
           dotnet-coverage collect "dotnet test ./source/TheGrid.sln --logger trx --results-directory ./test/testresults"  -f xml -o ./test/coverage.xml
+      - name: Code Coverage Report
+        uses: irongut/CodeCoverageSummary@v1.3.0
+        with:
+          filename: ./**/coverage.xml
+          badge: true
+          format: markdown
       - name: Publish test results
         uses: EnricoMi/publish-unit-test-result-action@v2
         with:
@@ -81,9 +87,3 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
-      - name: Code Coverage Report
-        uses: irongut/CodeCoverageSummary@v1.3.0
-        with:
-          filename: ./**/coverage.xml
-          badge: true
-          format: markdown
