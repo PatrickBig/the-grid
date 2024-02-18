@@ -69,7 +69,7 @@ jobs:
           dotnet build ./source/TheGrid.sln
       - name: Run tests
         run: |
-          dotnet-coverage collect "dotnet test ./source/TheGrid.sln --logger trx --results-directory ./test/testresults"  -f xml -o ./test/coverage.xml
+          dotnet-coverage collect "dotnet test ./source/TheGrid.sln --logger trx --results-directory ./test/testresults"  -f cobertura -o ./test/coverage.xml
       - name: Code Coverage Report
         uses: irongut/CodeCoverageSummary@v1.3.0
         with:
