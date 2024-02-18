@@ -74,6 +74,26 @@ namespace TheGrid.Connectors.Integration.Tests
         }
 
         /// <summary>
+        /// Tests that the result set has column information available.
+        /// </summary>
+        [Fact]
+        public void RunQueryAsync_Missing_Required_Connection_Parameters_Test()
+        {
+            // Arrange
+            var connectionParameters = GetConnectionConfiguration();
+
+            // Remove one of the required values
+            connectionParameters.Remove(CommonConnectionParameters.ConnectionString);
+
+            // Act
+            var exception = Assert.Throws<ConnectorParameterException>(() => new PostgreSqlConnector(connectionParameters));
+
+            // Assert
+            Assert.NotEmpty(exception.Parameters);
+            Assert.Contains(CommonConnectionParameters.ConnectionString, exception.Parameters);
+        }
+
+        /// <summary>
         /// Tests that a query can return rows.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
