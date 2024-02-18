@@ -11,5 +11,14 @@
 
     <ItemGroup>
         <AdditionalFiles Include="$(MSBuildThisFileDirectory)stylecop.json" Link="%(Filename)%(Extension)" />
-  </ItemGroup>
+    </ItemGroup>
+
+    <ModulePaths>
+        <Exclude>
+            <ModulePath>TheGrid.Tests.*.dll</ModulePath>
+            <ModulePath>Hangfire.Core.dll</ModulePath>
+            <ModulePath>Meziantou.Extensions.Logging.Xunit.dll</ModulePath>
+            <!-- Add more ModulePath nodes here. -->
+        </Exclude>
+    </ModulePaths>
 </Project>
