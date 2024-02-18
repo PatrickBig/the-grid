@@ -83,6 +83,6 @@ jobs:
           ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
       - name: Create code coverage report
         run: |
-          reportgenerator -reports:test/coverage.xml -targetdir:CodeCoverage -reporttypes:'MarkdownSummaryGithub' -assemblyfilters:"-Hangfire.Core*;-Meziantou.Extensions.Logging.Xunit.dll;-coverlet*;TheGrid.Tests.*;TheGrid.TestHelpers.dll;"
+          reportgenerator -reports:test/coverage.xml -targetdir:CodeCoverage -reporttypes:'MarkdownSummaryGithub' -assemblyfilters:"-Hangfire.Core*;-Meziantou.Extensions.Logging.Xunit.dll;-coverlet*;-TheGrid.Tests.*;-TheGrid.TestHelpers.dll;"
       - name: Write to Job Summary
         run: cat CodeCoverage/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
