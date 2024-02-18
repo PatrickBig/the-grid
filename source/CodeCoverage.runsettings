@@ -13,6 +13,8 @@
                                 <ModulePath>TheGrid.TestHelpers.dll</ModulePath>
                                 <ModulePath>Hangfire.Core.dll</ModulePath>
                                 <ModulePath>Meziantou.Extensions.Logging.Xunit.dll</ModulePath>
+                                <ModulePath>coverlet.collector.dll</ModulePath>
+                                <ModulePath>coverlet.core.dll</ModulePath>
                             </Exclude>
                         </ModulePaths>
 
