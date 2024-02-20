@@ -4,12 +4,14 @@
 
 using Meziantou.Extensions.Logging.Xunit;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using TheGrid.Data;
+using TheGrid.Models;
 using TheGrid.Services;
 using TheGrid.Services.Hubs;
-using TheGrid.Tests.Shared;
+using TheGrid.Tests.Services.Fixtures;
 using Xunit.Abstractions;
 
 namespace TheGrid.Tests.Services
@@ -17,19 +19,21 @@ namespace TheGrid.Tests.Services
     /// <summary>
     /// Tests for the <see cref="QueryExecutor"/> class.
     /// </summary>
-    public class QueryExecutorTests : IClassFixture<InMemoryDatabaseFixture>
+    public class QueryExecutorTests : IClassFixture<QueryExecutorDatabaseFixture>
     {
+        private readonly QueryExecutorDatabaseFixture _fixture;
         private readonly TheGridDbContext _db;
         private readonly ILogger<QueryExecutor> _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="QueryExecutorTests"/> class.
         /// </summary>
-        /// <param name="inMemoryDatabaseFixture">In memory database provider fixture.</param>
+        /// <param name="queryExecutorDatabaseFixture">In memory database provider fixture.</param>
         /// <param name="testOutputHelper">Test output helper.</param>
-        public QueryExecutorTests(InMemoryDatabaseFixture inMemoryDatabaseFixture, ITestOutputHelper testOutputHelper)
+        public QueryExecutorTests(QueryExecutorDatabaseFixture queryExecutorDatabaseFixture, ITestOutputHelper testOutputHelper)
         {
-            _db = inMemoryDatabaseFixture.Db;
+            _fixture = queryExecutorDatabaseFixture;
+            _db = queryExecutorDatabaseFixture.Db;
             _logger = XUnitLogger.CreateLogger<QueryExecutor>(testOutputHelper);
         }
 
@@ -43,12 +47,24 @@ namespace TheGrid.Tests.Services
             // Arrange
             IHubContext<QueryDesignerHub, IQueryDesignerHub> hubContext = Substitute.For<IHubContext<QueryDesignerHub, IQueryDesignerHub>>();
 
+            var execution = new QueryExecution
+            {
+                JobId = Guid.NewGuid().ToString(),
+                QueryId = _fixture.QueryId,
+            };
+
+            _db.QueryExecutions.Add(execution);
+            await _db.SaveChangesAsync();
+
             // Act
             var executor = new QueryExecutor(_db, _logger, hubContext);
 
-            //await executor.RefreshQueryResultsAsync(
+            await executor.RefreshQueryResultsAsync(execution.Id);
 
             // Assert
+            var results = await _db.QueryResultRows.Where(r => r.QueryExecutionId == execution.Id).ToListAsync();
+
+            Assert.NotEmpty(results);
         }
     }
 }
