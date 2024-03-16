@@ -1,5 +1,9 @@
 version: '3.4'
 
+##################################################################################
+# This compose file is not for production use. It is for use during development.
+##################################################################################
+
 services:
   thegrid.server:
     image: ${DOCKER_REGISTRY-}thegridserver
@@ -13,6 +17,8 @@ services:
     environment:
       POSTGRES_PASSWORD: thegrid123
       POSTGRES_DB: thegrid
+    volumes:
+      - postgresdata:/var/lib/postgresql/data
   adminer:
     image: adminer:latest
     environment:
@@ -21,3 +27,6 @@ services:
       - postgres
     ports:
       - 8080:8080
+
+volumes:
+  postgresdata:
