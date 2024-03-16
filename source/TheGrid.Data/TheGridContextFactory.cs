@@ -52,7 +52,9 @@ namespace TheGrid.Data
             }
             else
             {
-                throw new ArgumentException("Invalid provider name specified.");
+                var validProviderNames = Enum.GetValues<DatabaseProvider>().Select(p => p.ToString());
+
+                throw new ArgumentException("Invalid provider name specified. Only the values " + string.Join(", ", validProviderNames) + " are allowed.");
             }
 
             return new TheGridDbContext(builder.Options);
