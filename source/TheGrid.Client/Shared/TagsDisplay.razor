@@ -9,37 +9,3 @@
         <RadzenBadge BadgeStyle="BadgeStyle.Light" Style="text-transform: none;" Text="..." @onclick="@(() => _showAllTags = true)" />
     }
 </RadzenStack>
-
-@code {
-    private bool _showAllTags;
-
-    [Parameter]
-    [EditorRequired]
-    public IEnumerable<string> Tags { get; set; } = Enumerable.Empty<string>();
-
-    [Parameter]
-    public int? MaxTagsToDisplay { get; set; }
-
-    private IEnumerable<string> TruncatedTags
-    {
-        get
-        {
-            if (MaxTagsToDisplay == null || _showAllTags)
-            {
-                return Tags;
-            }
-            else
-            {
-                return Tags.Take(MaxTagsToDisplay.Value);
-            }
-        }
-    }
-
-    private bool ShowExpand
-    {
-        get
-        {
-            return Tags.Count() > MaxTagsToDisplay && _showAllTags == false;
-        }
-    }
-}
