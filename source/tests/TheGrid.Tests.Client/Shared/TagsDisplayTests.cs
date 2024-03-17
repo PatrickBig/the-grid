@@ -74,6 +74,7 @@ namespace TheGrid.Tests.Client.Shared
             // Assert
             var root = cut.Find("div");
 
+            // There should be the tag limit + the expander element.
             Assert.Equal(tagLimit + 1, root.ChildElementCount);
         }
 

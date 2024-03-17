@@ -67,6 +67,5 @@ namespace TheGrid.Tests.Client.Shared
 
             Assert.Equal(string.Empty, renderedValue);
         }
-
     }
 }
