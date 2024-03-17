@@ -43,7 +43,7 @@ namespace TheGrid.Client.Shared
         {
             get
             {
-                return Tags.Count() > MaxTagsToDisplay && _showAllTags == false;
+                return Tags.Count() > MaxTagsToDisplay && !_showAllTags;
             }
         }
     }
