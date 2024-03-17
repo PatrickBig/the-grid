@@ -5,6 +5,7 @@
 using Hangfire;
 using Mapster;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using TheGrid.Data;
 using TheGrid.Services;
 using TheGrid.Shared.Models;
@@ -20,16 +21,18 @@ namespace TheGrid.Server.Controllers
     {
         private readonly ConnectorDiscoveryService _connectorDiscoveryService;
         private readonly IDatabaseStatus _databaseStatus;
+        private readonly TheGridDbContext _dbContext;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SystemController"/> class.
         /// </summary>
         /// <param name="connectorDiscoveryService">Service to discover connectors.</param>
         /// <param name="databaseStatus">Database status provider.</param>
-        public SystemController(ConnectorDiscoveryService connectorDiscoveryService, IDatabaseStatus databaseStatus)
+        public SystemController(ConnectorDiscoveryService connectorDiscoveryService, IDatabaseStatus databaseStatus, TheGridDbContext dbContext)
         {
             _connectorDiscoveryService = connectorDiscoveryService;
             _databaseStatus = databaseStatus;
+            _dbContext = dbContext;
         }
 
         /// <summary>
@@ -44,6 +47,33 @@ namespace TheGrid.Server.Controllers
             await _connectorDiscoveryService.RefreshConnectorsAsync();
 
             return Ok();
+        }
+
+        /// <summary>
+        /// Applies any pending database migrations.
+        /// </summary>
+        /// <returns>Returns the result of the migration operation.</returns>
+        /// <response code="200">Returns an array of migrations that were applied to the database.</response>
+        /// <response code="204">Returned if no migrations were applied and the schema is currently at the latest version.</response>
+        [HttpGet]
+        [Route("ApplyDatabaseMigrations")]
+        [ProducesResponseType<string[]>(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<ActionResult> ApplyDatabaseMigrations()
+        {
+            var migrations = await _dbContext.Database.GetPendingMigrationsAsync();
+
+            if (migrations != null && migrations.Any())
+            {
+                await _dbContext.Database.MigrateAsync();
+
+                return Ok(migrations);
+            }
+            else
+            {
+                return NoContent();
+            }
+
         }
 
         /// <summary>
