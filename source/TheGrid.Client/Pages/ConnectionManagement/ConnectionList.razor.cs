@@ -11,7 +11,7 @@ namespace TheGrid.Client.Pages.ConnectionManagement
     /// <summary>
     /// Page lists all available connections and controls to manage them.
     /// </summary>
-    public partial class ConnectionList
+    public partial class ConnectionList : ComponentBase
     {
         private IEnumerable<ConnectionListItem> _items = Enumerable.Empty<ConnectionListItem>();
         private int _totalItems;
