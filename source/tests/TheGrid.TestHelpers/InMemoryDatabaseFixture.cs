@@ -10,8 +10,10 @@ namespace TheGrid.Tests.Shared
     /// <summary>
     /// Provides an in memory database context for <see cref="TheGridDbContext"/>.
     /// </summary>
-    public sealed class InMemoryDatabaseFixture : IDisposable
+    public class InMemoryDatabaseFixture : IDisposable
     {
+        private bool _disposedValue;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="InMemoryDatabaseFixture"/> class.
         /// </summary>
@@ -32,8 +34,26 @@ namespace TheGrid.Tests.Shared
         /// <inheritdoc/>
         public void Dispose()
         {
-            Db?.Dispose();
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
             GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Performs cleanup of resources.
+        /// </summary>
+        /// <param name="disposing">Set to true to perform dispose action.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposedValue)
+            {
+                if (disposing)
+                {
+                    Db?.Dispose();
+                }
+
+                _disposedValue = true;
+            }
         }
     }
 }

@@ -28,8 +28,4 @@
     <ProjectReference Include="..\TheGrid.TestHelpers\TheGrid.TestHelpers.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Extensions\" />
-  </ItemGroup>
-
 </Project>
