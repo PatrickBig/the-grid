@@ -1,15 +1,11 @@
 ﻿<RadzenStack Orientation="Orientation.Horizontal" Wrap="FlexWrap.Wrap" JustifyContent="JustifyContent.Start" Gap="0.25rem">
-    @foreach (var tag in Tags)
+    @foreach (var tag in TruncatedTags)
     {
         <RadzenBadge BadgeStyle="BadgeStyle.Info" Style="text-transform: none;" Text="@tag" />
     }
+
+    @if (ShowExpand)
+    {
+        <RadzenBadge BadgeStyle="BadgeStyle.Light" Style="text-transform: none;" Text="..." @onclick="@(() => _showAllTags = true)" />
+    }
 </RadzenStack>
-
-@code {
-    [Parameter]
-    [EditorRequired]
-    public IEnumerable<string> Tags { get; set; } = Enumerable.Empty<string>();
-
-    [Parameter]
-    public int? MaxTagsToDisplay { get; set; }
-}

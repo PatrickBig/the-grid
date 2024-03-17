@@ -38,9 +38,9 @@ namespace TheGrid.Tests.Services
         }
 
         /// <summary>
-        /// Tests
+        /// Tests the ability to refresh query results.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
         public async Task RefreshQueryResultsAsync_Test()
         {

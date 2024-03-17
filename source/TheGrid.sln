@@ -45,6 +45,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheGrid.TestHelpers", "test
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{9A9C5760-EBE5-4089-A2D6-7D9FCE25A970}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TheGrid.Tests.Client", "tests\TheGrid.Tests.Client\TheGrid.Tests.Client.csproj", "{F2244BC9-4B8B-41BC-9033-9AC900FBA1E5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -107,6 +109,10 @@ Global
 		{9A9C5760-EBE5-4089-A2D6-7D9FCE25A970}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9A9C5760-EBE5-4089-A2D6-7D9FCE25A970}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9A9C5760-EBE5-4089-A2D6-7D9FCE25A970}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F2244BC9-4B8B-41BC-9033-9AC900FBA1E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2244BC9-4B8B-41BC-9033-9AC900FBA1E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F2244BC9-4B8B-41BC-9033-9AC900FBA1E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F2244BC9-4B8B-41BC-9033-9AC900FBA1E5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -118,6 +124,7 @@ Global
 		{D1DCFB8E-5164-4957-ABED-00B8450F4531} = {774D035D-7A8F-49C0-A577-0B4B540B7A24}
 		{6D451C39-FE6D-45AC-B492-62B4B0B6CC21} = {003B3AED-ACFC-4B9A-90FD-195E056BEEA8}
 		{FD4623D8-C262-4612-8EE7-D07F2C24B78C} = {774D035D-7A8F-49C0-A577-0B4B540B7A24}
+		{F2244BC9-4B8B-41BC-9033-9AC900FBA1E5} = {774D035D-7A8F-49C0-A577-0B4B540B7A24}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B47BC8D3-4D25-49B8-8646-D1A69B540949}
