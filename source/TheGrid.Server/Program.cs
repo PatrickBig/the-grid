@@ -4,6 +4,7 @@
 
 using Hangfire;
 using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
 using TheGrid.Data;
 using TheGrid.Models.Configuration;
@@ -66,6 +67,25 @@ public static class Program
         if (!app.Environment.IsDevelopment())
         {
             app.UseResponseCompression();
+        }
+        else
+        {
+            // If running in development mode, allow creating the schema if it's not already setup.
+            //using (var serviceScope = app.Services.CreateScope())
+            //{
+            //    var context = serviceScope.ServiceProvider.GetRequiredService<TheGridDbContext>();
+
+
+            //    var pendingMigrations = context.Database.GetPendingMigrations();
+            //    foreach (var m in pendingMigrations)
+            //    {
+            //        Console.WriteLine("M: " + m.ToString());
+            //    }
+            //    context.Database.Migrate();
+
+            //    context.Database.EnsureCreated();
+
+            //}
         }
 
         if (systemOptions.RunMode is RunMode.Mixed or RunMode.Server)

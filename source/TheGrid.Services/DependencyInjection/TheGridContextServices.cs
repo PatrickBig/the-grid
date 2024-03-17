@@ -30,11 +30,11 @@ namespace Microsoft.Extensions.DependencyInjection
         public static IServiceCollection AddTheGridDbContext(this IServiceCollection services, IConfiguration configuration)
         {
             var dataOptions = configuration.GetSection(nameof(SystemOptions)).Get<SystemOptions>();
+            var connectionString = configuration.GetConnectionString(_connectionStringName) ?? throw new ArgumentException("No connection string was found for Database");
 
             if (dataOptions?.DatabaseProvider == DatabaseProvider.PostgreSql)
             {
                 // Create the data source
-                var connectionString = configuration.GetConnectionString(_connectionStringName) ?? throw new ArgumentException("No connection string was found for Database");
                 var builder = new NpgsqlDataSourceBuilder(connectionString)
                     .EnableDynamicJson();
 
@@ -42,10 +42,25 @@ namespace Microsoft.Extensions.DependencyInjection
 
                 services.AddDbContext<TheGridDbContext>(o =>
                 {
-                    o.UseNpgsql(src);
+                    o.UseNpgsql(src, o => o.MigrationsAssembly(nameof(TheGrid) + "." + nameof(TheGrid.Postgres)));
                 });
 
                 services.AddTransient<IDatabaseStatus, PostgresDatabaseStatus>();
+            }
+            else if (dataOptions?.DatabaseProvider == DatabaseProvider.Sqlite)
+            {
+                var builder = new DbContextOptionsBuilder<TheGridDbContext>();
+
+                services.AddDbContext<TheGridDbContext>(b =>
+                {
+                    b.UseSqlite(connectionString, o => o.MigrationsAssembly(nameof(TheGrid) + "." + nameof(TheGrid.Sqlite)));
+                });
+            }
+            else
+            {
+                var validProviderNames = Enum.GetValues<DatabaseProvider>().Select(p => p.ToString());
+
+                throw new ArgumentException("Invalid provider name specified. Only the values " + string.Join(", ", validProviderNames) + " are allowed.");
             }
 
             return services;

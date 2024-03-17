@@ -1,0 +1,32 @@
+version: '3.4'
+
+##################################################################################
+# This compose file is not for production use. It is for use during development.
+##################################################################################
+
+services:
+  thegrid.server:
+    image: ${DOCKER_REGISTRY-}thegridserver
+    build:
+      context: .
+      dockerfile: TheGrid.Server/Dockerfile
+  redis:
+    image: redis
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: thegrid123
+      POSTGRES_DB: thegrid
+    volumes:
+      - postgresdata:/var/lib/postgresql/data
+  adminer:
+    image: adminer:latest
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+    depends_on:
+      - postgres
+    ports:
+      - 8080:8080
+
+volumes:
+  postgresdata:
