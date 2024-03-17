@@ -49,8 +49,6 @@ namespace Microsoft.Extensions.DependencyInjection
             }
             else if (dataOptions?.DatabaseProvider == DatabaseProvider.Sqlite)
             {
-                var builder = new DbContextOptionsBuilder<TheGridDbContext>();
-
                 services.AddDbContext<TheGridDbContext>(b =>
                 {
                     b.UseSqlite(connectionString, o => o.MigrationsAssembly(nameof(TheGrid) + "." + nameof(TheGrid.Sqlite)));

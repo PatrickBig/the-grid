@@ -20,11 +20,11 @@ COPY ["TheGrid.Connectors/TheGrid.Connectors.csproj", "TheGrid.Connectors/"]
 RUN dotnet restore "./TheGrid.Server/TheGrid.Server.csproj"
 COPY . .
 WORKDIR "/src/TheGrid.Server"
-RUN dotnet build "./TheGrid.Server.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "./TheGrid.Server.csproj" -c "$BUILD_CONFIGURATION" -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./TheGrid.Server.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./TheGrid.Server.csproj" -c "$BUILD_CONFIGURATION" -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
