@@ -28,6 +28,7 @@ namespace TheGrid.Server.Controllers
         /// </summary>
         /// <param name="connectorDiscoveryService">Service to discover connectors.</param>
         /// <param name="databaseStatus">Database status provider.</param>
+        /// <param name="dbContext">Database context.</param>
         public SystemController(ConnectorDiscoveryService connectorDiscoveryService, IDatabaseStatus databaseStatus, TheGridDbContext dbContext)
         {
             _connectorDiscoveryService = connectorDiscoveryService;
@@ -73,7 +74,6 @@ namespace TheGrid.Server.Controllers
             {
                 return NoContent();
             }
-
         }
 
         /// <summary>
