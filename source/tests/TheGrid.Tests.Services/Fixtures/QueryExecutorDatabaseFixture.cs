@@ -12,17 +12,12 @@ namespace TheGrid.Tests.Services.Fixtures
     /// </summary>
     public class QueryExecutorDatabaseFixture : InMemoryDatabaseFixture
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="QueryExecutorDatabaseFixture"/> class.
+        /// </summary>
         public QueryExecutorDatabaseFixture()
             : base()
         {
-            //var testConnector = new Connector
-            //{
-            //    Id = "TheGrid.Connectors.TestConnector",
-            //    Disabled = false,
-            //    SupportsConnectionTest = false,
-
-            //}
-
             var organization = new Organization
             {
                 Id = "default",
@@ -48,14 +43,14 @@ namespace TheGrid.Tests.Services.Fixtures
             var query = new Query
             {
                 Name = "Test Query",
-                Columns = new List<Column>
-                {
+                Columns =
+                [
                     new()
                     {
                         Name = "Field1",
                         Type = QueryResultColumnType.Text,
                     },
-                },
+                ],
                 Command = "SELECT Field1 FROM TestTable",
                 ConnectionId = organization.Connections.First().Id,
                 Description = "Test Query.",
@@ -68,6 +63,9 @@ namespace TheGrid.Tests.Services.Fixtures
             QueryId = query.Id;
         }
 
+        /// <summary>
+        /// Gets the query ID for the test.
+        /// </summary>
         public int QueryId { get; private set; }
     }
 }
