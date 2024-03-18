@@ -7,6 +7,9 @@ version: '3.4'
 services:
   thegrid.server:
     image: ${DOCKER_REGISTRY-}thegridserver
+    depends_on:
+      - postgres
+      - redis
     build:
       context: .
       dockerfile: TheGrid.Server/Dockerfile
@@ -28,5 +31,11 @@ services:
     ports:
       - 8080:8080
 
+  # Images used for testing various connectors. These can be enabled/disabled as needed.
+  connector.postgres:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: connector123
+      POSTGRES_DB: connector
 volumes:
   postgresdata:
