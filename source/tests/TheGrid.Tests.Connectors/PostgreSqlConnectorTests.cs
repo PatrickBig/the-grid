@@ -3,6 +3,7 @@
 // </copyright>
 
 using Npgsql;
+using TheGrid.Tests.Connectors.Fixtures;
 using Xunit.Abstractions;
 
 namespace TheGrid.Connectors.Integration.Tests
@@ -10,42 +11,21 @@ namespace TheGrid.Connectors.Integration.Tests
     /// <summary>
     /// Tests for the <see cref="PostgreSqlConnector"/>.
     /// </summary>
-    public class PostgreSqlConnectorTests : IDisposable
+    [CollectionDefinition("PostgreSql")]
+    public class PostgreSqlConnectorTests : IClassFixture<PostgreSqlFixture>
     {
-        private static readonly string _connectionString = "Host=localhost;Username=postgres;Password=test;Database=test";
         private readonly ITestOutputHelper _output;
-        private readonly NpgsqlConnection _connection;
-        private readonly Random _random = new();
-        private readonly string _testTableName;
+        private readonly PostgreSqlFixture _fixture;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PostgreSqlConnectorTests"/> class.
         /// </summary>
         /// <param name="output">Test output helper.</param>
-        public PostgreSqlConnectorTests(ITestOutputHelper output)
+        /// <param name="fixture">Database fixture for tests.</param>
+        public PostgreSqlConnectorTests(ITestOutputHelper output, PostgreSqlFixture fixture)
         {
             _output = output;
-
-            // Create test tables
-            _connection = new NpgsqlConnection(_connectionString);
-
-            _connection.Open();
-
-            _testTableName = "test_table_" + _random.Next(0, 10000).ToString();
-
-            var command = new NpgsqlCommand(GetCreateTestTableQuery(_testTableName), _connection);
-
-            command.ExecuteNonQuery();
-
-            // Add some test data
-            CreateTestRows(10);
-        }
-
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            _fixture = fixture;
         }
 
         /// <summary>
@@ -59,7 +39,7 @@ namespace TheGrid.Connectors.Integration.Tests
             var connector = new PostgreSqlConnector(GetConnectionConfiguration());
 
             // Act
-            var results = await connector.GetDataAsync("SELECT * FROM " + _testTableName, null);
+            var results = await connector.GetDataAsync("SELECT * FROM " + _fixture.TestTableName, null);
 
             // Assert
             Assert.NotNull(results);
@@ -104,7 +84,7 @@ namespace TheGrid.Connectors.Integration.Tests
             var connector = new PostgreSqlConnector(GetConnectionConfiguration());
 
             // Act
-            var results = await connector.GetDataAsync("SELECT * FROM " + _testTableName, null);
+            var results = await connector.GetDataAsync("SELECT * FROM " + _fixture.TestTableName, null);
 
             // Assert
             Assert.NotNull(results);
@@ -136,7 +116,7 @@ namespace TheGrid.Connectors.Integration.Tests
             };
 
             // Act
-            var results = await connector.GetDataAsync("SELECT * FROM " + _testTableName + " where bool_field = @param", parameters);
+            var results = await connector.GetDataAsync("SELECT * FROM " + _fixture.TestTableName + " where bool_field = @param", parameters);
 
             // Assert
             Assert.NotNull(results);
@@ -218,36 +198,12 @@ namespace TheGrid.Connectors.Integration.Tests
             await Assert.ThrowsAnyAsync<Exception>(async () => await connector.TestConnectionAsync());
         }
 
-        /// <summary>
-        /// Cleans up the test environment.
-        /// </summary>
-        /// <param name="disposing">Set to true if disposing.</param>
-        protected virtual void Dispose(bool disposing)
+        private Dictionary<string, string> GetConnectionConfiguration()
         {
-            // Cleanup
-            if (_connection != null)
-            {
-                var dropTableCommand = new NpgsqlCommand("drop table " + _testTableName, _connection);
-                dropTableCommand.ExecuteNonQuery();
-                _connection.Close();
-                _connection.Dispose();
-            }
+            return GetConnectionConfiguration(_fixture.Container.Hostname + ":" + _fixture.Container.GetMappedPublicPort(5432));
         }
 
-        private static string GetCreateTestTableQuery(string tableName)
-        {
-            return "create table " + tableName + " (" +
-                "id SERIAL PRIMARY KEY, " +
-                "char_field CHAR(4)," +
-                "varchar_field VARCHAR(20)," +
-                "bool_field BOOL," +
-                "timestamp_field TIMESTAMP," +
-                "date_field DATE, " +
-                "integer_null_field INT NULL" +
-                ");";
-        }
-
-        private static Dictionary<string, string> GetConnectionConfiguration(string host = "localhost", string databaseName = "test")
+        private Dictionary<string, string> GetConnectionConfiguration(string host)
         {
             return new Dictionary<string, string>
                 {
@@ -257,7 +213,7 @@ namespace TheGrid.Connectors.Integration.Tests
                     },
                     {
                         CommonConnectionParameters.DatabaseName,
-                        databaseName
+                        PostgreSqlFixture.DatabaseName
                     },
                     {
                         "Username",
@@ -265,25 +221,9 @@ namespace TheGrid.Connectors.Integration.Tests
                     },
                     {
                         "Password",
-                        "test"
+                        PostgreSqlFixture.Password
                     },
                 };
-        }
-
-        private void CreateTestRows(int numberOfRows = 10)
-        {
-            for (int i = 0; i < numberOfRows; i++)
-            {
-                var statement = "insert into " + _testTableName + " (char_field, varchar_field, bool_field, timestamp_field, date_field ) VALUES (" +
-                    $"'{_random.Next(1000, 9999)}'," +
-                    $"'test_{_random.Next(0, 999999)}'," +
-                    $"{Convert.ToBoolean(_random.Next(0, 1))}," +
-                    "CURRENT_TIMESTAMP," +
-                    $"'{DateTime.Today.Year}-{_random.Next(1, 12)}-{_random.Next(1, 28)}')";
-                var command = new NpgsqlCommand(statement, _connection);
-
-                command.ExecuteNonQuery();
-            }
         }
     }
 }
