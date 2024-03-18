@@ -2,38 +2,41 @@
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
-using DotNet.Testcontainers.Builders;
 using Npgsql;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Testcontainers.PostgreSql;
 
 namespace TheGrid.Tests.Connectors.Fixtures
 {
+    /// <summary>
+    /// Fixture used to test PostgreSql features.
+    /// </summary>
     public class PostgreSqlFixture : IAsyncLifetime
     {
+        /// <summary>
+        /// Name of the database.
+        /// </summary>
+        public const string DatabaseName = "connector";
+
         private readonly Random _random = new();
 
-        public const string DatabaseName = "connector";
-        public const string Password = "connector123";
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PostgreSqlFixture"/> class.
+        /// </summary>
         public PostgreSqlFixture()
         {
             TestTableName = "test_table_" + _random.Next(0, 10000).ToString();
+            Password = Guid.NewGuid().ToString();
         }
+
+        /// <summary>
+        /// Gets the password generated to connect to the database.
+        /// </summary>
+        public string Password { get; private set; }
 
         /// <summary>
         /// Gets the container created for the database engine.
         /// </summary>
-        public PostgreSqlContainer Container { get; private set; }
-
-        public string? GetConnectionString()
-        {
-            return Container?.GetConnectionString();
-        }
+        public PostgreSqlContainer Container { get; private set; } = null!; // This should be not-null from InitializedAsync.
 
         /// <summary>
         /// Gets the name of the table that was generated for the test data.
@@ -58,7 +61,7 @@ namespace TheGrid.Tests.Connectors.Fixtures
         {
             // Build a container for tests
             Container = new PostgreSqlBuilder()
-                .WithImage("postgres:latest")
+                .WithImage("postgres:16")
                 .WithDatabase(DatabaseName)
                 .WithPassword(Password)
                 .Build();
@@ -66,8 +69,7 @@ namespace TheGrid.Tests.Connectors.Fixtures
             await Container.StartAsync();
 
             // Setup some test data
-            var connectionString = GetConnectionString();
-            using var connection = new NpgsqlConnection(GetConnectionString());
+            using var connection = new NpgsqlConnection(Container.GetConnectionString());
 
             connection.Open();
 

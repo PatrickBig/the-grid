@@ -2,7 +2,6 @@
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
-using Npgsql;
 using TheGrid.Tests.Connectors.Fixtures;
 using Xunit.Abstractions;
 
@@ -198,11 +197,6 @@ namespace TheGrid.Connectors.Integration.Tests
             await Assert.ThrowsAnyAsync<Exception>(async () => await connector.TestConnectionAsync());
         }
 
-        private Dictionary<string, string> GetConnectionConfiguration()
-        {
-            return GetConnectionConfiguration(_fixture.Container.Hostname + ":" + _fixture.Container.GetMappedPublicPort(5432));
-        }
-
         private Dictionary<string, string> GetConnectionConfiguration(string host)
         {
             return new Dictionary<string, string>
@@ -221,9 +215,14 @@ namespace TheGrid.Connectors.Integration.Tests
                     },
                     {
                         "Password",
-                        PostgreSqlFixture.Password
+                        _fixture.Password
                     },
                 };
+        }
+
+        private Dictionary<string, string> GetConnectionConfiguration()
+        {
+            return GetConnectionConfiguration(_fixture.Container.Hostname + ":" + _fixture.Container.GetMappedPublicPort(5432));
         }
     }
 }
