@@ -9,3 +9,8 @@ updates:
     directory: "/source" # Location of package manifests
     schedule:
       interval: "weekly"
+    groups:
+      microsoft:
+        patterns:
+          - "Microsoft.*"
+      
