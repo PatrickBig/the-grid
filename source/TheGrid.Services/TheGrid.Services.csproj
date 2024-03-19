@@ -1,31 +1,31 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFramework>net8.0</TargetFramework>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>
-	</PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
 
-	<ItemGroup>
-		<PackageReference Include="Hangfire.AspNetCore" Version="1.8.11" />
-		<PackageReference Include="Hangfire.Core" Version="1.8.11" />
-		<PackageReference Include="Hangfire.Redis.StackExchange" Version="1.9.3" />
-		<PackageReference Include="Humanizer.Core" Version="2.14.1" />
-		<PackageReference Include="LazyCache.AspNetCore" Version="2.4.0" />
-		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.1" />
-        <PackageReference Include="SignalRSwaggerGen" Version="4.5.0" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.1">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
-	</ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Hangfire.AspNetCore" Version="1.8.11" />
+        <PackageReference Include="Hangfire.Core" Version="1.8.11" />
+        <PackageReference Include="Hangfire.Redis.StackExchange" Version="1.9.3" />
+        <PackageReference Include="Humanizer.Core" Version="2.14.1" />
+        <PackageReference Include="LazyCache.AspNetCore" Version="2.4.0" />
+        <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.3" />
+    <PackageReference Include="SignalRSwaggerGen" Version="4.5.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.3">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    </ItemGroup>
 
-	<ItemGroup>
-		<ProjectReference Include="..\TheGrid.Data\TheGrid.Data.csproj" />
-		<ProjectReference Include="..\TheGrid.Models\TheGrid.Models.csproj" />
-		<ProjectReference Include="..\TheGrid.Postgres\TheGrid.Postgres.csproj" />
-		<ProjectReference Include="..\TheGrid.Connectors\TheGrid.Connectors.csproj" />
-		<ProjectReference Include="..\TheGrid.Sqlite\TheGrid.Sqlite.csproj" />
-	</ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\TheGrid.Data\TheGrid.Data.csproj" />
+        <ProjectReference Include="..\TheGrid.Models\TheGrid.Models.csproj" />
+        <ProjectReference Include="..\TheGrid.Postgres\TheGrid.Postgres.csproj" />
+        <ProjectReference Include="..\TheGrid.Connectors\TheGrid.Connectors.csproj" />
+        <ProjectReference Include="..\TheGrid.Sqlite\TheGrid.Sqlite.csproj" />
+    </ItemGroup>
 
 </Project>
