@@ -8,7 +8,10 @@
       "long_test": 2147483648,
       "decimal_test": 141230.5413412,
       "datetime_test": "2023-06-04T17:13:28.674814",
-      "time_test": "13:44:13"
+      "time_test": "13:44:13",
+      "nested_type": {
+        "nested_text": "test test 1231"
+      }
     },
     {
       "text_test": "test text 123",
@@ -18,7 +21,10 @@
       "long_test": 21474836489,
       "decimal_test": 2551.15898,
       "datetime_test": "2024-06-04T17:13:28.674814",
-      "time_test": "13:44:13"
+      "time_test": "13:44:13",
+      "nested_type": {
+        "nested_text": "test test 5666"
+      }
     }
   ]
 }
