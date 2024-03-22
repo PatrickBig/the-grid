@@ -6,6 +6,7 @@ using Meziantou.Extensions.Logging.Xunit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using TheGrid.Data;
+using TheGrid.Shared.Models;
 using TheGrid.Tests.Shared;
 using Xunit.Abstractions;
 
@@ -38,18 +39,32 @@ namespace TheGrid.Services.Tests
         public async Task RefreshConnectorsAsync_Test()
         {
             // Arrange
+            var disableConnector = new Connector
+            {
+                Id = "SomeConnector",
+                Disabled = false,
+                Name = "Test connector",
+                SupportsConnectionTest = false,
+            };
+
+            _db.Connectors.Add(disableConnector);
+            await _db.SaveChangesAsync();
+
             var connectorRefreshService = new ConnectorDiscoveryService(_db, _logger);
 
             // Act
             await connectorRefreshService.RefreshConnectorsAsync();
 
             // Check the connectors
-            var connectors = await _db.Connectors.ToListAsync();
+            var connectors = await _db.Connectors.Where(c => !c.Disabled).ToListAsync();
 
             Assert.NotEmpty(connectors);
 
             // Only verify one connector to prevent this becoming a maintenance pit.
             Assert.Contains(connectors, c => c.Id == "TheGrid.Connectors.PostgreSqlConnector");
+
+            // Make sure our test connector is disabled
+            Assert.True(await _db.Connectors.Where(c => c.Id == disableConnector.Id && c.Disabled).AnyAsync());
         }
     }
 }
