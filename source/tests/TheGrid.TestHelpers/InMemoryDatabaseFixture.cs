@@ -21,9 +21,13 @@ namespace TheGrid.Tests.Shared
         {
             var databaseOptions = new DbContextOptionsBuilder<TheGridDbContext>()
                 .UseInMemoryDatabase("TheGrid")
+                .EnableDetailedErrors()
+                .EnableSensitiveDataLogging()
                 .Options;
 
             Db = new TheGridDbContext(databaseOptions);
+
+            Db.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }
 
         /// <summary>
