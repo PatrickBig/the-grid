@@ -130,11 +130,6 @@ namespace TheGrid.Services
 
             var connectorAssembly = Assembly.GetAssembly(typeof(IConnector));
 
-            if (query.Connection == null)
-            {
-                throw new InvalidOperationException("Connection for query cannot be null");
-            }
-
             var connectorType = connectorAssembly?.GetType(query.Connection.ConnectorId) ?? throw new ArgumentException("No connector found.");
             return Activator.CreateInstance(connectorType, query.Connection.ConnectionProperties) as IConnector ?? throw new InvalidCastException("Unable to create connector instance from type.");
         }
