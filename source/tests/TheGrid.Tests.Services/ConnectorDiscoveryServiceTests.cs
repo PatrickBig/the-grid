@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using TheGrid.Data;
 using TheGrid.Shared.Models;
+using TheGrid.TestHelpers.DataGenerators;
 using TheGrid.Tests.Shared;
 using Xunit.Abstractions;
 
@@ -15,7 +16,7 @@ namespace TheGrid.Services.Tests
     /// <summary>
     /// Tests for the <see cref="ConnectorDiscoveryService"/>.
     /// </summary>
-    public class ConnectorDiscoveryServiceTests : IClassFixture<InMemoryDatabaseFixture>
+    public class ConnectorDiscoveryServiceTests : IClassFixture<SqliteProvider>
     {
         private readonly TheGridDbContext _db;
         private readonly ILogger<ConnectorDiscoveryService> _logger;
@@ -23,11 +24,11 @@ namespace TheGrid.Services.Tests
         /// <summary>
         /// Initializes a new instance of the <see cref="ConnectorDiscoveryServiceTests"/> class.
         /// </summary>
-        /// <param name="inMemoryDatabaseFixture">In memory database fixture.</param>
+        /// <param name="sqliteProvider">Database fixture.</param>
         /// <param name="testOutputHelper">Test output helper.</param>
-        public ConnectorDiscoveryServiceTests(InMemoryDatabaseFixture inMemoryDatabaseFixture, ITestOutputHelper testOutputHelper)
+        public ConnectorDiscoveryServiceTests(SqliteProvider sqliteProvider, ITestOutputHelper testOutputHelper)
         {
-            _db = inMemoryDatabaseFixture.Db;
+            _db = sqliteProvider.Db;
             _logger = XUnitLogger.CreateLogger<ConnectorDiscoveryService>(testOutputHelper);
         }
 
@@ -64,6 +65,7 @@ namespace TheGrid.Services.Tests
             Assert.Contains(connectors, c => c.Id == "TheGrid.Connectors.PostgreSqlConnector");
 
             // Make sure our test connector is disabled
+            var disabledConnectors = await _db.Connectors.Where(c => c.Disabled).ToListAsync();
             Assert.True(await _db.Connectors.Where(c => c.Id == disableConnector.Id && c.Disabled).AnyAsync());
         }
     }
