@@ -86,6 +86,7 @@ namespace TheGrid.Tests.Connectors.Fixtures
         {
             return "create table " + tableName + " (" +
                 "id SERIAL PRIMARY KEY, " +
+                "identity_int_field INT GENERATED ALWAYS AS IDENTITY, " +
                 "char_field CHAR(4)," +
                 "varchar_field VARCHAR(20)," +
                 "bool_field BOOL," +
