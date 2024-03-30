@@ -5,6 +5,7 @@
 using Hangfire;
 using Hangfire.Redis.StackExchange;
 using StackExchange.Redis;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using TheGrid.Models.Configuration;
@@ -14,6 +15,7 @@ namespace TheGrid.Server
     /// <summary>
     /// Contains most of the startup code but organized by run mode.
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public static class StartupHelpers
     {
         /// <summary>
