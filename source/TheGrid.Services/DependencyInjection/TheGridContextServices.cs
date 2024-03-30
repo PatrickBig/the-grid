@@ -5,6 +5,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Npgsql;
+using System.Diagnostics.CodeAnalysis;
 using TheGrid.Data;
 using TheGrid.Models.Configuration;
 using TheGrid.Postgres;
@@ -15,6 +16,7 @@ namespace Microsoft.Extensions.DependencyInjection
     /// <summary>
     /// Configures the service collection with requirements for <see cref="TheGridDbContext"/>.
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public static class TheGridContextServices
     {
         private const string _connectionStringName = "Database";
