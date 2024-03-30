@@ -1,16 +1,15 @@
-﻿using Meziantou.Extensions.Logging.Xunit;
+﻿// <copyright file="VisualizationInformationTests.cs" company="BiglerNet">
+// Copyright (c) BiglerNet. All rights reserved.
+// </copyright>
+
+using Meziantou.Extensions.Logging.Xunit;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TheGrid.Data;
 using TheGrid.Models;
 using TheGrid.Models.Visualizations;
 using TheGrid.Services;
 using TheGrid.Shared.Models;
-using TheGrid.Tests.Shared;
+using TheGrid.TestHelpers;
 using Xunit.Abstractions;
 
 namespace TheGrid.Tests.Services
@@ -18,7 +17,7 @@ namespace TheGrid.Tests.Services
     /// <summary>
     /// Tests for the <see cref="VisualizationInformation"/> class.
     /// </summary>
-    public class VisualizationInformationTests : IClassFixture<InMemoryDatabaseFixture>
+    public class VisualizationInformationTests : IClassFixture<SqliteProvider>
     {
         private readonly TheGridDbContext _db;
         private readonly ILogger<VisualizationInformation> _logger;
@@ -27,11 +26,11 @@ namespace TheGrid.Tests.Services
         /// <summary>
         /// Initializes a new instance of the <see cref="VisualizationInformationTests"/> class.
         /// </summary>
-        /// <param name="inMemoryDatabaseFixture">In memory database provider fixture.</param>
+        /// <param name="sqliteProvider">In memory database provider fixture.</param>
         /// <param name="testOutputHelper">Test output helper.</param>
-        public VisualizationInformationTests(InMemoryDatabaseFixture inMemoryDatabaseFixture, ITestOutputHelper testOutputHelper)
+        public VisualizationInformationTests(SqliteProvider sqliteProvider, ITestOutputHelper testOutputHelper)
         {
-            _db = inMemoryDatabaseFixture.Db;
+            _db = sqliteProvider.Db;
             _logger = XUnitLogger.CreateLogger<VisualizationInformation>(testOutputHelper);
             _random = new Random();
         }

@@ -8,7 +8,6 @@ using Microsoft.Extensions.Logging;
 using TheGrid.Data;
 using TheGrid.Shared.Models;
 using TheGrid.TestHelpers;
-using TheGrid.Tests.Shared;
 using Xunit.Abstractions;
 
 namespace TheGrid.Services.Tests

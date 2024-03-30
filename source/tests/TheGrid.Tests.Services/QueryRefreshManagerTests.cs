@@ -9,7 +9,7 @@ using NSubstitute;
 using TheGrid.Data;
 using TheGrid.Models;
 using TheGrid.Services;
-using TheGrid.Tests.Shared;
+using TheGrid.TestHelpers;
 using Xunit.Abstractions;
 
 namespace TheGrid.Tests.Services
@@ -17,7 +17,7 @@ namespace TheGrid.Tests.Services
     /// <summary>
     /// Tests for the <see cref="QueryRefreshManager"/> class.
     /// </summary>
-    public class QueryRefreshManagerTests : IClassFixture<InMemoryDatabaseFixture>
+    public class QueryRefreshManagerTests : IClassFixture<SqliteProvider>
     {
         private readonly TheGridDbContext _db;
         private readonly ILogger<QueryRefreshManager> _logger;
@@ -26,11 +26,11 @@ namespace TheGrid.Tests.Services
         /// <summary>
         /// Initializes a new instance of the <see cref="QueryRefreshManagerTests"/> class.
         /// </summary>
-        /// <param name="inMemoryDatabaseFixture">In memory database provider fixture.</param>
+        /// <param name="sqliteProvider">Database provider fixture.</param>
         /// <param name="testOutputHelper">Test output helper.</param>
-        public QueryRefreshManagerTests(InMemoryDatabaseFixture inMemoryDatabaseFixture, ITestOutputHelper testOutputHelper)
+        public QueryRefreshManagerTests(SqliteProvider sqliteProvider, ITestOutputHelper testOutputHelper)
         {
-            _db = inMemoryDatabaseFixture.Db;
+            _db = sqliteProvider.Db;
             _logger = XUnitLogger.CreateLogger<QueryRefreshManager>(testOutputHelper);
             _random = new Random();
         }

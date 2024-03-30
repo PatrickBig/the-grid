@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using TheGrid.Data;
 using TheGrid.Services;
-using TheGrid.Tests.Shared;
+using TheGrid.TestHelpers;
 using Xunit.Abstractions;
 
 namespace TheGrid.Tests.Services
@@ -16,7 +16,7 @@ namespace TheGrid.Tests.Services
     /// <summary>
     /// Tests for the <see cref="QueryManager"/> class.
     /// </summary>
-    public class QueryManagerTests : IClassFixture<InMemoryDatabaseFixture>
+    public class QueryManagerTests : IClassFixture<SqliteProvider>
     {
         private readonly TheGridDbContext _db;
         private readonly ILogger<QueryManager> _logger;
@@ -25,11 +25,11 @@ namespace TheGrid.Tests.Services
         /// <summary>
         /// Initializes a new instance of the <see cref="QueryManagerTests"/> class.
         /// </summary>
-        /// <param name="inMemoryDatabaseFixture">In memory database provider fixture.</param>
+        /// <param name="sqliteProvider">Database provider fixture.</param>
         /// <param name="testOutputHelper">Test output helper.</param>
-        public QueryManagerTests(InMemoryDatabaseFixture inMemoryDatabaseFixture, ITestOutputHelper testOutputHelper)
+        public QueryManagerTests(SqliteProvider sqliteProvider, ITestOutputHelper testOutputHelper)
         {
-            _db = inMemoryDatabaseFixture.Db;
+            _db = sqliteProvider.Db;
             _logger = XUnitLogger.CreateLogger<QueryManager>(testOutputHelper);
             _random = new Random();
         }

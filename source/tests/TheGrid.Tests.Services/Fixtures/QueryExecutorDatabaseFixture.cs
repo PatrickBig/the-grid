@@ -5,7 +5,6 @@
 using TheGrid.Connectors;
 using TheGrid.Models;
 using TheGrid.TestHelpers;
-using TheGrid.Tests.Shared;
 
 namespace TheGrid.Tests.Services.Fixtures
 {
