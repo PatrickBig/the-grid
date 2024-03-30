@@ -7,8 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using TheGrid.Data;
 using TheGrid.Shared.Models;
-using TheGrid.TestHelpers.DataGenerators;
-using TheGrid.Tests.Shared;
+using TheGrid.TestHelpers;
 using Xunit.Abstractions;
 
 namespace TheGrid.Services.Tests

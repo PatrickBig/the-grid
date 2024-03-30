@@ -5,7 +5,7 @@
 using Microsoft.EntityFrameworkCore;
 using TheGrid.Data;
 
-namespace TheGrid.TestHelpers.DataGenerators
+namespace TheGrid.TestHelpers
 {
     /// <summary>
     /// Creates a Sqlite database with migrations applied.

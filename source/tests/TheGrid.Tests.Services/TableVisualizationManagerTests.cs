@@ -7,7 +7,8 @@ using Microsoft.Extensions.Logging;
 using TheGrid.Data;
 using TheGrid.Models.Visualizations;
 using TheGrid.Services;
-using TheGrid.Tests.Shared;
+using TheGrid.TestHelpers;
+using TheGrid.TestHelpers.Fixtures;
 using Xunit.Abstractions;
 
 namespace TheGrid.Tests.Services
@@ -15,22 +16,24 @@ namespace TheGrid.Tests.Services
     /// <summary>
     /// Tests for the <see cref="TableVisualizationManager"/> class.
     /// </summary>
-    public class TableVisualizationManagerTests : IClassFixture<InMemoryDatabaseFixture>
+    public class TableVisualizationManagerTests : IClassFixture<QueryFixture>
     {
         private readonly ILogger<TableVisualizationManager> _logger;
         private readonly TheGridDbContext _db;
         private readonly Random _random;
+        private readonly int _queryId;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TableVisualizationManagerTests"/> class.
         /// </summary>
-        /// <param name="inMemoryDatabaseFixture">Database fixture.</param>
+        /// <param name="queryFixture">Database fixture.</param>
         /// <param name="testOutputHelper">Test output helper.</param>
-        public TableVisualizationManagerTests(InMemoryDatabaseFixture inMemoryDatabaseFixture, ITestOutputHelper testOutputHelper)
+        public TableVisualizationManagerTests(QueryFixture queryFixture, ITestOutputHelper testOutputHelper)
         {
-            _db = inMemoryDatabaseFixture.Db;
+            _db = queryFixture.Db;
             _logger = XUnitLogger.CreateLogger<TableVisualizationManager>(testOutputHelper);
             _random = new Random();
+            _queryId = queryFixture.QueryId;
         }
 
         /// <summary>
@@ -44,7 +47,7 @@ namespace TheGrid.Tests.Services
             var manager = new TableVisualizationManager(_db, _logger);
 
             // Act
-            var visualization = await manager.CreateVisualizationAsync(1, "Test visualization", default);
+            var visualization = await manager.CreateVisualizationAsync(_queryId, "Test visualization", default);
 
             // Assert
             Assert.NotNull(visualization);
@@ -64,7 +67,7 @@ namespace TheGrid.Tests.Services
             {
                 Id = _random.Next(),
                 Name = "Vis name " + _random.Next(),
-                QueryId = _random.Next(),
+                QueryId = _queryId,
                 PageSize = 10,
             };
 

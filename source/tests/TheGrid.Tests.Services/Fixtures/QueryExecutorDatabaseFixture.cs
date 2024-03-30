@@ -2,15 +2,16 @@
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
+using TheGrid.Connectors;
 using TheGrid.Models;
-using TheGrid.Tests.Shared;
+using TheGrid.TestHelpers.Fixtures;
 
 namespace TheGrid.Tests.Services.Fixtures
 {
     /// <summary>
-    /// Contains data structures needed to perform query execution tests.
+    /// Contains data structures needed to perform validQuery execution tests.
     /// </summary>
-    public class QueryExecutorDatabaseFixture : InMemoryDatabaseFixture
+    public class QueryExecutorDatabaseFixture : OrganizationWithConnection
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="QueryExecutorDatabaseFixture"/> class.
@@ -18,29 +19,7 @@ namespace TheGrid.Tests.Services.Fixtures
         public QueryExecutorDatabaseFixture()
             : base()
         {
-            var organization = new Organization
-            {
-                Id = "default",
-                Name = "Default Organization",
-                Connections =
-                {
-                    new Connection
-                    {
-                        Name = "Test Connection",
-                        Connector = new TheGrid.Shared.Models.Connector
-                        {
-                            Id = "TheGrid.Connectors.TestConnector",
-                            Name = "Fake Database Connection",
-                            SupportsConnectionTest = false,
-                            SupportsSchemaDiscovery = false,
-                        },
-                    },
-                },
-            };
-
-            Db.Organizations.Add(organization);
-
-            var query = new Query
+            var validQuery = new Query
             {
                 Name = "Test Query",
                 Columns =
@@ -52,20 +31,44 @@ namespace TheGrid.Tests.Services.Fixtures
                     },
                 ],
                 Command = "SELECT Field1 FROM TestTable",
-                ConnectionId = organization.Connections.First().Id,
+                ConnectionId = ConnectionId,
                 Description = "Test Query.",
             };
 
-            Db.Queries.Add(query);
+            Db.Queries.Add(validQuery);
+
+            var failsQuery = new Query
+            {
+                Name = "Query That Fails Execution",
+                Columns =
+                [
+                    new()
+                    {
+                        Name = "Field1",
+                        Type = QueryResultColumnType.Text,
+                    },
+                ],
+                Command = TestConnector.ThrowExceptionQuery,
+                ConnectionId = ConnectionId,
+                Description = "This query has no connection so it will fail.",
+            };
+
+            Db.Queries.Add(failsQuery);
 
             Db.SaveChanges();
 
-            QueryId = query.Id;
+            ValidQueryId = validQuery.Id;
+            FailsExecutionQueryId = failsQuery.Id;
         }
 
         /// <summary>
-        /// Gets the query ID for the test.
+        /// Gets the validQuery ID for the test.
         /// </summary>
-        public int QueryId { get; private set; }
+        public int ValidQueryId { get; private set; }
+
+        /// <summary>
+        /// Gets the validQuery ID for the validQuery with no connection.
+        /// </summary>
+        public int FailsExecutionQueryId { get; private set; }
     }
 }

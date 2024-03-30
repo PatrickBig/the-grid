@@ -1,16 +1,16 @@
-﻿using Meziantou.Extensions.Logging.Xunit;
+﻿// <copyright file="VisualizationInformationTests.cs" company="BiglerNet">
+// Copyright (c) BiglerNet. All rights reserved.
+// </copyright>
+
+using Meziantou.Extensions.Logging.Xunit;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TheGrid.Data;
 using TheGrid.Models;
 using TheGrid.Models.Visualizations;
 using TheGrid.Services;
 using TheGrid.Shared.Models;
-using TheGrid.Tests.Shared;
+using TheGrid.TestHelpers;
+using TheGrid.TestHelpers.Fixtures;
 using Xunit.Abstractions;
 
 namespace TheGrid.Tests.Services
@@ -18,22 +18,24 @@ namespace TheGrid.Tests.Services
     /// <summary>
     /// Tests for the <see cref="VisualizationInformation"/> class.
     /// </summary>
-    public class VisualizationInformationTests : IClassFixture<InMemoryDatabaseFixture>
+    public class VisualizationInformationTests : IClassFixture<QueryFixture>
     {
         private readonly TheGridDbContext _db;
         private readonly ILogger<VisualizationInformation> _logger;
         private readonly Random _random;
+        private readonly int _queryId;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="VisualizationInformationTests"/> class.
         /// </summary>
-        /// <param name="inMemoryDatabaseFixture">In memory database provider fixture.</param>
+        /// <param name="queryFixture">In memory database provider fixture.</param>
         /// <param name="testOutputHelper">Test output helper.</param>
-        public VisualizationInformationTests(InMemoryDatabaseFixture inMemoryDatabaseFixture, ITestOutputHelper testOutputHelper)
+        public VisualizationInformationTests(QueryFixture queryFixture, ITestOutputHelper testOutputHelper)
         {
-            _db = inMemoryDatabaseFixture.Db;
+            _db = queryFixture.Db;
             _logger = XUnitLogger.CreateLogger<VisualizationInformation>(testOutputHelper);
             _random = new Random();
+            _queryId = queryFixture.QueryId;
         }
 
         /// <summary>
@@ -72,17 +74,6 @@ namespace TheGrid.Tests.Services
         public async Task GetQueryVisualizationsAsync_Success()
         {
             // Arrange
-            var queryId = _random.Next();
-
-            var query = new Query
-            {
-                Id = queryId,
-                Name = "Test query",
-                Command = "SELECT * FROM Customers",
-            };
-
-            _db.Queries.Add(query);
-
             var visualizationInformation = new VisualizationInformation(_db);
 
             var expectedVisualizations = new[]
@@ -91,7 +82,7 @@ namespace TheGrid.Tests.Services
                 {
                     Id = _random.Next(),
                     Name = "Test visualization " + _random.Next(),
-                    QueryId = queryId,
+                    QueryId = _queryId,
                 },
             };
 
@@ -100,7 +91,7 @@ namespace TheGrid.Tests.Services
             await _db.SaveChangesAsync();
 
             // Act
-            var result = await visualizationInformation.GetQueryVisualizationsAsync(queryId);
+            var result = await visualizationInformation.GetQueryVisualizationsAsync(_queryId);
 
             // Assert
             Assert.NotNull(result);
