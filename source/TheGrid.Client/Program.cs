@@ -5,6 +5,7 @@
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Radzen;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using TheGrid.Client;
@@ -31,3 +32,11 @@ builder.Services.AddScoped<IQueryDesignerHubClient, QueryDesignerHubClient>();
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
 await builder.Build().RunAsync();
+
+/// <summary>
+/// Program entrypoint.
+/// </summary>
+[ExcludeFromCodeCoverage] // Exclude startup class from code coverage.
+public static partial class Program
+{
+}

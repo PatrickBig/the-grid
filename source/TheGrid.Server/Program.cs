@@ -6,6 +6,7 @@ using Hangfire;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
+using System.Diagnostics.CodeAnalysis;
 using TheGrid.Data;
 using TheGrid.Models.Configuration;
 using TheGrid.Server.HealthChecks;
@@ -17,6 +18,7 @@ namespace TheGrid.Server;
 /// <summary>
 /// Entry point for the application.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public static class Program
 {
     private static readonly string[] _responseMimeTypes = ["application/octet-stream"];
