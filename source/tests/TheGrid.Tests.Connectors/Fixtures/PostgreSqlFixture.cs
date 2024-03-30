@@ -3,6 +3,7 @@
 // </copyright>
 
 using Npgsql;
+using System.Text;
 using Testcontainers.PostgreSql;
 
 namespace TheGrid.Tests.Connectors.Fixtures
@@ -85,29 +86,41 @@ namespace TheGrid.Tests.Connectors.Fixtures
         {
             return "create table " + tableName + " (" +
                 "id SERIAL PRIMARY KEY, " +
+                "identity_int_field INT GENERATED ALWAYS AS IDENTITY, " +
                 "char_field CHAR(4)," +
                 "varchar_field VARCHAR(20)," +
                 "bool_field BOOL," +
                 "timestamp_field TIMESTAMP," +
                 "date_field DATE, " +
-                "integer_null_field INT NULL" +
+                "integer_null_field INT NULL, " +
+                "integer_array_null INT[] " +
                 ");";
         }
 
         private void CreateTestRows(NpgsqlConnection connection, int numberOfRows = 10)
         {
+            var insertStatement = new StringBuilder("insert into " + TestTableName + " (char_field, varchar_field, bool_field, timestamp_field, date_field ) VALUES ");
+
             for (int i = 0; i < numberOfRows; i++)
             {
-                var statement = "insert into " + TestTableName + " (char_field, varchar_field, bool_field, timestamp_field, date_field ) VALUES (" +
+                var row = "(" +
                     $"'{_random.Next(1000, 9999)}'," +
                     $"'test_{_random.Next(0, 999999)}'," +
                     $"{Convert.ToBoolean(_random.Next(0, 1))}," +
                     "CURRENT_TIMESTAMP," +
                     $"'{DateTime.Today.Year}-{_random.Next(1, 12)}-{_random.Next(1, 28)}')";
-                var command = new NpgsqlCommand(statement, connection);
 
-                command.ExecuteNonQuery();
+                if (i < numberOfRows - 1)
+                {
+                    row += ", ";
+                }
+
+                insertStatement.Append(row);
             }
+
+            var command = new NpgsqlCommand(insertStatement.ToString(), connection);
+
+            command.ExecuteNonQuery();
         }
     }
 }
