@@ -10,6 +10,7 @@ using TheGrid.Data;
 using TheGrid.Models;
 using TheGrid.Services;
 using TheGrid.TestHelpers;
+using TheGrid.TestHelpers.Fixtures;
 using Xunit.Abstractions;
 
 namespace TheGrid.Tests.Services
@@ -17,22 +18,24 @@ namespace TheGrid.Tests.Services
     /// <summary>
     /// Tests for the <see cref="QueryRefreshManager"/> class.
     /// </summary>
-    public class QueryRefreshManagerTests : IClassFixture<SqliteProvider>
+    public class QueryRefreshManagerTests : IClassFixture<OrganizationWithConnection>
     {
         private readonly TheGridDbContext _db;
         private readonly ILogger<QueryRefreshManager> _logger;
         private readonly Random _random;
+        private readonly int _connectionId;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="QueryRefreshManagerTests"/> class.
         /// </summary>
-        /// <param name="sqliteProvider">Database provider fixture.</param>
+        /// <param name="organizationWithConnection">Database provider fixture.</param>
         /// <param name="testOutputHelper">Test output helper.</param>
-        public QueryRefreshManagerTests(SqliteProvider sqliteProvider, ITestOutputHelper testOutputHelper)
+        public QueryRefreshManagerTests(OrganizationWithConnection organizationWithConnection, ITestOutputHelper testOutputHelper)
         {
-            _db = sqliteProvider.Db;
+            _db = organizationWithConnection.Db;
             _logger = XUnitLogger.CreateLogger<QueryRefreshManager>(testOutputHelper);
             _random = new Random();
+            _connectionId = organizationWithConnection.ConnectionId;
         }
 
         /// <summary>
@@ -56,6 +59,7 @@ namespace TheGrid.Tests.Services
             {
                 Id = _random.Next(),
                 Name = "Test Query " + _random.Next(),
+                ConnectionId = _connectionId,
             };
 
             _db.Queries.Add(query);

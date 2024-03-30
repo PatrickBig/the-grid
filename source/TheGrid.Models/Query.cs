@@ -19,7 +19,7 @@ namespace TheGrid.Models
         public int Id { get; set; }
 
         /// <summary>
-        /// connection used to execute the query.
+        /// Connection used to execute the query.
         /// </summary>
         [Required]
         public int ConnectionId { get; set; }

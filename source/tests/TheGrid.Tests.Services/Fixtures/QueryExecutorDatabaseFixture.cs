@@ -4,14 +4,14 @@
 
 using TheGrid.Connectors;
 using TheGrid.Models;
-using TheGrid.TestHelpers;
+using TheGrid.TestHelpers.Fixtures;
 
 namespace TheGrid.Tests.Services.Fixtures
 {
     /// <summary>
     /// Contains data structures needed to perform validQuery execution tests.
     /// </summary>
-    public class QueryExecutorDatabaseFixture : SqliteProvider
+    public class QueryExecutorDatabaseFixture : OrganizationWithConnection
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="QueryExecutorDatabaseFixture"/> class.
@@ -19,30 +19,6 @@ namespace TheGrid.Tests.Services.Fixtures
         public QueryExecutorDatabaseFixture()
             : base()
         {
-            var organization = new Organization
-            {
-                Id = "default",
-                Name = "Default Organization",
-                Connections =
-                {
-                    new Connection
-                    {
-                        Name = "Test Connection",
-                        Connector = new TheGrid.Shared.Models.Connector
-                        {
-                            Id = "TheGrid.Connectors.TestConnector",
-                            Name = "Fake Database Connection",
-                            SupportsConnectionTest = false,
-                            SupportsSchemaDiscovery = false,
-                        },
-                    },
-                },
-            };
-
-            Db.Organizations.Add(organization);
-
-            Db.SaveChanges();
-
             var validQuery = new Query
             {
                 Name = "Test Query",
@@ -55,13 +31,13 @@ namespace TheGrid.Tests.Services.Fixtures
                     },
                 ],
                 Command = "SELECT Field1 FROM TestTable",
-                ConnectionId = organization.Connections.First().Id,
+                ConnectionId = ConnectionId,
                 Description = "Test Query.",
             };
 
             Db.Queries.Add(validQuery);
 
-            var noConnectionQuery = new Query
+            var failsQuery = new Query
             {
                 Name = "Query That Fails Execution",
                 Columns =
@@ -73,16 +49,16 @@ namespace TheGrid.Tests.Services.Fixtures
                     },
                 ],
                 Command = TestConnector.ThrowExceptionQuery,
-                ConnectionId = organization.Connections.First().Id,
+                ConnectionId = ConnectionId,
                 Description = "This query has no connection so it will fail.",
             };
 
-            Db.Queries.Add(noConnectionQuery);
+            Db.Queries.Add(failsQuery);
 
             Db.SaveChanges();
 
             ValidQueryId = validQuery.Id;
-            FailsExecutionQueryId = noConnectionQuery.Id;
+            FailsExecutionQueryId = failsQuery.Id;
         }
 
         /// <summary>

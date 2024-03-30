@@ -9,6 +9,7 @@ using NSubstitute;
 using TheGrid.Data;
 using TheGrid.Services;
 using TheGrid.TestHelpers;
+using TheGrid.TestHelpers.Fixtures;
 using Xunit.Abstractions;
 
 namespace TheGrid.Tests.Services
@@ -16,22 +17,24 @@ namespace TheGrid.Tests.Services
     /// <summary>
     /// Tests for the <see cref="QueryManager"/> class.
     /// </summary>
-    public class QueryManagerTests : IClassFixture<SqliteProvider>
+    public class QueryManagerTests : IClassFixture<OrganizationWithConnection>
     {
         private readonly TheGridDbContext _db;
         private readonly ILogger<QueryManager> _logger;
         private readonly Random _random;
+        private readonly int _connectionId;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="QueryManagerTests"/> class.
         /// </summary>
-        /// <param name="sqliteProvider">Database provider fixture.</param>
+        /// <param name="organizationWithConnection">Database provider fixture.</param>
         /// <param name="testOutputHelper">Test output helper.</param>
-        public QueryManagerTests(SqliteProvider sqliteProvider, ITestOutputHelper testOutputHelper)
+        public QueryManagerTests(OrganizationWithConnection organizationWithConnection, ITestOutputHelper testOutputHelper)
         {
-            _db = sqliteProvider.Db;
+            _db = organizationWithConnection.Db;
             _logger = XUnitLogger.CreateLogger<QueryManager>(testOutputHelper);
             _random = new Random();
+            _connectionId = organizationWithConnection.ConnectionId;
         }
 
         /// <summary>
@@ -48,7 +51,7 @@ namespace TheGrid.Tests.Services
             var expectedDescription = "A description of the query " + _random.Next();
 
             // Act
-            var queryId = await queryManager.CreateQueryAsync(1, expectedName, expectedDescription, "SELECT * FROM Customers", null, default);
+            var queryId = await queryManager.CreateQueryAsync(_connectionId, expectedName, expectedDescription, "SELECT * FROM Customers", null, default);
 
             // Assert
             var query = await _db.Queries.FirstOrDefaultAsync(q => q.Id == queryId);
