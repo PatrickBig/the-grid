@@ -106,9 +106,16 @@ namespace TheGrid.Server.Controllers
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>A success code indicating the record was updated.</returns>
         [HttpPut("{queryId:int}")]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult> UpdateQuery([FromRoute][Required][Range(1, int.MaxValue)] int queryId, [FromBody] UpdateQueryRequest request, CancellationToken cancellationToken = default)
         {
-            var originalQuery = await _db.Queries.SingleAsync(q => q.Id == queryId, cancellationToken);
+            var originalQuery = await _db.Queries.FirstOrDefaultAsync(q => q.Id == queryId, cancellationToken);
+
+            if (originalQuery == null)
+            {
+                return NotFound();
+            }
 
             originalQuery.Command = request.Command;
             originalQuery.Name = request.Name;
@@ -179,7 +186,7 @@ namespace TheGrid.Server.Controllers
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>An empty response.</returns>
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
         [HttpDelete("{queryId}")]
         public async Task<ActionResult> DeleteQuery([FromRoute] int queryId, CancellationToken cancellationToken = default)
         {
@@ -202,7 +209,7 @@ namespace TheGrid.Server.Controllers
         /// <param name="request">Add tags request.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>A response message indicating the number of tags modified.</returns>
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(TagsResponse), StatusCodes.Status201Created)]
         [HttpPost("{queryId:int}/Tags")]
         public async Task<ActionResult> AddTags([FromRoute] int queryId, [FromBody] TagsRequest request, CancellationToken cancellationToken = default)
@@ -216,6 +223,7 @@ namespace TheGrid.Server.Controllers
 
             // Only add tags that are not already part of the query
             var tagsToAdd = request.Tags.Except(query.Tags, StringComparer.OrdinalIgnoreCase);
+            var totalTagsToAdd = tagsToAdd.Count();
             if (tagsToAdd.Any())
             {
                 query.Tags.AddRange(tagsToAdd);
@@ -223,7 +231,7 @@ namespace TheGrid.Server.Controllers
 
             await _db.SaveChangesAsync(cancellationToken);
 
-            return Ok(new TagsResponse { TagsModified = tagsToAdd.Count() });
+            return Ok(new TagsResponse { TagsModified = totalTagsToAdd });
         }
 
         /// <summary>

@@ -12,6 +12,11 @@ namespace TheGrid.TestHelpers.Fixtures
     public class QueryFixture : OrganizationWithConnection
     {
         /// <summary>
+        /// The default tag applied to all queries in this fixture.
+        /// </summary>
+        public const string QueryTag = "testtag";
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="QueryFixture"/> class.
         /// </summary>
         public QueryFixture()
@@ -30,6 +35,9 @@ namespace TheGrid.TestHelpers.Fixtures
                         Name = "Field1",
                         Type = QueryResultColumnType.Text,
                     },
+                ],
+                Tags = [
+                    QueryTag
                 ],
             };
 
