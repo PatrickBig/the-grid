@@ -16,11 +16,21 @@ namespace TheGrid.Connectors
     [ExcludeFromCodeCoverage]
     public class TestConnector(Dictionary<string, string> connectorParameters) : ConnectorBase(connectorParameters)
     {
+        /// <summary>
+        /// Query to use to force no columns to be returned in the result, which can generate errors.
+        /// </summary>
+        public const string ThrowExceptionQuery = "THROW AN EXCEPTION";
+
         private readonly Random _random = new();
 
         /// <inheritdoc/>
         public override Task<QueryResult> GetDataAsync(string query, Dictionary<string, object?>? queryParameters, CancellationToken cancellationToken = default)
         {
+            if (query == ThrowExceptionQuery)
+            {
+                throw new InvalidOperationException("This query was expected to fail for tests.");
+            }
+
             var results = new QueryResult
             {
                 Columns =

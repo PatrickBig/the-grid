@@ -42,7 +42,7 @@ namespace TheGrid.Tests.Services
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
-        public async Task RefreshQueryResultsAsync_Test()
+        public async Task RefreshQueryResultsAsync_Success_Test()
         {
             // Arrange
             IHubContext<QueryDesignerHub, IQueryDesignerHub> hubContext = Substitute.For<IHubContext<QueryDesignerHub, IQueryDesignerHub>>();
@@ -50,7 +50,7 @@ namespace TheGrid.Tests.Services
             var execution = new QueryExecution
             {
                 JobId = Guid.NewGuid().ToString(),
-                QueryId = _fixture.QueryId,
+                QueryId = _fixture.ValidQueryId,
             };
 
             _db.QueryExecutions.Add(execution);
@@ -65,6 +65,57 @@ namespace TheGrid.Tests.Services
             var results = await _db.QueryResultRows.Where(r => r.QueryExecutionId == execution.Id).ToListAsync();
 
             Assert.NotEmpty(results);
+        }
+
+        /// <summary>
+        /// Tests the ability to refresh query results.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task RefreshQueryResultsAsync_No_Execution_Found_Test()
+        {
+            // Arrange
+            IHubContext<QueryDesignerHub, IQueryDesignerHub> hubContext = Substitute.For<IHubContext<QueryDesignerHub, IQueryDesignerHub>>();
+
+            long executionId = -1;
+
+            var executor = new QueryExecutor(_db, _logger, hubContext);
+
+            // Act & Assert
+            await Assert.ThrowsAsync<ArgumentException>(async () => await executor.RefreshQueryResultsAsync(executionId));
+        }
+
+        /// <summary>
+        /// Tests that when executing a query that fails that we get some type of error message.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task RefreshQueryResultsAsync_Fails_Execution_Test()
+        {
+            // Arrange
+            IHubContext<QueryDesignerHub, IQueryDesignerHub> hubContext = Substitute.For<IHubContext<QueryDesignerHub, IQueryDesignerHub>>();
+
+            var execution = new QueryExecution
+            {
+                JobId = Guid.NewGuid().ToString(),
+                QueryId = _fixture.FailsExecutionQueryId,
+            };
+
+            _db.QueryExecutions.Add(execution);
+            await _db.SaveChangesAsync();
+
+            // Act
+            var executor = new QueryExecutor(_db, _logger, hubContext);
+
+            var exception = await Assert.ThrowsAnyAsync<Exception>(async () => await executor.RefreshQueryResultsAsync(execution.Id));
+
+            // Assert
+            var results = await _db.QueryExecutions.Where(e => e.Id == execution.Id).FirstOrDefaultAsync();
+            Assert.NotNull(exception);
+            _logger.LogInformation("Found exception: {exceptionMessage}", exception.Message);
+            Assert.NotNull(results);
+
+            Assert.Equal(TheGrid.Shared.Models.QueryExecutionStatus.Error, results.Status);
         }
     }
 }
