@@ -139,6 +139,7 @@ namespace TheGrid.Connectors.Integration.Tests
             // Arrange
             var connector = new PostgreSqlConnector(GetConnectionConfiguration());
 
+            // Act
             var schema = await connector.GetSchemaAsync();
 
             _output.WriteLine($"Discovered schema: {schema.DatabaseName}");
@@ -164,6 +165,9 @@ namespace TheGrid.Connectors.Integration.Tests
                     }
                 }
             }
+
+            // Assert
+            Assert.Contains(schema.DatabaseObjects, c => c.Fields != null && c.Fields.Any(f => f.Attributes.ContainsKey("Identity")));
         }
 
         /// <summary>

@@ -92,7 +92,8 @@ namespace TheGrid.Tests.Connectors.Fixtures
                 "bool_field BOOL," +
                 "timestamp_field TIMESTAMP," +
                 "date_field DATE, " +
-                "integer_null_field INT NULL" +
+                "integer_null_field INT NULL, " +
+                "integer_array_null INT[] " +
                 ");";
         }
 
