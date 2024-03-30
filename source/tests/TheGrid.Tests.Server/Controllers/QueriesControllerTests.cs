@@ -161,7 +161,7 @@ namespace TheGrid.Tests.Server.Controllers
             var controller = new QueriesController(_fixture.Db, _queryManager);
 
             // Act
-            var actionResult = await controller.GetList(_fixture.OrganizationId, null);
+            var actionResult = await controller.GetList(_fixture.OrganizationId, [new() { Field = "Name",  Direction = SortDirection.Descending }]);
 
             // Assert
             Assert.IsType<OkObjectResult>(actionResult);
