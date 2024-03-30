@@ -9,7 +9,6 @@ using NSubstitute;
 using TheGrid.Data;
 using TheGrid.Models;
 using TheGrid.Services;
-using TheGrid.TestHelpers;
 using TheGrid.TestHelpers.Fixtures;
 using Xunit.Abstractions;
 
