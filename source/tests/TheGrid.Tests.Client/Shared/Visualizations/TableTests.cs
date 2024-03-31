@@ -5,6 +5,7 @@
 using AngleSharp.Dom;
 using Bunit;
 using Microsoft.AspNetCore.Components.Web;
+using Newtonsoft.Json.Linq;
 using Radzen;
 using Radzen.Blazor;
 using RichardSzalay.MockHttp;
@@ -121,9 +122,10 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
         }
 
         [Fact]
-        public void Visualization_Resize_Column_Success_Test()
+        public async Task Visualization_Resize_Column_Success_Test()
         {
             // Arrange
+            var expectedWidth = _random.Next(10, 100);
             var options = new VisualizationResponse
             {
                 Id = 1,
@@ -143,19 +145,27 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
                 .Add(p => p.ReadOnly, false));
 
             // Get the grid and wait for the row data to be available.
-            var grid = cut.FindComponent<RadzenDataGrid<Dictionary<string, object>>>();
+            var grid = cut.FindComponent<RadzenDataGrid<Dictionary<string, object?>>>();
             cut.WaitForElement(".rz-data-row");
 
             // Locate the first column resizer.
+            var firstColumn = grid.FindComponent<RadzenDataGridColumn<Dictionary<string, object?>>>();
+            var resizeEventArgs = new DataGridColumnResizedEventArgs<Dictionary<string, object?>>();
 
-            // Act
-            var resizer = grid.Find(".rz-column-resizer");
-            Assert.NotNull(resizer);
+            // Since this is an internal property, for the sake of testing we will use reflection to set the value.
+            var eventArgType = typeof(DataGridColumnResizedEventArgs<Dictionary<string, object?>>);
+            var columnProperty = eventArgType.GetProperty(nameof(DataGridColumnResizedEventArgs<Dictionary<string, object?>>.Column));
+            var widthProperty = eventArgType.GetProperty(nameof(DataGridColumnResizedEventArgs<Dictionary<string, object?>>.Width));
 
-            resizer.MouseDown(new MouseEventArgs() { Button = 0, });
-            resizer.MouseUp(new MouseEventArgs() { Button = 0 });
+            columnProperty?.SetValue(resizeEventArgs, firstColumn.Instance);
+            widthProperty?.SetValue(resizeEventArgs, expectedWidth);
+
+            await grid.InvokeAsync(() => grid.Instance.ColumnResized.InvokeAsync(resizeEventArgs));
 
             // Assert
+            var updatedWidth = int.Parse(firstColumn.Instance.Width.Replace("px", string.Empty));
+            Assert.Equal(expectedWidth, updatedWidth);
+
             DisposeComponents();
         }
 
