@@ -42,11 +42,14 @@ namespace TheGrid.Client.Shared.Visualizations
         [EditorRequired]
         public VisualizationResponse VisualizationOptions { get; set; } = default!;
 
+        /// <summary>
+        /// Gets or sets the columns used in the visualization.
+        /// </summary>
+        [CascadingParameter]
+        public Dictionary<string, Column> Columns { get; set; }
+
         [Inject]
         private ILogger<Table> Logger { get; set; } = default!;
-
-        [CascadingParameter]
-        private Dictionary<string, Column> Columns { get; set; }
 
         /// <inheritdoc/>
         public async ValueTask DisposeAsync()
