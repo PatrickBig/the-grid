@@ -4,6 +4,7 @@
 
 using AngleSharp.Dom;
 using Bunit;
+using Microsoft.AspNetCore.Components.Web;
 using Radzen;
 using Radzen.Blazor;
 using RichardSzalay.MockHttp;
@@ -66,7 +67,7 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
         /// Tests the ability to render the table visualization.
         /// </summary>
         [Fact]
-        public void Visualization_Success_Test()
+        public void Visualization_View_Success_Test()
         {
             // Arrange
             var options = new VisualizationResponse
@@ -114,39 +115,51 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
             var expectedDate = _expectedRowData[_dateTimeColumnName] as DateTime?;
             Assert.NotNull(expectedDate);
             Assert.Equal(expectedDate.Value.Date, parsedDate);
+
+            // Cleanup the components to trigger an options update.
+            DisposeComponents();
         }
 
-        private IEnumerable<Dictionary<string, object?>> GetRows(int numberOfRows)
+        [Fact]
+        public void Visualization_Resize_Column_Success_Test()
         {
-            var results = new List<Dictionary<string, object?>>
+            // Arrange
+            var options = new VisualizationResponse
             {
-                // Add the first row as an expected row
-                _expectedRowData,
+                Id = 1,
+                Name = "Test Table",
+                QueryId = 1,
+                VisualizationType = VisualizationType.Table,
+                TableVisualizationOptions = new()
+                {
+                    PageSize = 25,
+                    ColumnOptions = GetTableColumnOptions(),
+                },
             };
 
-            for (int i = 0; i < numberOfRows - 1; i++)
-            {
-                results.Add(GetRowData());
-            }
+            var cut = RenderComponent<Table>(parameters => parameters
+                .Add(p => p.VisualizationOptions, options)
+                .Add(p => p.Columns, GetColumns())
+                .Add(p => p.ReadOnly, false));
 
-            return results;
+            // Get the grid and wait for the row data to be available.
+            var grid = cut.FindComponent<RadzenDataGrid<Dictionary<string, object>>>();
+            cut.WaitForElement(".rz-data-row");
+
+            // Locate the first column resizer.
+
+            // Act
+            var resizer = grid.Find(".rz-column-resizer");
+            Assert.NotNull(resizer);
+
+            resizer.MouseDown(new MouseEventArgs() { Button = 0, });
+            resizer.MouseUp(new MouseEventArgs() { Button = 0 });
+
+            // Assert
+            DisposeComponents();
         }
 
-        private Dictionary<string, object?> GetRowData()
-        {
-            return new Dictionary<string, object?>
-                {
-                    { _integerColumnName, _random.Next() },
-                    { _longColumnName, (long)_random.Next() },
-                    { _booleanColumnName, true },
-                    { _decimalColumnName, (decimal)_random.Next() },
-                    { _dateTimeColumnName, DateTime.Now.AddDays(_random.Next(-500, 500)) },
-                    { _timeColumnName, TimeSpan.FromSeconds(_random.Next()) },
-                    { _textColumnName, "some text content " + _random.Next() },
-                };
-        }
-
-        private Dictionary<string, TableColumnOptions> GetTableColumnOptions()
+        private static Dictionary<string, TableColumnOptions> GetTableColumnOptions()
         {
             var columns = new Dictionary<string, TableColumnOptions>()
             {
@@ -184,7 +197,7 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
             return columns;
         }
 
-        private Dictionary<string, QueryResultColumn> GetQueryResultColumns()
+        private static Dictionary<string, QueryResultColumn> GetQueryResultColumns()
         {
             var columns = new Dictionary<string, QueryResultColumn>()
             {
@@ -235,7 +248,7 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
             return columns;
         }
 
-        private Dictionary<string, Column> GetColumns()
+        private static Dictionary<string, Column> GetColumns()
         {
             var columns = new Dictionary<string, Column>
             {
@@ -284,6 +297,36 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
             };
 
             return columns;
+        }
+
+        private List<Dictionary<string, object?>> GetRows(int numberOfRows)
+        {
+            var results = new List<Dictionary<string, object?>>
+            {
+                // Add the first row as an expected row
+                _expectedRowData,
+            };
+
+            for (int i = 0; i < numberOfRows - 1; i++)
+            {
+                results.Add(GetRowData());
+            }
+
+            return results;
+        }
+
+        private Dictionary<string, object?> GetRowData()
+        {
+            return new Dictionary<string, object?>
+                {
+                    { _integerColumnName, _random.Next() },
+                    { _longColumnName, (long)_random.Next() },
+                    { _booleanColumnName, true },
+                    { _decimalColumnName, (decimal)_random.Next() },
+                    { _dateTimeColumnName, DateTime.Now.AddDays(_random.Next(-500, 500)) },
+                    { _timeColumnName, TimeSpan.FromSeconds(_random.Next()) },
+                    { _textColumnName, "some text content " + _random.Next() },
+                };
         }
     }
 }
