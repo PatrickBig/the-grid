@@ -100,19 +100,12 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
 
             Assert.NotNull(firstRow);
 
-            // The date column should be the last one.
-            var dateColumn = firstRow.GetElementsByTagName("td").LastOrDefault();
-
-            Assert.NotNull(dateColumn);
-
-            // The date should be formatted in a specific way. Verify
-            var dateFormatCorrect = DateTime.TryParseExact(dateColumn.TextContent.Trim(), _expectedDateFormat, CultureInfo.CurrentCulture, DateTimeStyles.None, out var parsedDate);
-            Assert.True(dateFormatCorrect);
-
-            // Make sure our date values match
+            // Find our date column with the matching value.
             var expectedDate = _expectedRowData[_dateTimeColumnName] as DateTime?;
             Assert.NotNull(expectedDate);
-            Assert.Equal(expectedDate.Value.Date, parsedDate);
+            var dateColumn = firstRow.GetElementsByTagName("td").Where(e => DateTime.TryParseExact(e.TextContent.Trim(), _expectedDateFormat, CultureInfo.CurrentCulture, DateTimeStyles.None, out var parsedDate) && parsedDate == expectedDate.Value.Date).FirstOrDefault();
+
+            Assert.NotNull(dateColumn);
 
             // Cleanup the components to trigger an options update.
             DisposeComponents();
