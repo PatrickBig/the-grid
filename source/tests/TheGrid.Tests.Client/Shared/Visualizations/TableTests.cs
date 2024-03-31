@@ -2,12 +2,14 @@
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
+using AngleSharp.Dom;
 using Bunit;
 using Radzen;
 using Radzen.Blazor;
 using RichardSzalay.MockHttp;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,8 +24,17 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
     /// </summary>
     public class TableTests : TestContext
     {
+        private const string _expectedDateFormat = "yyyy-MM-dd";
+        private const string _integerColumnName = "IntegerColumn";
+        private const string _longColumnName = "LongColumn";
+        private const string _booleanColumnName = "BooleanColumn";
+        private const string _decimalColumnName = "DecimalColumn";
+        private const string _dateTimeColumnName = "DateTimeColumn";
+        private const string _timeColumnName = "TimeColumn";
+        private const string _textColumnName = "TextColumn";
         private readonly ITestOutputHelper _outputHelper;
         private readonly Random _random = new();
+        private readonly Dictionary<string, object?> _expectedRowData;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TableTests"/> class.
@@ -34,6 +45,9 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
             Services.AddRadzenComponents();
 
             var mock = Services.AddMockHttpClient();
+
+            // Setup the expected row data before we build our other dataset.
+            _expectedRowData = GetRowData();
 
             var mockedTableResponse = new PaginatedQueryResult
             {
@@ -64,7 +78,7 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
                 TableVisualizationOptions = new()
                 {
                     PageSize = 25,
-                    ColumnOptions = new(),
+                    ColumnOptions = GetTableColumnOptions(),
                 },
             };
 
@@ -78,29 +92,96 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
             cut.WaitForElement(".rz-data-row");
 
             // Make sure it has the same number of columns that we would expect.
+            var columns = grid.FindComponents<RadzenDataGridColumn<Dictionary<string, object>>>();
+
+            Assert.Equal(options.TableVisualizationOptions.ColumnOptions.Count, columns.Count);
+
+            // Get the first row, which should contain data from _expectedRowData
+            var firstRow = grid.Nodes.GetElementsByClassName("rz-data-row").FirstOrDefault();
+
+            Assert.NotNull(firstRow);
+
+            // The date column should be the last one.
+            var dateColumn = firstRow.GetElementsByTagName("td").LastOrDefault();
+
+            Assert.NotNull(dateColumn);
+
+            // The date should be formatted in a specific way. Verify
+            var dateFormatCorrect = DateTime.TryParseExact(dateColumn.TextContent.Trim(), _expectedDateFormat, CultureInfo.CurrentCulture, DateTimeStyles.None, out var parsedDate);
+            Assert.True(dateFormatCorrect);
+
+            // Make sure our date values match
+            var expectedDate = _expectedRowData[_dateTimeColumnName] as DateTime?;
+            Assert.NotNull(expectedDate);
+            Assert.Equal(expectedDate.Value.Date, parsedDate);
         }
 
         private IEnumerable<Dictionary<string, object?>> GetRows(int numberOfRows)
         {
-            var results = new List<Dictionary<string, object?>>();
-
-            for (int i = 0; i < numberOfRows; i++)
+            var results = new List<Dictionary<string, object?>>
             {
-                var row = new Dictionary<string, object?>
-                {
-                    { "IntegerColumn", (int)_random.Next() },
-                    { "LongColumn", (long)_random.Next() },
-                    { "BooleanColumn", true },
-                    { "DecimalColumn", (decimal)_random.Next() },
-                    { "DateTimeColumn", DateTime.Now.AddMinutes(_random.Next()) },
-                    { "TimeColumn", TimeSpan.FromSeconds(_random.Next()) },
-                    { "TextColumn", "some text content " + _random.Next() },
-                };
+                // Add the first row as an expected row
+                _expectedRowData,
+            };
 
-                results.Add(row);
+            for (int i = 0; i < numberOfRows - 1; i++)
+            {
+                results.Add(GetRowData());
             }
 
             return results;
+        }
+
+        private Dictionary<string, object?> GetRowData()
+        {
+            return new Dictionary<string, object?>
+                {
+                    { _integerColumnName, _random.Next() },
+                    { _longColumnName, (long)_random.Next() },
+                    { _booleanColumnName, true },
+                    { _decimalColumnName, (decimal)_random.Next() },
+                    { _dateTimeColumnName, DateTime.Now.AddDays(_random.Next(-500, 500)) },
+                    { _timeColumnName, TimeSpan.FromSeconds(_random.Next()) },
+                    { _textColumnName, "some text content " + _random.Next() },
+                };
+        }
+
+        private Dictionary<string, TableColumnOptions> GetTableColumnOptions()
+        {
+            var columns = new Dictionary<string, TableColumnOptions>()
+            {
+                {
+                    _integerColumnName, new TableColumnOptions
+                    {
+                        Width = 100,
+                    }
+                },
+                {
+                    _longColumnName, new TableColumnOptions()
+                },
+                {
+                    _booleanColumnName, new TableColumnOptions()
+                },
+                {
+                    _decimalColumnName, new TableColumnOptions()
+                },
+                {
+                    _dateTimeColumnName, new TableColumnOptions
+                    {
+                        DisplayFormat = _expectedDateFormat,
+                        DisplayName = "Date time",
+                        DisplayOrder = 1000,
+                    }
+                },
+                {
+                    _timeColumnName, new TableColumnOptions()
+                },
+                {
+                    _textColumnName, new TableColumnOptions()
+                },
+            };
+
+            return columns;
         }
 
         private Dictionary<string, QueryResultColumn> GetQueryResultColumns()
@@ -108,43 +189,43 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
             var columns = new Dictionary<string, QueryResultColumn>()
             {
                 {
-                    "IntegerColumn", new QueryResultColumn
+                    _integerColumnName, new QueryResultColumn
                     {
                         Type = QueryResultColumnType.Integer,
                     }
                 },
                 {
-                    "LongColumn", new QueryResultColumn
+                    _longColumnName, new QueryResultColumn
                     {
                         Type = QueryResultColumnType.Long,
                     }
                 },
                 {
-                    "BooleanColumn", new QueryResultColumn
+                    _booleanColumnName, new QueryResultColumn
                     {
                         Type = QueryResultColumnType.Boolean,
                     }
                 },
                 {
-                    "DecimalColumn", new QueryResultColumn
+                    _decimalColumnName, new QueryResultColumn
                     {
                         Type = QueryResultColumnType.Decimal,
                     }
                 },
                 {
-                    "DateTimeColumn", new QueryResultColumn
+                    _dateTimeColumnName, new QueryResultColumn
                     {
                         Type = QueryResultColumnType.DateTime,
                     }
                 },
                 {
-                    "TimeColumn", new QueryResultColumn
+                    _timeColumnName, new QueryResultColumn
                     {
                         Type = QueryResultColumnType.Time,
                     }
                 },
                 {
-                    "TextColumn", new QueryResultColumn
+                    _textColumnName, new QueryResultColumn
                     {
                         Type = QueryResultColumnType.Text,
                     }
@@ -159,43 +240,43 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
             var columns = new Dictionary<string, Column>
             {
                 {
-                    "IntegerColumn", new Column
+                    _integerColumnName, new Column
                     {
                         Type = QueryResultColumnType.Integer,
                     }
                 },
                 {
-                    "LongColumn", new Column
+                    _longColumnName, new Column
                     {
                         Type = QueryResultColumnType.Long,
                     }
                 },
                 {
-                    "BooleanColumn", new Column
+                    _booleanColumnName, new Column
                     {
                         Type = QueryResultColumnType.Boolean,
                     }
                 },
                 {
-                    "DecimalColumn", new Column
+                    _decimalColumnName, new Column
                     {
                         Type = QueryResultColumnType.Decimal,
                     }
                 },
                 {
-                    "DateTimeColumn", new Column
+                    _dateTimeColumnName, new Column
                     {
                         Type = QueryResultColumnType.DateTime,
                     }
                 },
                 {
-                    "TimeColumn", new Column
+                    _timeColumnName, new Column
                     {
                         Type = QueryResultColumnType.Time,
                     }
                 },
                 {
-                    "TextColumn", new Column
+                    _textColumnName, new Column
                     {
                         Type = QueryResultColumnType.Text,
                     }
