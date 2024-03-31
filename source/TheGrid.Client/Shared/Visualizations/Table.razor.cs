@@ -71,7 +71,7 @@ namespace TheGrid.Client.Shared.Visualizations
                 throw new InvalidOperationException("Unable to initialize table visualization without column information.");
             }
 
-            if (VisualizationOptions.TableVisualizationOptions == null)
+            if (VisualizationOptions?.TableVisualizationOptions == null)
             {
                 throw new InvalidOperationException("Unable to initialize table visualization without table options being available.");
             }

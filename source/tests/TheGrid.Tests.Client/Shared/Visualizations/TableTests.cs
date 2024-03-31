@@ -4,18 +4,11 @@
 
 using AngleSharp.Dom;
 using Bunit;
-using Microsoft.AspNetCore.Components.Web;
-using Newtonsoft.Json.Linq;
 using Radzen;
 using Radzen.Blazor;
 using RichardSzalay.MockHttp;
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 using TheGrid.Client.Shared.Visualizations;
 using TheGrid.Shared.Models;
 using Xunit.Abstractions;
@@ -125,6 +118,57 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
             DisposeComponents();
         }
 
+        /// <summary>
+        /// Tests that when trying to initialize the visualization without the column options that an exception will be thrown.
+        /// </summary>
+        [Fact]
+        public void Visualization_Missing_Columns_Fails()
+        {
+            // Arrange
+            var options = new VisualizationResponse
+            {
+                Id = 1,
+                Name = "Test Table",
+                QueryId = 1,
+                VisualizationType = VisualizationType.Table,
+                TableVisualizationOptions = new()
+                {
+                    PageSize = 25,
+                    ColumnOptions = GetTableColumnOptions(),
+                },
+            };
+
+            // Act
+            var exception = Assert.Throws<InvalidOperationException>(() => RenderComponent<Table>(parameters => parameters
+                .Add(p => p.VisualizationOptions, options)));
+
+            // Assert
+            Assert.NotNull(exception);
+            Assert.Contains("without column information.", exception.Message);
+        }
+
+        /// <summary>
+        /// Tests that when trying to initialize the visualization without the table visualization options that an exception will be thrown.
+        /// </summary>
+        [Fact]
+        public void Visualization_Missing_Table_Options_Fails()
+        {
+            // Arrange
+            var columns = GetColumns();
+
+            // Act
+            var exception = Assert.Throws<InvalidOperationException>(() => RenderComponent<Table>(parameters => parameters
+                .Add(p => p.Columns, columns)));
+
+            // Assert
+            Assert.NotNull(exception);
+            Assert.Contains(" without table options being available", exception.Message);
+        }
+
+        /// <summary>
+        /// Tests the ability to resize a column.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
         public async Task Visualization_Resize_Column_Success_Test()
         {
@@ -175,6 +219,7 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
 
         private static Dictionary<string, TableColumnOptions> GetTableColumnOptions()
         {
+            // We are omitting the long column on purpose to add coverage for automatically creating the options when not available.
             var columns = new Dictionary<string, TableColumnOptions>()
             {
                 {
@@ -182,9 +227,6 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
                     {
                         Width = 100,
                     }
-                },
-                {
-                    _longColumnName, new TableColumnOptions()
                 },
                 {
                     _booleanColumnName, new TableColumnOptions()
