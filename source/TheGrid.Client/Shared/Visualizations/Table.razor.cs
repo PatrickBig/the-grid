@@ -143,7 +143,7 @@ namespace TheGrid.Client.Shared.Visualizations
                 for (int i = 0; i < columns.Count; i++)
                 {
                     var column = columns[i];
-                    VisualizationOptions.TableVisualizationOptions!.ColumnOptions[column.Property].DisplayOrder = column.GetOrderIndex() ?? 1 * 1000;
+                    VisualizationOptions.TableVisualizationOptions!.ColumnOptions[column.Property].DisplayOrder = column.GetOrderIndex() ?? (i + 1) * 1000;
                 }
 
                 // Update the options
@@ -156,6 +156,7 @@ namespace TheGrid.Client.Shared.Visualizations
             // Give whatever we have in the visualization options if the columns from the dataset is not yet available or we already built the options.
             if (_columns == null || _columnOptionsBuilt)
             {
+                FixColumnOrder(VisualizationOptions.TableVisualizationOptions!.ColumnOptions);
                 return VisualizationOptions.TableVisualizationOptions!.ColumnOptions;
             }
 
@@ -187,10 +188,22 @@ namespace TheGrid.Client.Shared.Visualizations
 
             // If this isn't a readonly component send an update so the visualization options are saved and can be used again later.
             _optionsNeedUpdate = true;
-
             _columnOptionsBuilt = true;
 
+            FixColumnOrder(VisualizationOptions.TableVisualizationOptions!.ColumnOptions);
+
             return VisualizationOptions.TableVisualizationOptions.ColumnOptions;
+        }
+
+        private void FixColumnOrder(Dictionary<string, TableColumnOptions> columnOptions)
+        {
+            var lastOrder = 0;
+
+            foreach (var column in columnOptions.OrderBy(c => c.Value.DisplayOrder).ThenBy(c => c.Key))
+            {
+                lastOrder++;
+                column.Value.DisplayOrder = lastOrder;
+            }
         }
 
         private async Task UpdateOptionsAsync()

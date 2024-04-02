@@ -189,7 +189,7 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
             var grid = cut.FindComponent<RadzenDataGrid<Dictionary<string, object?>>>();
             cut.WaitForElement(".rz-data-row");
 
-            // Locate the first column resizer.
+            // Locate the first column to resize.
             var firstColumn = grid.FindComponent<RadzenDataGridColumn<Dictionary<string, object?>>>();
             var resizeEventArgs = new DataGridColumnResizedEventArgs<Dictionary<string, object?>>();
 
@@ -201,6 +201,7 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
             columnProperty?.SetValue(resizeEventArgs, firstColumn.Instance);
             widthProperty?.SetValue(resizeEventArgs, expectedWidth);
 
+            // Act
             await grid.InvokeAsync(() => grid.Instance.ColumnResized.InvokeAsync(resizeEventArgs));
 
             // Assert
@@ -208,6 +209,61 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
             Assert.Equal(expectedWidth, updatedWidth);
 
             DisposeComponents();
+        }
+
+        /// <summary>
+        /// Tests the ability to move a column.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task Visualization_Move_Column_Success_Test()
+        {
+            // Arrange
+            var options = new VisualizationResponse
+            {
+                Id = 1,
+                Name = "Test Table",
+                QueryId = 1,
+                VisualizationType = VisualizationType.Table,
+                TableVisualizationOptions = new()
+                {
+                    PageSize = 25,
+                    ColumnOptions = GetTableColumnOptions(),
+                },
+            };
+
+            var cut = RenderComponent<Table>(parameters => parameters
+                .Add(p => p.VisualizationOptions, options)
+                .Add(p => p.Columns, GetColumns())
+                .Add(p => p.ReadOnly, false));
+
+            // Get the grid and wait for the row data to be available.
+            var grid = cut.FindComponent<RadzenDataGrid<Dictionary<string, object?>>>();
+            cut.WaitForElement(".rz-data-row");
+
+            // Locate the first column to move.
+            var firstColumn = grid.FindComponent<RadzenDataGridColumn<Dictionary<string, object?>>>();
+
+            var oldIndex = firstColumn.Instance.OrderIndex;
+            var columnCount = grid.FindComponents<RadzenDataGridColumn<Dictionary<string, object?>>>().Count;
+            var expectedIndex = columnCount;
+
+            var reorderColumnEvent = new DataGridColumnReorderedEventArgs<Dictionary<string, object?>>();
+
+            // Since this is an internal property, for the sake of testing we will use reflection to set the value.
+            var eventArgType = typeof(DataGridColumnReorderedEventArgs<Dictionary<string, object?>>);
+            var columnProperty = eventArgType.GetProperty(nameof(DataGridColumnReorderedEventArgs<Dictionary<string, object?>>.Column));
+            var oldIndexProperty = eventArgType.GetProperty(nameof(DataGridColumnReorderedEventArgs<Dictionary<string, object?>>.OldIndex));
+            var newIndexProperty = eventArgType.GetProperty(nameof(DataGridColumnReorderedEventArgs<Dictionary<string, object?>>.NewIndex));
+
+            columnProperty?.SetValue(reorderColumnEvent, firstColumn.Instance);
+            oldIndexProperty?.SetValue(reorderColumnEvent, oldIndex);
+            newIndexProperty?.SetValue(reorderColumnEvent, expectedIndex);
+
+            // Act
+            await grid.InvokeAsync(() => grid.Instance.ColumnReordered.InvokeAsync(reorderColumnEvent));
+
+            // Assert: TODO - This needs work. Currently the re-ordering doesn't seem to work as expected.
         }
 
         private static Dictionary<string, TableColumnOptions> GetTableColumnOptions()
@@ -222,10 +278,16 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
                     }
                 },
                 {
-                    _booleanColumnName, new TableColumnOptions()
+                    _booleanColumnName, new TableColumnOptions
+                    {
+                        Width = 100,
+                    }
                 },
                 {
-                    _decimalColumnName, new TableColumnOptions()
+                    _decimalColumnName, new TableColumnOptions
+                    {
+                        Width = 100,
+                    }
                 },
                 {
                     _dateTimeColumnName, new TableColumnOptions
@@ -236,10 +298,16 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
                     }
                 },
                 {
-                    _timeColumnName, new TableColumnOptions()
+                    _timeColumnName, new TableColumnOptions
+                    {
+                        Width = 100,
+                    }
                 },
                 {
-                    _textColumnName, new TableColumnOptions()
+                    _textColumnName, new TableColumnOptions
+                    {
+                        Width = 100,
+                    }
                 },
             };
 

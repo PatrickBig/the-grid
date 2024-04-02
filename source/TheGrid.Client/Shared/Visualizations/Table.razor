@@ -28,6 +28,7 @@
                                           Title="@(kv.Value.DisplayName ?? kv.Key)"
                                           Type="@GetTypeForColumnType(valueType)"
                                           Property="@kv.Key"
+                                          OrderIndex="@kv.Value.DisplayOrder"
                                           Width="@GetWidth(kv.Value)">
                         <Template>
                             @if (valueType == QueryResultColumnType.Text || kv.Value.DisplayFormat == null)
