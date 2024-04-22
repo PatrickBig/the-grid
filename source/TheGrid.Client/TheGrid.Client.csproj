@@ -13,7 +13,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8.0.3" PrivateAssets="all" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.3" />
-    <PackageReference Include="Radzen.Blazor" Version="4.29.4" />
+    <PackageReference Include="Radzen.Blazor" Version="4.29.9" />
     <PackageReference Include="Mapster" Version="7.4.0" />
   </ItemGroup>
 
