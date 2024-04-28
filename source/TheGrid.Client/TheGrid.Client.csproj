@@ -10,10 +10,10 @@
   <ItemGroup>
     <PackageReference Include="BlazorMonaco" Version="3.2.0" />
     <PackageReference Include="Humanizer.Core" Version="2.14.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.3" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8.0.3" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.3" />
-    <PackageReference Include="Radzen.Blazor" Version="4.29.4" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.4" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8.0.4" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.4" />
+    <PackageReference Include="Radzen.Blazor" Version="4.30.2" />
     <PackageReference Include="Mapster" Version="7.4.0" />
   </ItemGroup>
 

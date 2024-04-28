@@ -11,7 +11,7 @@ using TheGrid.Shared.Models;
 namespace TheGrid.Client.Shared.Queries
 {
     /// <summary>
-    /// Code behind file for the visualization editor.
+    /// Tabbed component listing all visualizations associated to a query.
     /// </summary>
     public partial class QueryVisualizations : TheGridComponentBase
     {
@@ -19,11 +19,17 @@ namespace TheGrid.Client.Shared.Queries
         private int _selectedTabIndex;
 
         /// <summary>
-        /// Identifier for the query to display the visualizations for.
+        /// Gets or sets the identifier for the query to display the visualizations for.
         /// </summary>
         [Parameter]
         [EditorRequired]
         public int QueryId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the columns for the visuzliation.
+        /// </summary>
+        [CascadingParameter]
+        public Dictionary<string, Column>? Columns { get; set; }
 
         [Inject]
         private DialogService DialogService { get; set; } = default!;
@@ -33,9 +39,6 @@ namespace TheGrid.Client.Shared.Queries
 
         [Inject]
         private ILogger<QueryVisualizations> Logger { get; set; } = default!;
-
-        [CascadingParameter]
-        private Dictionary<string, Column>? Columns { get; set; }
 
         /// <summary>
         /// Refreshes the available visualizations.
