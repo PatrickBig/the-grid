@@ -21,22 +21,13 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
     public class TableTests : TestContext
     {
         private const string _expectedDateFormat = "yyyy-MM-dd";
-        private const string _integerColumnName = "IntegerColumn";
-        private const string _longColumnName = "LongColumn";
-        private const string _booleanColumnName = "BooleanColumn";
-        private const string _decimalColumnName = "DecimalColumn";
-        private const string _dateTimeColumnName = "DateTimeColumn";
-        private const string _timeColumnName = "TimeColumn";
-        private const string _textColumnName = "TextColumn";
-        private readonly ITestOutputHelper _outputHelper;
         private readonly Random _random = new();
         private readonly Dictionary<string, object?> _expectedRowData;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TableTests"/> class.
         /// </summary>
-        /// <param name="testOutputHelper">Test output helper.</param>
-        public TableTests(ITestOutputHelper testOutputHelper)
+        public TableTests()
         {
             Services.AddRadzenComponents();
 
@@ -57,8 +48,6 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
 
             mock.When("/api/v1/Visualizations/*")
                 .Respond(HttpStatusCode.OK);
-
-            _outputHelper = testOutputHelper;
         }
 
         /// <summary>
@@ -84,7 +73,7 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
             // Act
             var cut = RenderComponent<Table>(parameters => parameters
                 .Add(p => p.VisualizationOptions, options)
-                .Add(p => p.Columns, GetColumns()));
+                .Add(p => p.Columns, QueryColumnFixture.GetColumns()));
 
             // Assert: Make sure there is a grid component and it has some rows in it.
             var grid = cut.FindComponent<RadzenDataGrid<Dictionary<string, object>>>();
@@ -101,7 +90,7 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
             Assert.NotNull(firstRow);
 
             // Find our date column with the matching value.
-            var expectedDate = _expectedRowData[_dateTimeColumnName] as DateTime?;
+            var expectedDate = _expectedRowData[QueryColumnFixture.DateTimeColumnName] as DateTime?;
             Assert.NotNull(expectedDate);
             var dateColumn = firstRow.GetElementsByTagName("td").Where(e => DateTime.TryParseExact(e.TextContent.Trim(), _expectedDateFormat, CultureInfo.CurrentCulture, DateTimeStyles.None, out var parsedDate) && parsedDate == expectedDate.Value.Date).FirstOrDefault();
 
@@ -147,7 +136,7 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
         public void Visualization_Missing_Table_Options_Fails()
         {
             // Arrange
-            var columns = GetColumns();
+            var columns = QueryColumnFixture.GetColumns();
 
             // Act
             var exception = Assert.Throws<InvalidOperationException>(() => RenderComponent<Table>(parameters => parameters
@@ -182,7 +171,7 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
 
             var cut = RenderComponent<Table>(parameters => parameters
                 .Add(p => p.VisualizationOptions, options)
-                .Add(p => p.Columns, GetColumns())
+                .Add(p => p.Columns, QueryColumnFixture.GetColumns())
                 .Add(p => p.ReadOnly, false));
 
             // Get the grid and wait for the row data to be available.
@@ -234,7 +223,7 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
 
             var cut = RenderComponent<Table>(parameters => parameters
                 .Add(p => p.VisualizationOptions, options)
-                .Add(p => p.Columns, GetColumns())
+                .Add(p => p.Columns, QueryColumnFixture.GetColumns())
                 .Add(p => p.ReadOnly, false));
 
             // Get the grid and wait for the row data to be available.
@@ -272,25 +261,25 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
             var columns = new Dictionary<string, TableColumnOptions>()
             {
                 {
-                    _integerColumnName, new TableColumnOptions
+                    QueryColumnFixture.IntegerColumnName, new TableColumnOptions
                     {
                         Width = 100,
                     }
                 },
                 {
-                    _booleanColumnName, new TableColumnOptions
+                    QueryColumnFixture.BooleanColumnName, new TableColumnOptions
                     {
                         Width = 100,
                     }
                 },
                 {
-                    _decimalColumnName, new TableColumnOptions
+                    QueryColumnFixture.DecimalColumnName, new TableColumnOptions
                     {
                         Width = 100,
                     }
                 },
                 {
-                    _dateTimeColumnName, new TableColumnOptions
+                    QueryColumnFixture.DateTimeColumnName, new TableColumnOptions
                     {
                         DisplayFormat = _expectedDateFormat,
                         DisplayName = "Date time",
@@ -298,13 +287,13 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
                     }
                 },
                 {
-                    _timeColumnName, new TableColumnOptions
+                    QueryColumnFixture.TimeColumnName, new TableColumnOptions
                     {
                         Width = 100,
                     }
                 },
                 {
-                    _textColumnName, new TableColumnOptions
+                    QueryColumnFixture.TextColumnName, new TableColumnOptions
                     {
                         Width = 100,
                     }
@@ -319,94 +308,43 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
             var columns = new Dictionary<string, QueryResultColumn>()
             {
                 {
-                    _integerColumnName, new QueryResultColumn
+                    QueryColumnFixture.IntegerColumnName, new QueryResultColumn
                     {
                         Type = QueryResultColumnType.Integer,
                     }
                 },
                 {
-                    _longColumnName, new QueryResultColumn
+                    QueryColumnFixture.LongColumnName, new QueryResultColumn
                     {
                         Type = QueryResultColumnType.Long,
                     }
                 },
                 {
-                    _booleanColumnName, new QueryResultColumn
+                    QueryColumnFixture.BooleanColumnName, new QueryResultColumn
                     {
                         Type = QueryResultColumnType.Boolean,
                     }
                 },
                 {
-                    _decimalColumnName, new QueryResultColumn
+                    QueryColumnFixture.DecimalColumnName, new QueryResultColumn
                     {
                         Type = QueryResultColumnType.Decimal,
                     }
                 },
                 {
-                    _dateTimeColumnName, new QueryResultColumn
+                    QueryColumnFixture.DateTimeColumnName, new QueryResultColumn
                     {
                         Type = QueryResultColumnType.DateTime,
                     }
                 },
                 {
-                    _timeColumnName, new QueryResultColumn
+                    QueryColumnFixture.TimeColumnName, new QueryResultColumn
                     {
                         Type = QueryResultColumnType.Time,
                     }
                 },
                 {
-                    _textColumnName, new QueryResultColumn
-                    {
-                        Type = QueryResultColumnType.Text,
-                    }
-                },
-            };
-
-            return columns;
-        }
-
-        private static Dictionary<string, Column> GetColumns()
-        {
-            var columns = new Dictionary<string, Column>
-            {
-                {
-                    _integerColumnName, new Column
-                    {
-                        Type = QueryResultColumnType.Integer,
-                    }
-                },
-                {
-                    _longColumnName, new Column
-                    {
-                        Type = QueryResultColumnType.Long,
-                    }
-                },
-                {
-                    _booleanColumnName, new Column
-                    {
-                        Type = QueryResultColumnType.Boolean,
-                    }
-                },
-                {
-                    _decimalColumnName, new Column
-                    {
-                        Type = QueryResultColumnType.Decimal,
-                    }
-                },
-                {
-                    _dateTimeColumnName, new Column
-                    {
-                        Type = QueryResultColumnType.DateTime,
-                    }
-                },
-                {
-                    _timeColumnName, new Column
-                    {
-                        Type = QueryResultColumnType.Time,
-                    }
-                },
-                {
-                    _textColumnName, new Column
+                    QueryColumnFixture.TextColumnName, new QueryResultColumn
                     {
                         Type = QueryResultColumnType.Text,
                     }
@@ -436,13 +374,13 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
         {
             return new Dictionary<string, object?>
                 {
-                    { _integerColumnName, _random.Next() },
-                    { _longColumnName, (long)_random.Next() },
-                    { _booleanColumnName, true },
-                    { _decimalColumnName, (decimal)_random.Next() },
-                    { _dateTimeColumnName, DateTime.Now.AddDays(_random.Next(-500, 500)) },
-                    { _timeColumnName, TimeSpan.FromSeconds(_random.Next()) },
-                    { _textColumnName, "some text content " + _random.Next() },
+                    { QueryColumnFixture.IntegerColumnName, _random.Next() },
+                    { QueryColumnFixture.LongColumnName, (long)_random.Next() },
+                    { QueryColumnFixture.BooleanColumnName, true },
+                    { QueryColumnFixture.DecimalColumnName, (decimal)_random.Next() },
+                    { QueryColumnFixture.DateTimeColumnName, DateTime.Now.AddDays(_random.Next(-500, 500)) },
+                    { QueryColumnFixture.TimeColumnName, TimeSpan.FromSeconds(_random.Next()) },
+                    { QueryColumnFixture.TextColumnName, "some text content " + _random.Next() },
                 };
         }
     }

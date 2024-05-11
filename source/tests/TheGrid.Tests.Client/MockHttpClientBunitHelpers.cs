@@ -42,7 +42,8 @@ namespace TheGrid.Tests.Client
             request.Respond(req =>
             {
                 var response = new HttpResponseMessage(HttpStatusCode.OK);
-                response.Content = new StringContent(JsonSerializer.Serialize(content));
+                var json = JsonSerializer.Serialize(content);
+                response.Content = new StringContent(json);
                 response.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
                 return response;
             });
