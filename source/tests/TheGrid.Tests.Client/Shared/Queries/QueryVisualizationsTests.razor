@@ -96,7 +96,7 @@
                 <RadzenDialog />
                 <QueryVisualizations QueryId="@_validQueryId" />
             </text>
-        );
+    );
 
         // Act
         cut.WaitForElement("#visualization-" + _validQueryId, TimeSpan.FromSeconds(5));
@@ -107,5 +107,8 @@
 
         // We won't actually interact with the options dialog from here. Just make sure it shows up.
         cut.WaitForElement(".rz-dialog-wrapper", TimeSpan.FromSeconds(5));
+
+        // Our test is to make sure the dialog appears, which failure would result in an exception above.
+        Assert.True(true);
     }
 }
