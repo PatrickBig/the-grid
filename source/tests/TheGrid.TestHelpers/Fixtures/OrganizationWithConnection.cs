@@ -58,6 +58,6 @@ namespace TheGrid.TestHelpers.Fixtures
         /// Gest the test connector ID.
         /// </summary>
         /// <returns>The test connector ID.</returns>
-        public string GetTestConnectorId() => "TheGrid.Connectors.TestConnector";
+        public static string GetTestConnectorId() => "TheGrid.Connectors.TestConnector";
     }
 }
