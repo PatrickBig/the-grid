@@ -3,11 +3,6 @@
 // </copyright>
 
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TheGrid.Models;
 using TheGrid.Server.Controllers;
 using TheGrid.Shared.Models;
@@ -22,6 +17,10 @@ namespace TheGrid.Tests.Server.Controllers
     {
         private readonly OrganizationWithConnection _fixture;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ConnectionsControllerTests"/> class.
+        /// </summary>
+        /// <param name="fixture">Testing fixture.</param>
         public ConnectionsControllerTests(OrganizationWithConnection fixture)
         {
             _fixture = fixture;
@@ -40,7 +39,7 @@ namespace TheGrid.Tests.Server.Controllers
             var request = new CreateConnectionRequest
             {
                 Name = "Test connection",
-                ConnectorId = _fixture.GetTestConnectorId(),
+                ConnectorId = OrganizationWithConnection.GetTestConnectorId(),
                 OrganizationId = _fixture.OrganizationId,
             };
 
@@ -101,7 +100,7 @@ namespace TheGrid.Tests.Server.Controllers
             var request = new CreateConnectionRequest
             {
                 Name = "Test connection",
-                ConnectorId = _fixture.GetTestConnectorId(),
+                ConnectorId = OrganizationWithConnection.GetTestConnectorId(),
                 OrganizationId = "invalid_org",
             };
 
