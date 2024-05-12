@@ -4,17 +4,16 @@
     <RadzenFormField Text="@ConnectionProperty.Name">
         @if (ConnectionProperty.Type == ConnectionPropertyType.SingleLineText)
         {
-            <RadzenTextBox Name="@ConnectionProperty.Name" Change="OnValueChangedAsync" AutoComplete=false />
+            <RadzenTextBox Name="@HtmlUtility.GetSafeId(ConnectionProperty.Name)" Change="OnValueChangedAsync" AutoComplete=false />
         }
         else if (ConnectionProperty.Type == ConnectionPropertyType.ProtectedText)
         {
-            <RadzenPassword Name="@ConnectionProperty.Name" Change="OnValueChangedAsync" AutoComplete=false />
+            <RadzenPassword Name="@HtmlUtility.GetSafeId(ConnectionProperty.Name)" Change="OnValueChangedAsync" AutoComplete=false />
         }
 
         @if (ConnectionProperty.Required)
         {
-            <RadzenRequiredValidator Component="@ConnectionProperty.Name" Popup/>
+            <RadzenRequiredValidator Component="@HtmlUtility.GetSafeId(ConnectionProperty.Name)" Popup />
         }
-    </RadzenFormField>
-    
+    </RadzenFormField>    
 }
