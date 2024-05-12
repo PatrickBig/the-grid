@@ -28,7 +28,7 @@ namespace TheGrid.TestHelpers.Fixtures
                         Name = "Test Connection",
                         Connector = new TheGrid.Shared.Models.Connector
                         {
-                            Id = "TheGrid.Connectors.TestConnector",
+                            Id = GetTestConnectorId(),
                             Name = "Fake Database Connection",
                             SupportsConnectionTest = false,
                             SupportsSchemaDiscovery = false,
@@ -41,7 +41,7 @@ namespace TheGrid.TestHelpers.Fixtures
 
             Db.SaveChanges();
 
-            ConnectionId = organization.Connections.First().Id;
+            ConnectionId = organization.Connections[0].Id;
         }
 
         /// <summary>
@@ -53,5 +53,11 @@ namespace TheGrid.TestHelpers.Fixtures
         /// Gets the ID of the default connection setup using the test connector.
         /// </summary>
         public int ConnectionId { get; private set; }
+
+        /// <summary>
+        /// Gest the test connector ID.
+        /// </summary>
+        /// <returns>The test connector ID.</returns>
+        public string GetTestConnectorId() => "TheGrid.Connectors.TestConnector";
     }
 }

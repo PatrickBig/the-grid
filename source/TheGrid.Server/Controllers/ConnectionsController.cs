@@ -43,7 +43,7 @@ namespace TheGrid.Server.Controllers
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(CreateConnectionResponse), StatusCodes.Status201Created)]
         [HttpPost]
-        public async Task<ActionResult<CreateConnectionResponse>> Post([FromBody] CreateConnectionRequest request, CancellationToken cancellationToken = default)
+        public async Task<ActionResult> Post([FromBody] CreateConnectionRequest request, CancellationToken cancellationToken = default)
         {
             if (!await _db.Organizations.AnyAsync(d => d.Id == request.OrganizationId, cancellationToken))
             {
@@ -71,8 +71,10 @@ namespace TheGrid.Server.Controllers
         /// <param name="connectionId">The ID of the connection to fetch.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>Information about the connection.</returns>
+        [ProducesResponseType(typeof(Connection), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         [HttpGet("{connectionId:int}")]
-        public async Task<ActionResult<Connection>> Get([FromRoute] int connectionId, CancellationToken cancellationToken = default)
+        public async Task<ActionResult> Get([FromRoute] int connectionId, CancellationToken cancellationToken = default)
         {
             var connection = await _db.Connections.FirstOrDefaultAsync(d => d.Id == connectionId, cancellationToken);
 
