@@ -1,11 +1,24 @@
-﻿<RadzenImage Style="width: 16px; height: 16px;" Path="@("/images/connector-icons/" + ConnectorIcon)"></RadzenImage>
+﻿<RadzenImage Style="width: 16px; height: 16px;" Path="@GetConnectorIconPath()"></RadzenImage>
 @Name
 
 @code {
+    /// <summary>
+    /// Gets or sest the name of the connector.
+    /// </summary>
     [Parameter]
     [EditorRequired]
     public string Name { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Gets or sets the connector icon. If null or empty the default icon will be used.
+    /// </summary>
     [Parameter]
-    public string? ConnectorIcon { get; set; } = "unknown.png";
+    public string? ConnectorIcon { get; set; }
+
+    private string GetConnectorIconPath()
+    {
+        var iconFileName = string.IsNullOrEmpty(ConnectorIcon) ? "unknown.png" : ConnectorIcon;
+
+        return "/images/connector-icons/" + iconFileName;
+    }
 }
