@@ -92,7 +92,7 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
             // Find our date column with the matching value.
             var expectedDate = _expectedRowData[QueryColumnFixture.DateTimeColumnName] as DateTime?;
             Assert.NotNull(expectedDate);
-            var dateColumn = firstRow.GetElementsByTagName("td").Where(e => DateTime.TryParseExact(e.TextContent.Trim(), _expectedDateFormat, CultureInfo.CurrentCulture, DateTimeStyles.None, out var parsedDate) && parsedDate == expectedDate.Value.Date).FirstOrDefault();
+            var dateColumn = firstRow.GetElementsByTagName("td").FirstOrDefault(e => DateTime.TryParseExact(e.TextContent.Trim(), _expectedDateFormat, CultureInfo.CurrentCulture, DateTimeStyles.None, out var parsedDate) && parsedDate == expectedDate.Value.Date);
 
             Assert.NotNull(dateColumn);
 
