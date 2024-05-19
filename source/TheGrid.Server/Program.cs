@@ -3,6 +3,7 @@
 // </copyright>
 
 using Hangfire;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
@@ -76,6 +77,11 @@ public static class Program
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
+                // Apply migrations
+                using var scope = app.Services.CreateScope();
+                var dbContext = scope.ServiceProvider.GetRequiredService<TheGridDbContext>();
+                dbContext.Database.Migrate();
+
                 app.UseWebAssemblyDebugging();
                 app.UseSwagger();
                 app.UseSwaggerUI(o =>
@@ -102,6 +108,7 @@ public static class Program
 
             app.UseAuthorization();
 
+            app.MapIdentityApi<IdentityUser>();
             app.MapControllers();
 
             app.UseResponseCaching();
