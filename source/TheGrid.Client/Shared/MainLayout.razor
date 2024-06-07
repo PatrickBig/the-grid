@@ -11,7 +11,8 @@
                 </RadzenColumn>
                 <RadzenColumn Size="7">
                     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
-                        <RadzenProfileMenu>
+                        <GridUserMenu />
+                        @* <RadzenProfileMenu>
                             <Template>
                                 <RadzenGravatar Email="user@example.com" />
                             </Template>
@@ -20,7 +21,7 @@
                                 <RadzenProfileMenuItem Text="Settings" />
                                 <RadzenProfileMenuItem Text="@_userOrganization.Name" />
                             </ChildContent>
-                        </RadzenProfileMenu>
+                        </RadzenProfileMenu> *@
                     </RadzenStack>
                 </RadzenColumn>
             </RadzenRow>

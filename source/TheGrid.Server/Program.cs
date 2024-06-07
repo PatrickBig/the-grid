@@ -46,6 +46,9 @@ public static class Program
         {
             StartupHelpers.AddServerServices(builder.Services);
             healthCheckBuilder.AddCheck<AgentQueueCheck>("Agent Queue Check");
+
+            // Add startup job
+            builder.Services.AddSetupJobs();
         }
 
         StartupHelpers.AddSharedServices(builder.Services, builder.Configuration, redis);
@@ -108,7 +111,9 @@ public static class Program
 
             app.UseAuthorization();
 
-            app.MapIdentityApi<IdentityUser>();
+            app.MapGroup("/api/v1/account")
+                .MapIdentityApi<IdentityUser>();
+
             app.MapControllers();
 
             app.UseResponseCaching();

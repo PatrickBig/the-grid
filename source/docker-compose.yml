@@ -13,6 +13,9 @@ services:
     build:
       context: .
       dockerfile: TheGrid.Server/Dockerfile
+    ports:
+      - 20080:8080
+      - 20443:8081
   redis:
     image: redis
   postgres:

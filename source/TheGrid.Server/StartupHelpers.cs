@@ -66,7 +66,10 @@ namespace TheGrid.Server
             services.AddResponseCaching();
 
             services.AddAuthorization();
-            services.AddIdentityApiEndpoints<IdentityUser>()
+            services.AddIdentityApiEndpoints<IdentityUser>(o =>
+            {
+            })
+                .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<TheGridDbContext>();
 
             services.AddControllers(o =>
