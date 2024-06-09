@@ -2,14 +2,6 @@
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
-
 namespace TheGrid.Shared.Models
 {
     /// <summary>
@@ -39,5 +31,15 @@ namespace TheGrid.Shared.Models
         /// Gets or sets the roles the user is a member of.
         /// </summary>
         public IList<string> Roles { get; set; } = Array.Empty<string>();
+
+        /// <summary>
+        /// Gets or sets the organizations the user is a member of.
+        /// </summary>
+        public IList<UserOrganizationMembership> Organizations { get; set; } = Array.Empty<UserOrganizationMembership>();
+
+        /// <summary>
+        /// Gets or sets the default organization of the current user.
+        /// </summary>
+        public string? DefaultOrganizationId { get; set; }
     }
 }

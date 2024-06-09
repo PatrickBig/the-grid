@@ -1,4 +1,8 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿// <copyright file="SeedData.cs" company="BiglerNet">
+// Copyright (c) BiglerNet. All rights reserved.
+// </copyright>
+
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
@@ -29,10 +33,10 @@ namespace TheGrid.Services.Jobs
         private async Task SeedRolesAsync()
         {
             _logger.LogTrace("Seeding Roles");
-            if (!(await _roleManager.RoleExistsAsync(TheGridRoles.SystemAdministrator)))
+            if (!(await _roleManager.RoleExistsAsync(GridRoles.SystemAdministrator)))
             {
                 _logger.LogTrace("Creating System Administrator Role");
-                var role = await _roleManager.CreateAsync(new IdentityRole(TheGridRoles.SystemAdministrator));
+                var role = await _roleManager.CreateAsync(new IdentityRole(GridRoles.SystemAdministrator));
             }
         }
     }

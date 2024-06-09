@@ -10,6 +10,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using TheGrid.Data;
+using TheGrid.Models;
 using TheGrid.Models.Configuration;
 
 namespace TheGrid.Server
@@ -66,7 +67,7 @@ namespace TheGrid.Server
             services.AddResponseCaching();
 
             services.AddAuthorization();
-            services.AddIdentityApiEndpoints<IdentityUser>(o =>
+            services.AddIdentityApiEndpoints<GridUser>(o =>
             {
             })
                 .AddRoles<IdentityRole>()

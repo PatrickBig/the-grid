@@ -4,9 +4,6 @@
 
 using Blazored.SessionStorage;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.Extensions.Logging;
-using Radzen;
-using System.Net.Http;
 using System.Net.Http.Json;
 using System.Security.Claims;
 using TheGrid.Client.Models.User;
@@ -14,6 +11,9 @@ using TheGrid.Shared.Models;
 
 namespace TheGrid.Client.Utilities
 {
+    /// <summary>
+    /// Authentication state provider for the grid.
+    /// </summary>
     public class GridAuthenticationStateProvider : AuthenticationStateProvider
     {
         private readonly ISessionStorageService _sessionStorageService;
@@ -21,7 +21,7 @@ namespace TheGrid.Client.Utilities
         private readonly HttpClient _anonymousHttpClient;
         private readonly HttpClient _authorizedHttpClient;
 
-        private ClaimsPrincipal _currentUser = new ClaimsPrincipal(new ClaimsIdentity());
+        private ClaimsPrincipal _currentUser = new(new ClaimsIdentity());
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GridAuthenticationStateProvider"/> class.
@@ -39,12 +39,33 @@ namespace TheGrid.Client.Utilities
         }
 
         /// <summary>
+        /// Overall result of the login operation.
+        /// </summary>
+        public enum LoginResult
+        {
+            /// <summary>
+            /// The login operation was successful.
+            /// </summary>
+            Success,
+
+            /// <summary>
+            /// THe user provided an incorrect username or password.
+            /// </summary>
+            InvalidCredentials,
+
+            /// <summary>
+            /// The server returned another type of error.
+            /// </summary>
+            ServerError,
+        }
+
+        /// <summary>
         /// Logs the user in and updates the authentication state.
         /// </summary>
         /// <param name="username">Username of the user logging in.</param>
         /// <param name="password">Password of the user logging in.</param>
-        /// <returns></returns>
-        public async Task LoginAsync(string username, string password)
+        /// <returns>The result of the login process.</returns>
+        public async Task<LoginResult> LoginAsync(string username, string password)
         {
             var request = new LoginRequest
             {
@@ -57,14 +78,26 @@ namespace TheGrid.Client.Utilities
             if (!response.IsSuccessStatusCode)
             {
                 // Handle errors.
+                if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                {
+                    _logger.LogError("Invalid username or password.");
+                    return LoginResult.InvalidCredentials;
+                }
+                else
+                {
+                    _logger.LogError("Server error.");
+                    return LoginResult.ServerError;
+                }
             }
 
             var loginResponse = await response.Content.ReadFromJsonAsync<LoginResponse>();
 
             if (loginResponse == null)
             {
-                _logger.LogError("Failed to login.");
-                return;
+                var rawResponse = await response.Content.ReadAsStringAsync();
+                _logger.LogError("Failed to login. Result was not recognized. Result: {Result}", rawResponse);
+
+                return LoginResult.ServerError;
             }
 
             _logger.LogInformation("Login successful, new token issued.");
@@ -77,6 +110,8 @@ namespace TheGrid.Client.Utilities
             // The user must be saved to storage first so the authorized client can get the token issued by it.
             await _sessionStorageService.SetItemAsync("user", userState);
 
+            _logger.LogTrace("Getting user information from server.");
+
             var userInformation = await _authorizedHttpClient.GetFromJsonAsync<UserInformationResponse>("/api/v1/userinfo");
 
             userState.Information = userInformation ?? new();
@@ -86,6 +121,10 @@ namespace TheGrid.Client.Utilities
             BuildClaimsIdentity(userState);
 
             NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
+
+            _logger.LogInformation("Successfully logged user in and generated identity.");
+
+            return LoginResult.Success;
         }
 
         /// <inheritdoc/>
@@ -104,7 +143,7 @@ namespace TheGrid.Client.Utilities
 
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, userState.Information.Identifier ?? throw new InvalidOperationException("Identifier not set.")),
+                new(ClaimTypes.NameIdentifier, userState.Information.Identifier ?? throw new InvalidOperationException("Identifier not set.")),
             };
 
             if (userState.Information.DisplayName != null)

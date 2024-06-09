@@ -8,32 +8,51 @@ using TheGrid.Client.Models.User;
 
 namespace TheGrid.Client.Services
 {
-    public class GridTokenProvider : IAccessTokenProvider
+    /// <summary>
+    /// Provider to fetch user access tokens.
+    /// </summary>
+    /// <remarks>
+    /// Initializes a new instance of the <see cref="GridTokenProvider"/> class.
+    /// </remarks>
+    /// <param name="sessionStorage">Session storage.</param>
+    /// <param name="logger">Logger instance.</param>
+    public class GridTokenProvider(ISessionStorageService sessionStorage, ILogger<GridTokenProvider> logger) : IAccessTokenProvider
     {
-        private readonly ISessionStorageService _sessionStorage;
-        private readonly ILogger<GridTokenProvider> _logger;
+        private static readonly InteractiveRequestOptions _defaultInteractiveRequestOptions = new() { Interaction = InteractionType.SignIn, ReturnUrl = "test" };
+        private readonly ISessionStorageService _sessionStorage = sessionStorage;
+        private readonly ILogger<GridTokenProvider> _logger = logger;
 
-        public GridTokenProvider(ISessionStorageService sessionStorage, ILogger<GridTokenProvider> logger)
+        /// <inheritdoc/>
+        public ValueTask<AccessTokenResult> RequestAccessToken()
         {
-            _sessionStorage = sessionStorage;
-            _logger = logger;
+            return GetAccessToken();
         }
 
-        public async ValueTask<AccessTokenResult> RequestAccessToken()
+        /// <inheritdoc/>
+        public ValueTask<AccessTokenResult> RequestAccessToken(AccessTokenRequestOptions options)
+        {
+            return GetAccessToken();
+        }
+
+        private async ValueTask<AccessTokenResult> GetAccessToken()
         {
             var user = await _sessionStorage.GetItemAsync<SavedUserState>("user");
+
+            if (user == null)
+            {
+                _logger.LogDebug("No user found in session storage.");
+                return new AccessTokenResult(AccessTokenResultStatus.RequiresRedirect, new AccessToken(), "/authentication/login", _defaultInteractiveRequestOptions);
+            }
+
+            _logger.LogTrace("Located user {UserName} in session storage.", user.Information?.DisplayName);
+
             var token = new AccessToken()
             {
                 Value = user.LoginResponse.AccessToken,
                 Expires = user.LoginResponse.ExpiresAt,
             };
 
-            return new AccessTokenResult(AccessTokenResultStatus.Success, token, "", new InteractiveRequestOptions() { Interaction = InteractionType.SignIn, ReturnUrl = "test"});
-        }
-
-        public ValueTask<AccessTokenResult> RequestAccessToken(AccessTokenRequestOptions options)
-        {
-            throw new NotImplementedException();
+            return new AccessTokenResult(AccessTokenResultStatus.Success, token, "/authentication/login", _defaultInteractiveRequestOptions);
         }
     }
 }

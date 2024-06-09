@@ -3,7 +3,7 @@
 // </copyright>
 
 using Microsoft.AspNetCore.Components.Authorization;
-using Radzen;
+using TheGrid.Client.Models.User;
 using TheGrid.Client.Utilities;
 
 namespace TheGrid.Client.Pages.Authentication
@@ -13,6 +13,9 @@ namespace TheGrid.Client.Pages.Authentication
     /// </summary>
     public partial class Login
     {
+        private readonly LoginRequest _input = new();
+        private GridAuthenticationStateProvider.LoginResult? _loginResult;
+
         /// <summary>
         /// Gets or sets the URL the user will be returned to after logging in.
         /// </summary>
@@ -20,24 +23,20 @@ namespace TheGrid.Client.Pages.Authentication
         public string? ReturnUrl { get; set; }
 
         [Inject]
-        private ILogger<Login> Logger { get; set; } = default!;
-
-        [Inject]
         private NavigationManager NavigationManager { get; set; } = default!;
 
         [Inject]
         private AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
 
-        private async Task OnLoginAsync(LoginArgs loginArgs)
+        private async Task OnLoginAsync(LoginRequest input)
         {
-            await ((GridAuthenticationStateProvider)AuthenticationStateProvider).LoginAsync(loginArgs.Username, loginArgs.Password);
+            _loginResult = await ((GridAuthenticationStateProvider)AuthenticationStateProvider).LoginAsync(input.Email, input.Password);
 
-            NavigationManager.NavigateTo(ReturnUrl ?? "/");
-        }
-
-        private async Task OnResetPasswordAsync()
-        {
-
+            if (_loginResult == GridAuthenticationStateProvider.LoginResult.Success)
+            {
+                _loginResult = null;
+                NavigationManager.NavigateTo(ReturnUrl ?? "/");
+            }
         }
 
         private void OnRegister()

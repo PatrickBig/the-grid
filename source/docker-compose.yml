@@ -25,6 +25,8 @@ services:
       POSTGRES_DB: thegrid
     volumes:
       - postgresdata:/var/lib/postgresql/data
+    ports:
+     - 5432:5432
   adminer:
     image: adminer:latest
     environment:

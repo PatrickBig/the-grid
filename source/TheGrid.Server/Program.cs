@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
 using System.Diagnostics.CodeAnalysis;
 using TheGrid.Data;
+using TheGrid.Models;
 using TheGrid.Models.Configuration;
 using TheGrid.Server.HealthChecks;
 using TheGrid.Services.Hubs;
@@ -46,9 +47,6 @@ public static class Program
         {
             StartupHelpers.AddServerServices(builder.Services);
             healthCheckBuilder.AddCheck<AgentQueueCheck>("Agent Queue Check");
-
-            // Add startup job
-            builder.Services.AddSetupJobs();
         }
 
         StartupHelpers.AddSharedServices(builder.Services, builder.Configuration, redis);
@@ -112,7 +110,7 @@ public static class Program
             app.UseAuthorization();
 
             app.MapGroup("/api/v1/account")
-                .MapIdentityApi<IdentityUser>();
+                .MapIdentityApi<GridUser>();
 
             app.MapControllers();
 

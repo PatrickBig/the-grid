@@ -1,35 +1,45 @@
-﻿// <copyright file="UserManagerController.cs" company="BiglerNet">
+﻿// <copyright file="UserInformationController.cs" company="BiglerNet">
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
+using Microsoft.EntityFrameworkCore;
+using TheGrid.Data;
+using TheGrid.Models;
 using TheGrid.Shared.Models;
 
 namespace TheGrid.Server.Controllers
 {
+    /// <summary>
+    /// Used to fetch information about a user.
+    /// </summary>
     [Route("api/v{version:apiVersion}/userinfo")]
     [ApiController]
     [Authorize]
     [ApiVersion("1.0")]
     public class UserInformationController : ControllerBase
     {
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<GridUser> _userManager;
+        private readonly TheGridDbContext _db;
 
-        public UserInformationController(UserManager<IdentityUser> userManager)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UserInformationController"/> class.
+        /// </summary>
+        /// <param name="userManager">User manager.</param>
+        /// <param name="db">Database context.</param>
+        public UserInformationController(UserManager<GridUser> userManager, TheGridDbContext db)
         {
             _userManager = userManager;
+            _db = db;
         }
 
         /// <summary>
         /// Gets information about the currently logged in user.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Returns information about the currently logged in user.</returns>
         [HttpGet]
         [ProducesResponseType(typeof(UserInformationResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(NotFoundResult), StatusCodes.Status404NotFound)]
@@ -42,19 +52,22 @@ namespace TheGrid.Server.Controllers
                 return NotFound();
             }
 
+            // Get the organizations of the user by accessing it from the database. I need to get the organization name and ID.
+            var organizations = await _db.Organizations
+                .Where(o => o.Users.Any(m => m.Id == user.Id))
+                .Select(o => new UserOrganizationMembership
+                { Name = o.Name, OrganizationId = o.Id })
+                .ToListAsync();
+
             var response = new UserInformationResponse
             {
-                Identifier = user.UserName,
-                DisplayName = user.UserName, // TODO: Add a "display name" property
+                Identifier = user.UserName ?? user.Id,
+                DisplayName = user.DisplayName ?? user.UserName,
                 Email = user.Email,
+                Organizations = organizations,
             };
 
             response.Roles = await _userManager.GetRolesAsync(user);
-
-            // Build the response
-            //response.Add(new Claim(ClaimTypes.OtherPhone, user.PhoneNumber ?? string.Empty));
-            //response.Add(new Claim(nameof(user.TwoFactorEnabled), user.TwoFactorEnabled.ToString()));
-
 
             return Ok(response);
         }

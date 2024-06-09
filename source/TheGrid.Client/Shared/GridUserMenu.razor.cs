@@ -7,6 +7,9 @@ using TheGrid.Client.Models.User;
 
 namespace TheGrid.Client.Shared
 {
+    /// <summary>
+    /// Top level menu for user options.
+    /// </summary>
     public partial class GridUserMenu
     {
         private SavedUserState? _savedUserState;
@@ -14,6 +17,7 @@ namespace TheGrid.Client.Shared
         [Inject]
         private ISessionStorageService SessionStorageService { get; set; } = default!;
 
+        /// <inheritdoc/>
         protected override async Task OnInitializedAsync()
         {
             var userInformation = await SessionStorageService.GetItemAsync<SavedUserState>("user");

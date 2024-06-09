@@ -33,5 +33,10 @@ namespace TheGrid.Models
         /// The connections associated to this organization.
         /// </summary>
         public List<Connection> Connections { get; set; } = new();
+
+        /// <summary>
+        /// Gets or sets the users associated to this organization.
+        /// </summary>
+        public ICollection<GridUser> Users { get; set; } = new List<GridUser>();
     }
 }

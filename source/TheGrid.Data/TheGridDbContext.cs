@@ -17,7 +17,7 @@ namespace TheGrid.Data
     /// Initializes a new instance of the <see cref="TheGridDbContext"/> class.
     /// </remarks>
     /// <param name="options">Options for the database context.</param>
-    public class TheGridDbContext(DbContextOptions<TheGridDbContext> options) : IdentityDbContext(options)
+    public class TheGridDbContext(DbContextOptions<TheGridDbContext> options) : IdentityDbContext<GridUser>(options)
     {
         /// <summary>
         /// Connections to various data sources.
@@ -59,6 +59,11 @@ namespace TheGrid.Data
         /// </summary>
         public virtual DbSet<Visualization> Visualizations { get; set; }
 
+        /// <summary>
+        /// Many-to-many relationship between users and organizations.
+        /// </summary>
+        public virtual DbSet<UserOrganization> UserOrganizations { get; set; }
+
         /// <inheritdoc/>
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -82,6 +87,19 @@ namespace TheGrid.Data
             builder.Entity<Connection>()
                 .Property(c => c.ConnectionProperties)
                 .HasConversion<JsonColumnConverter<Dictionary<string, string?>>>();
+
+            // Setup the many-to-many for users and organizations
+            builder.Entity<UserOrganization>()
+                .HasKey(ou => new { ou.UserId, ou.OrganizationId });
+
+            builder.Entity<Organization>()
+                .HasMany(o => o.Users)
+                .WithMany(u => u.Organizations)
+                .UsingEntity<UserOrganization>();
+
+            // Set up default organization for users who have one set.
+            builder.Entity<GridUser>()
+                .HasOne(u => u.DefaultOrganization);
 
             base.OnModelCreating(builder);
         }
