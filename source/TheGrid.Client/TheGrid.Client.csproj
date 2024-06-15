@@ -41,8 +41,4 @@
     <None Include="Pages\Authentication.razor" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Pages\User\" />
-  </ItemGroup>
-
 </Project>

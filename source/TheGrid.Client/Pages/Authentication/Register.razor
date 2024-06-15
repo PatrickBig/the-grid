@@ -2,7 +2,7 @@
 @layout EmptyLayout
 
 <RadzenTemplateForm class="super-center" Data="_input" Submit="RegisterAsync" TItem="RegisterRequest">
-    <RadzenCard class="rz-my-12 rz-mx-auto rz-p-4 rz-p-md-12" style="max-width: 600px;">
+    <RadzenCard class="rz-my-12 rz-mx-auto rz-p-4 rz-p-md-12" style="max-width: 800px;">
         <RadzenRow Gap="2rem">
             <RadzenColumn>
                 <RadzenStack>
@@ -27,6 +27,7 @@
 
 @code {
     private RegisterRequest _input = new();
+
     [Inject]
     private HttpClient HttpClient { get; set; } = default!;
 

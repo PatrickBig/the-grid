@@ -52,11 +52,14 @@ namespace TheGrid.Server.Controllers
                 return NotFound();
             }
 
-            // Get the organizations of the user by accessing it from the database. I need to get the organization name and ID.
+            // Get the organizations of the user by accessing it from the database.
             var organizations = await _db.Organizations
                 .Where(o => o.Users.Any(m => m.Id == user.Id))
                 .Select(o => new UserOrganizationMembership
-                { Name = o.Name, OrganizationId = o.Id })
+                {
+                    Name = o.Name,
+                    OrganizationId = o.Id,
+                })
                 .ToListAsync();
 
             var response = new UserInformationResponse
@@ -65,11 +68,52 @@ namespace TheGrid.Server.Controllers
                 DisplayName = user.DisplayName ?? user.UserName,
                 Email = user.Email,
                 Organizations = organizations,
+                DefaultOrganizationId = user.DefaultOrganizationId,
             };
 
             response.Roles = await _userManager.GetRolesAsync(user);
 
             return Ok(response);
+        }
+
+        /// <summary>
+        /// Changes the user's organization.
+        /// </summary>
+        /// <param name="organizationId">Unique ID of the organization to change to.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Returns IActionResult based on the success of changing the user's organization.</returns>
+        [HttpPut]
+        [Route(nameof(ChangeOrganization))]
+        public async Task<IActionResult> ChangeOrganization([FromQuery] string organizationId, CancellationToken cancellationToken = default)
+        {
+            // Check that the user is a member of the given organization.
+            var user = await _userManager.GetUserAsync(User);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var userOrganization = await _db.UserOrganizations
+                .Where(u => u.OrganizationId == organizationId && u.UserId == user.Id)
+                .Include(u => u.Organization)
+                .Select(u => new UserOrganizationMembership
+                {
+                    OrganizationId = u.OrganizationId,
+                    Name = u!.Organization!.Name,
+                })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (userOrganization != null)
+            {
+                user.DefaultOrganizationId = organizationId;
+                await _userManager.UpdateAsync(user);
+                return Ok(userOrganization);
+            }
+            else
+            {
+                return BadRequest();
+            }
         }
     }
 }

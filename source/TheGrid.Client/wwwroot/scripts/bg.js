@@ -8,7 +8,7 @@ function animateBackgroundCanvas(canvasId) {
 
     // Configuration variables
     const griderWidth = 10; // Width of the griders and their trails
-    const trailRelativeLength = 0.5; // Relative length of the trail to the screen size
+    const trailRelativeLength = 1; // Relative length of the trail to the screen size
     const griderSpeed = 0.5; // Speed of the griders
     const griderDensity = 4 / (1024 * 768); // Density of griders per pixel
     const griderColors = ['#FFA500', '#00FFFF']; // Orange and Cyan colors
@@ -69,7 +69,7 @@ function animateBackgroundCanvas(canvasId) {
             this.trail.push({ x: this.x, y: this.y });
 
             // Keep the trail at the configured length
-            const trailLength = Math.round(trailRelativeLength * ((this.direction === 'up' || this.direction === 'down') ? canvas.width : canvas.height));
+            const trailLength = Math.round(trailRelativeLength * ((canvas.width + canvas.height) / 2))
             while (this.trail.length > trailLength / this.width) {
                 this.trail.shift();
             }

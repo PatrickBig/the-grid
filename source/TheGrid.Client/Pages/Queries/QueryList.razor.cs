@@ -23,7 +23,7 @@ namespace TheGrid.Client.Pages
         private HttpClient HttpClient { get; set; } = default!;
 
         [CascadingParameter]
-        private UserOrganization UserOrganization { get; set; } = default!;
+        private UserOrganizationMembership UserOrganization { get; set; } = default!;
 
         private async Task OnLoadDataAsync(LoadDataArgs e)
         {

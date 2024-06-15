@@ -62,7 +62,7 @@ namespace TheGrid.Data
         /// <summary>
         /// Many-to-many relationship between users and organizations.
         /// </summary>
-        public virtual DbSet<UserOrganization> UserOrganizations { get; set; }
+        public virtual DbSet<Models.UserOrganization> UserOrganizations { get; set; }
 
         /// <inheritdoc/>
         protected override void OnModelCreating(ModelBuilder builder)
@@ -89,13 +89,13 @@ namespace TheGrid.Data
                 .HasConversion<JsonColumnConverter<Dictionary<string, string?>>>();
 
             // Setup the many-to-many for users and organizations
-            builder.Entity<UserOrganization>()
+            builder.Entity<Models.UserOrganization>()
                 .HasKey(ou => new { ou.UserId, ou.OrganizationId });
 
             builder.Entity<Organization>()
                 .HasMany(o => o.Users)
                 .WithMany(u => u.Organizations)
-                .UsingEntity<UserOrganization>();
+                .UsingEntity<Models.UserOrganization>();
 
             // Set up default organization for users who have one set.
             builder.Entity<GridUser>()

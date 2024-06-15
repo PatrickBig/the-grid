@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using System.Net.Http.Json;
 using System.Security.Claims;
 using TheGrid.Client.Models.User;
+using TheGrid.Client.Services;
 using TheGrid.Shared.Models;
 
 namespace TheGrid.Client.Utilities
@@ -20,6 +21,7 @@ namespace TheGrid.Client.Utilities
         private readonly ILogger<GridAuthenticationStateProvider> _logger;
         private readonly HttpClient _anonymousHttpClient;
         private readonly HttpClient _authorizedHttpClient;
+        private readonly IUserOrganizationService _userOrganizationService;
 
         private ClaimsPrincipal _currentUser = new(new ClaimsIdentity());
 
@@ -30,12 +32,14 @@ namespace TheGrid.Client.Utilities
         /// <param name="httpClient">HTTP client with authorization setup.</param>
         /// <param name="sessionStorageService">Session storage service.</param>
         /// <param name="logger">Logging instance.</param>
-        public GridAuthenticationStateProvider(IHttpClientFactory httpClientFactory, HttpClient httpClient, ISessionStorageService sessionStorageService, ILogger<GridAuthenticationStateProvider> logger)
+        /// <param name="userOrganizationService">User organization service.</param>
+        public GridAuthenticationStateProvider(IHttpClientFactory httpClientFactory, HttpClient httpClient, ISessionStorageService sessionStorageService, ILogger<GridAuthenticationStateProvider> logger, IUserOrganizationService userOrganizationService)
         {
             _sessionStorageService = sessionStorageService;
             _logger = logger;
             _anonymousHttpClient = httpClientFactory.CreateClient("Anonymous");
             _authorizedHttpClient = httpClient;
+            _userOrganizationService = userOrganizationService;
         }
 
         /// <summary>
@@ -128,9 +132,20 @@ namespace TheGrid.Client.Utilities
         }
 
         /// <inheritdoc/>
-        public override Task<AuthenticationState> GetAuthenticationStateAsync()
+        public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            return Task.FromResult(new AuthenticationState(_currentUser));
+            if (_currentUser.Identity != null && !_currentUser.Identity.IsAuthenticated)
+            {
+                // Check session storage to see if a user is logged in.
+                var userState = await _sessionStorageService.GetItemAsync<SavedUserState>("user");
+
+                if (userState != null)
+                {
+                    BuildClaimsIdentity(userState);
+                }
+            }
+
+            return new AuthenticationState(_currentUser);
         }
 
         private void BuildClaimsIdentity(SavedUserState userState)
@@ -164,6 +179,11 @@ namespace TheGrid.Client.Utilities
             var identity = new ClaimsIdentity(claims, "ASP.NET Identity");
 
             _currentUser = new ClaimsPrincipal(identity);
+
+            if (userState.Information.DefaultOrganizationId != null)
+            {
+                _userOrganizationService.SetOrganization(userState.Information.Organizations.First(o => o.OrganizationId == userState.Information.DefaultOrganizationId));
+            }
         }
     }
 }

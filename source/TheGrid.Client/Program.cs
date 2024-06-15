@@ -32,6 +32,7 @@ builder.Services.AddBlazoredSessionStorage();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<IAccessTokenProvider, GridTokenProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider, GridAuthenticationStateProvider>();
+builder.Services.AddScoped<IUserOrganizationService, UserOrganizationService>();
 
 var defaultOptions = new JsonSerializerOptions
 {

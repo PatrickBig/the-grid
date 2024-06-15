@@ -28,4 +28,8 @@
         <ProjectReference Include="..\TheGrid.Sqlite\TheGrid.Sqlite.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Jobs\" />
+    </ItemGroup>
+
 </Project>
