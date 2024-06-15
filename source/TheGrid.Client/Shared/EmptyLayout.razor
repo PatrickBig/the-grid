@@ -1,0 +1,25 @@
+﻿@inherits LayoutComponentBase
+
+<canvas id="grid-anim" style="display: block;"></canvas>
+
+@Body
+
+@code {
+    private bool _startedAnimation = false;
+
+    [Inject]
+    private IJSRuntime JSRuntime { get; set; } = default!;
+
+    [Inject]
+    private ILogger<EmptyLayout> Logger { get; set; } = default!;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_startedAnimation)
+        {
+            Logger.LogTrace("Started empty layout");
+            await JSRuntime.InvokeVoidAsync("animateBackgroundCanvas", "grid-anim");
+            _startedAnimation = true;
+        }
+    }
+}

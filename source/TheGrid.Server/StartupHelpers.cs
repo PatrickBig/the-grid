@@ -4,10 +4,13 @@
 
 using Hangfire;
 using Hangfire.Redis.StackExchange;
+using Microsoft.AspNetCore.Identity;
 using StackExchange.Redis;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text.Json.Serialization;
+using TheGrid.Data;
+using TheGrid.Models;
 using TheGrid.Models.Configuration;
 
 namespace TheGrid.Server
@@ -62,6 +65,13 @@ namespace TheGrid.Server
             });
 
             services.AddResponseCaching();
+
+            services.AddAuthorization();
+            services.AddIdentityApiEndpoints<GridUser>(o =>
+            {
+            })
+                .AddRoles<IdentityRole>()
+                .AddEntityFrameworkStores<TheGridDbContext>();
 
             services.AddControllers(o =>
             {

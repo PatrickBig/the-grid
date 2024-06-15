@@ -1,0 +1,17 @@
+﻿<AuthorizeView>
+    <Authorized>
+        @if (_savedUserState != null)
+        {
+            <RadzenProfileMenu>
+                <Template>
+                    <RadzenGravatar Email="@_savedUserState.Information.Email" />
+                </Template>
+                <ChildContent>
+                    <RadzenProfileMenuItem Text="@("Logged in as " + _savedUserState.Information.DisplayName)" />
+                    <RadzenProfileMenuItem Text="Settings" Path="/authentication/profile" />
+                    <RadzenProfileMenuItem Text="Log out" Path="/authentication/logout" />
+                </ChildContent>
+            </RadzenProfileMenu>
+        }
+    </Authorized>
+</AuthorizeView>

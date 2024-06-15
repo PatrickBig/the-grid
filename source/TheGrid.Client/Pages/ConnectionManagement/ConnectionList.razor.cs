@@ -17,7 +17,7 @@ namespace TheGrid.Client.Pages.ConnectionManagement
         private int _totalItems;
 
         [CascadingParameter]
-        private UserOrganization UserOrganization { get; set; } = default!;
+        private UserOrganizationMembership UserOrganization { get; set; } = default!;
 
         [Inject]
         private HttpClient HttpClient { get; set; } = default!;

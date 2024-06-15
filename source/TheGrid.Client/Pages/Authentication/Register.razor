@@ -1,0 +1,48 @@
+﻿@page "/authentication/register"
+@layout EmptyLayout
+
+<RadzenTemplateForm class="super-center" Data="_input" Submit="RegisterAsync" TItem="RegisterRequest">
+    <RadzenCard class="rz-my-12 rz-mx-auto rz-p-4 rz-p-md-12" style="max-width: 800px;">
+        <RadzenRow Gap="2rem">
+            <RadzenColumn>
+                <RadzenStack>
+                    <RadzenFormField Text="Email" Component="Email">
+                        <RadzenTextBox Name="Email" @bind-Value=_input.Email />
+                        <RadzenRequiredValidator Component="Email" Popup />
+                        <RadzenLengthValidator Component="Email" Max="256" Popup />
+                    </RadzenFormField>
+                    <RadzenFormField Text="Password" Component="Password">
+                        <RadzenTextBox Name="Password" @bind-Value=_input.Password />
+                        <RadzenRequiredValidator Component="Password" Popup />
+                        <RadzenLengthValidator Component="Password" Max="256" Popup />
+                    </RadzenFormField>
+                </RadzenStack>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" Gap="1rem" class="rz-mt-8 rz-mb-4">
+            <RadzenButton Text="Save" ButtonType="ButtonType.Submit" Icon="save" />
+        </RadzenStack>
+    </RadzenCard>
+</RadzenTemplateForm>
+
+@code {
+    private RegisterRequest _input = new();
+
+    [Inject]
+    private HttpClient HttpClient { get; set; } = default!;
+
+    [Inject]
+    private ILogger<Register> Logger { get; set; } = default!;
+
+    public class RegisterRequest
+    {
+        public string? Email { get; set; }
+
+        public string? Password { get; set; }
+    }
+
+    private async Task RegisterAsync(RegisterRequest registerRequest)
+    {
+        var response = await HttpClient.PostAsJsonAsync("register", registerRequest);
+    }
+}

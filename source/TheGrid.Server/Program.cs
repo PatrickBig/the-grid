@@ -3,11 +3,13 @@
 // </copyright>
 
 using Hangfire;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
 using System.Diagnostics.CodeAnalysis;
 using TheGrid.Data;
+using TheGrid.Models;
 using TheGrid.Models.Configuration;
 using TheGrid.Server.HealthChecks;
 using TheGrid.Services.Hubs;
@@ -76,6 +78,11 @@ public static class Program
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
+                // Apply migrations
+                using var scope = app.Services.CreateScope();
+                var dbContext = scope.ServiceProvider.GetRequiredService<TheGridDbContext>();
+                dbContext.Database.Migrate();
+
                 app.UseWebAssemblyDebugging();
                 app.UseSwagger();
                 app.UseSwaggerUI(o =>
@@ -101,6 +108,9 @@ public static class Program
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
+
+            app.MapGroup("/api/v1/account")
+                .MapIdentityApi<GridUser>();
 
             app.MapControllers();
 

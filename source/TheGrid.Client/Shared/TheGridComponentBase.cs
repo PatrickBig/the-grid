@@ -3,6 +3,7 @@
 // </copyright>
 
 using Radzen;
+using TheGrid.Shared.Models;
 
 namespace TheGrid.Client.Shared
 {
@@ -39,7 +40,7 @@ namespace TheGrid.Client.Shared
         /// Organization for the current user.
         /// </summary>
         [CascadingParameter]
-        protected UserOrganization UserOrganization { get; set; } = default!;
+        protected UserOrganizationMembership UserOrganization { get; set; } = default!;
 
         /// <summary>
         /// Http client.

@@ -1,0 +1,61 @@
+﻿@page "/authentication/login"
+@layout EmptyLayout
+@attribute [AllowAnonymous]
+@using System.ComponentModel.DataAnnotations
+@using System.Text.Json
+@using TheGrid.Client.Models.User
+
+
+<div class="super-center">
+    <RadzenCard class="rz-my-12 rz-mx-auto rz-p-4 rz-p-md-12" style="max-width: 600px;">
+        <RadzenText TextStyle="TextStyle.H4">
+            Log in
+        </RadzenText>
+        @if (_loginResult != null && _loginResult != GridAuthenticationStateProvider.LoginResult.Success)
+        {
+            <RadzenAlert AlertStyle="AlertStyle.Danger" Title="Login failed" Variant="Variant.Flat" AllowClose="false">
+                @if (_loginResult == GridAuthenticationStateProvider.LoginResult.InvalidCredentials)
+                {
+                    @:Invalid credentials specified.
+                    @:If you have forgotten your password, click
+                    <RadzenLink Text="here" Path="/authentication/reset-password" />
+                }
+                else if (_loginResult == GridAuthenticationStateProvider.LoginResult.ServerError)
+                {
+                    @:There was an error logging you in.
+                }
+            </RadzenAlert>
+        }
+        <RadzenTemplateForm TItem="LoginRequest" Data="_input" Submit="OnLoginAsync">
+            <RadzenStack>
+                <RadzenFormField Text="Username">
+                    <ChildContent>
+                        <RadzenTextBox Name="username" id="login-form-username" @bind-Value="_input.Email" AutoComplete=true />
+                    </ChildContent>
+                    <Helper>
+                        <RadzenRequiredValidator Component="username" />
+                    </Helper>
+                </RadzenFormField>
+                <RadzenFormField Text="Password">
+                    <ChildContent>
+                        <RadzenPassword Name="password" id="login-form-password" @bind-Value="_input.Password" />
+                    </ChildContent>
+                    <Helper>
+                        <RadzenRequiredValidator Component="password" />
+                    </Helper>
+                </RadzenFormField>
+            </RadzenStack>
+
+            <RadzenStack style="margin-top: 1rem;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween" Gap="0.5rem">
+                <RadzenButton Text="Login" ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" />
+                <RadzenLink Text="Forgot password?" Path="/authentication/reset-password" />
+            </RadzenStack>
+
+            <RadzenStack style="margin-top: 1rem;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                Become a user?
+                <RadzenButton Text="Register" Click="OnRegister" ButtonType="ButtonType.Button" Variant="Variant.Flat" ButtonStyle="ButtonStyle.Secondary" Shade="Shade.Lighter" />
+            </RadzenStack>
+            
+        </RadzenTemplateForm>
+    </RadzenCard> 
+</div>

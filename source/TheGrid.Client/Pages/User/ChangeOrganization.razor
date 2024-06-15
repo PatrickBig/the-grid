@@ -1,0 +1,54 @@
+﻿@page "/change-organization"
+@using Blazored.SessionStorage
+@using TheGrid.Client.Models.User
+@layout EmptyLayout
+
+<RadzenTemplateForm class="super-center" Data="@_inputModel" TItem="InputModel" Submit="SubmitAsync">
+    <RadzenCard style="max-width: 800px;">
+        <RadzenText TextStyle="TextStyle.H3">Change Organization</RadzenText>
+        <RadzenFormField Text="Organization" Component="Organization">
+            <RadzenDropDown Name="Organization" Data=_userOrganizations TValue="string" @bind-Value="@_inputModel.OrganizationId" TextProperty="@(nameof(UserOrganizationMembership.Name))" ValueProperty="@(nameof(UserOrganizationMembership.OrganizationId))" />
+            <RadzenRequiredValidator Component="Organization" Popup />
+        </RadzenFormField>
+        <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Text="Save" Icon="save"/>
+    </RadzenCard>
+</RadzenTemplateForm>
+
+@code {
+    private IEnumerable<UserOrganizationMembership> _userOrganizations { get; set;} = Array.Empty<UserOrganizationMembership>();
+    private InputModel _inputModel = new();
+
+    [Inject]
+    private IUserOrganizationService OrganizationManager { get; set; } = default!;
+
+    [Inject]
+    private ISessionStorageService SessionStorage { get; set; } = default!;
+
+    [Inject]
+    private NavigationManager NavigationManager { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = await SessionStorage.GetItemAsync<SavedUserState>("user");
+
+        if (user != null)
+        {
+            _userOrganizations = user.Information.Organizations;
+        }
+    }
+
+    private async Task SubmitAsync(InputModel model)
+    {
+        if (model != null && model.OrganizationId != null)
+        {
+            await OrganizationManager.SetOrganizationAsync(model.OrganizationId);
+
+            NavigationManager.NavigateTo("/");
+        }
+    }
+
+    private class InputModel
+    {
+        public string? OrganizationId { get; set; }
+    }
+}
