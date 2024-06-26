@@ -4,6 +4,7 @@
 
 using Asp.Versioning;
 using Mapster;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Net.Mime;
@@ -19,6 +20,7 @@ namespace TheGrid.Server.Controllers
     /// </summary>
     [Route("api/v{version:apiVersion}/[controller]")]
     [ApiController]
+    [Authorize]
     [ApiVersion("1.0")]
     [Consumes(MediaTypeNames.Application.Json)]
     public class OrganizationsController : ControllerBase

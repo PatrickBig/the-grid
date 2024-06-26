@@ -3,6 +3,7 @@
 // </copyright>
 
 using Asp.Versioning;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TheGrid.Services;
 using TheGrid.Shared.Models;
@@ -14,6 +15,7 @@ namespace TheGrid.Server.Controllers
     /// </summary>
     [Route("api/v{version:apiVersion}/[controller]")]
     [ApiController]
+    [Authorize]
     [ApiVersion("1.0")]
     public class QueryResultRefreshController : ControllerBase
     {
