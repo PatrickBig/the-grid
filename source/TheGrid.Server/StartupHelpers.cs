@@ -5,6 +5,7 @@
 using Hangfire;
 using Hangfire.Redis.StackExchange;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.OpenApi.Models;
 using StackExchange.Redis;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
@@ -95,8 +96,21 @@ namespace TheGrid.Server
                 var apiProjectDocumentation = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, apiProjectDocumentation));
 
-                var sharedDocumentationXml = $"{nameof(TheGrid)}.{nameof(TheGrid.Shared)}.xml";
+                var sharedDocumentationXml = $"{nameof(TheGrid)}.{nameof(Shared)}.xml";
                 options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, sharedDocumentationXml));
+
+                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Scheme = "Bearer",
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer",
+                    },
+                    In = ParameterLocation.Header,
+                    Description = "ASP.NET Identity token required. Example: \"Bearer {token}\"",
+                });
             });
         }
 
