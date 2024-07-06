@@ -11,6 +11,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Net.Mime;
 using TheGrid.Data;
 using TheGrid.Models;
+using TheGrid.Shared.Extensions;
 using TheGrid.Shared.Models;
 
 namespace TheGrid.Server.Controllers
@@ -26,14 +27,17 @@ namespace TheGrid.Server.Controllers
     public class ConnectionsController : ControllerBase
     {
         private readonly TheGridDbContext _db;
+        private readonly IAuthorizationService _authorizationService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConnectionsController"/> class.
         /// </summary>
         /// <param name="db">Database context.</param>
-        public ConnectionsController(TheGridDbContext db)
+        /// <param name="authorizationService">Authorization service.</param>
+        public ConnectionsController(TheGridDbContext db, IAuthorizationService authorizationService)
         {
             _db = db;
+            _authorizationService = authorizationService;
         }
 
         /// <summary>
@@ -44,9 +48,12 @@ namespace TheGrid.Server.Controllers
         /// <returns>The unique ID of the newly created connection.</returns>
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(CreateConnectionResponse), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(UnauthorizedResult), StatusCodes.Status401Unauthorized)]
         [HttpPost]
         public async Task<ActionResult> Post([FromBody] CreateConnectionRequest request, CancellationToken cancellationToken = default)
         {
+            
+
             if (!await _db.Organizations.AnyAsync(d => d.Id == request.OrganizationId, cancellationToken))
             {
                 ModelState.AddModelError(nameof(request.OrganizationId), "No organization was found.");
@@ -73,8 +80,11 @@ namespace TheGrid.Server.Controllers
         /// <param name="connectionId">The ID of the connection to fetch.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>Information about the connection.</returns>
+        /// <response code="401">Unauthorized if the user is not a member of the given organization.</response>
+        /// <response code="404">If the connection is not found.</response>
         [ProducesResponseType(typeof(Connection), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(UnauthorizedResult), StatusCodes.Status401Unauthorized)]
         [HttpGet("{connectionId:int}")]
         public async Task<ActionResult> Get([FromRoute] int connectionId, CancellationToken cancellationToken = default)
         {
@@ -83,6 +93,11 @@ namespace TheGrid.Server.Controllers
             if (connection == null)
             {
                 return NotFound();
+            }
+
+            if (!User.IsMemberOfOrganization(connection.OrganizationId))
+            {
+                return Unauthorized();
             }
 
             return Ok(connection);
@@ -96,8 +111,11 @@ namespace TheGrid.Server.Controllers
         /// <param name="take" default="25">Number of records to take for a single request.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>A list of connections in the system.</returns>
+        /// <response code="200">The list of connections.</response>
+        /// <response code="401">Unauthorized if the user is not a member of the given organization.</response>
         [HttpGet]
         [ProducesResponseType(typeof(PaginatedResult<ConnectionListItem>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(UnauthorizedResult), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> GetList(
             [FromQuery] string organization,
@@ -105,6 +123,11 @@ namespace TheGrid.Server.Controllers
             [FromQuery][Range(1, 200)] int take = 25,
             CancellationToken cancellationToken = default)
         {
+            if (!User.IsMemberOfOrganization(organization))
+            {
+                return Unauthorized();
+            }
+
             var baseQuery = _db.Connections
                 .Include(d => d.Connector)
                 .Where(d => d.Organization != null && d.Organization.Id == organization && d.Connector != null)

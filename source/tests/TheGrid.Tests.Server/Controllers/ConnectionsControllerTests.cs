@@ -2,9 +2,14 @@
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using NSubstitute;
+using System.Security.Claims;
 using TheGrid.Models;
 using TheGrid.Server.Controllers;
+using TheGrid.Shared.Constants;
 using TheGrid.Shared.Models;
 using TheGrid.TestHelpers.Fixtures;
 
@@ -16,6 +21,12 @@ namespace TheGrid.Tests.Server.Controllers
     public class ConnectionsControllerTests : IClassFixture<OrganizationWithConnection>
     {
         private readonly OrganizationWithConnection _fixture;
+        private readonly IAuthorizationService _authorizationService;
+        private readonly ClaimsPrincipal _testUser = new(new ClaimsIdentity(
+        [
+            new Claim(ClaimTypes.NameIdentifier, "admin"),
+            new Claim(GridClaimTypes.Organization, "default"),
+        ]));
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConnectionsControllerTests"/> class.
@@ -24,6 +35,11 @@ namespace TheGrid.Tests.Server.Controllers
         public ConnectionsControllerTests(OrganizationWithConnection fixture)
         {
             _fixture = fixture;
+
+            // Mock the authorization service so it always returns success if the user ID is "admin"
+            _authorizationService = Substitute.For<IAuthorizationService>();
+            _authorizationService.AuthorizeAsync(Arg.Any<ClaimsPrincipal>(), Arg.Any<object>(), Arg.Any<string>())
+                .Returns(Task.FromResult(AuthorizationResult.Success()));
         }
 
         /// <summary>
@@ -34,7 +50,13 @@ namespace TheGrid.Tests.Server.Controllers
         public async Task CreateConnection_Success_Test()
         {
             // Arrange
-            var controller = new ConnectionsController(_fixture.Db);
+            var controller = new ConnectionsController(_fixture.Db, _authorizationService)
+            {
+                ControllerContext = new ControllerContext
+                {
+                    HttpContext = new DefaultHttpContext { User = _testUser },
+                },
+            };
 
             var request = new CreateConnectionRequest
             {
@@ -63,7 +85,13 @@ namespace TheGrid.Tests.Server.Controllers
         public async Task CreateConnection_Invalid_ConnectorId_Test()
         {
             // Arrange
-            var controller = new ConnectionsController(_fixture.Db);
+            var controller = new ConnectionsController(_fixture.Db, _authorizationService)
+            {
+                ControllerContext = new ControllerContext
+                {
+                    HttpContext = new DefaultHttpContext { User = _testUser },
+                },
+            };
 
             var request = new CreateConnectionRequest
             {
@@ -95,7 +123,13 @@ namespace TheGrid.Tests.Server.Controllers
         public async Task CreateConnection_Invalid_Organization_Test()
         {
             // Arrange
-            var controller = new ConnectionsController(_fixture.Db);
+            var controller = new ConnectionsController(_fixture.Db, _authorizationService)
+            {
+                ControllerContext = new ControllerContext
+                {
+                    HttpContext = new DefaultHttpContext { User = _testUser },
+                },
+            };
 
             var request = new CreateConnectionRequest
             {
@@ -127,7 +161,13 @@ namespace TheGrid.Tests.Server.Controllers
         public async Task GetConnection_Ok_Test()
         {
             // Arrange
-            var controller = new ConnectionsController(_fixture.Db);
+            var controller = new ConnectionsController(_fixture.Db, _authorizationService)
+            {
+                ControllerContext = new ControllerContext
+                {
+                    HttpContext = new DefaultHttpContext { User = _testUser },
+                },
+            };
             var connectionId = _fixture.ConnectionId;
 
             // Act
@@ -151,7 +191,13 @@ namespace TheGrid.Tests.Server.Controllers
         public async Task GetConnection_NotFound_Test()
         {
             // Arrange
-            var controller = new ConnectionsController(_fixture.Db);
+            var controller = new ConnectionsController(_fixture.Db, _authorizationService)
+            {
+                ControllerContext = new ControllerContext
+                {
+                    HttpContext = new DefaultHttpContext { User = _testUser },
+                },
+            };
 
             // Act
             var actionResult = await controller.Get(-5);
@@ -169,7 +215,13 @@ namespace TheGrid.Tests.Server.Controllers
         public async Task GetConnectionList_Ok_Test()
         {
             // Arrange
-            var controller = new ConnectionsController(_fixture.Db);
+            var controller = new ConnectionsController(_fixture.Db, _authorizationService)
+            {
+                ControllerContext = new ControllerContext
+                {
+                    HttpContext = new DefaultHttpContext { User = _testUser },
+                },
+            };
 
             // Act
             var actionResult = await controller.GetList(_fixture.OrganizationId);

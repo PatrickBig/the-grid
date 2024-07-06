@@ -68,7 +68,7 @@ namespace TheGrid.Server.Controllers
                 DisplayName = user.DisplayName ?? user.UserName,
                 Email = user.Email,
                 Organizations = organizations,
-                DefaultOrganizationId = user.DefaultOrganizationId,
+                CurrentOrganizationId = user.CurrentOrganizationId,
             };
 
             response.Roles = await _userManager.GetRolesAsync(user);
@@ -106,7 +106,7 @@ namespace TheGrid.Server.Controllers
 
             if (userOrganization != null)
             {
-                user.DefaultOrganizationId = organizationId;
+                user.CurrentOrganizationId = organizationId;
                 await _userManager.UpdateAsync(user);
                 return Ok(userOrganization);
             }

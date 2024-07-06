@@ -2,3 +2,14 @@
 @attribute [Authorize]
 
 <RadzenText TextStyle="TextStyle.DisplayH3">Welcome to the grid</RadzenText>
+
+<AuthorizeView>
+    <Authorized>
+        Claims:
+        @foreach (var claim in context.User.Claims)
+        {
+            <RadzenText>@claim.Type</RadzenText>
+            <RadzenText>@claim.Value</RadzenText>
+        }
+    </Authorized>
+</AuthorizeView>

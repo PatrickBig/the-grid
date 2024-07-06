@@ -4,6 +4,8 @@
 
 using Hangfire;
 using Hangfire.Redis.StackExchange;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.OpenApi.Models;
 using StackExchange.Redis;
@@ -13,6 +15,8 @@ using System.Text.Json.Serialization;
 using TheGrid.Data;
 using TheGrid.Models;
 using TheGrid.Models.Configuration;
+using TheGrid.Server.Security;
+using TheGrid.Services.Authorization;
 
 namespace TheGrid.Server
 {
@@ -47,6 +51,8 @@ namespace TheGrid.Server
             {
                 configuration.UseRedisStorage(redis);
             });
+
+            services.AddSingleton<IAuthorizationHandler, ConnectionAuthorizationHandler>();
         }
 
         /// <summary>
@@ -72,7 +78,13 @@ namespace TheGrid.Server
             {
             })
                 .AddRoles<IdentityRole>()
-                .AddEntityFrameworkStores<TheGridDbContext>();
+                .AddEntityFrameworkStores<TheGridDbContext>()
+                .AddClaimsPrincipalFactory<ApplicationUserClaimsPrincipalFactory>()
+                .AddDefaultTokenProviders();
+
+            //services.AddScoped<SignInManager<GridUser>, ApplicationUserSigninManager>();
+
+            //services.AddTransient<IClaimsTransformation, GridClaimTransformation>();
 
             services.AddControllers(o =>
             {
@@ -90,7 +102,7 @@ namespace TheGrid.Server
                 // Add SignalR documentation
                 options.AddSignalRSwaggerGen(o =>
                 {
-                    o.ScanAssembly(Assembly.GetAssembly(typeof(TheGrid.Services.IQueryExecutor)));
+                    o.ScanAssembly(Assembly.GetAssembly(typeof(Services.IQueryExecutor)));
                 });
 
                 var apiProjectDocumentation = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
