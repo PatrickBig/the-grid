@@ -3,6 +3,7 @@
 // </copyright>
 
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NSubstitute;
@@ -38,7 +39,7 @@ namespace TheGrid.Tests.Server.Controllers
 
             // Mock the authorization service so it always returns success if the user ID is "admin"
             _authorizationService = Substitute.For<IAuthorizationService>();
-            _authorizationService.AuthorizeAsync(Arg.Any<ClaimsPrincipal>(), Arg.Any<object>(), Arg.Any<string>())
+            _authorizationService.AuthorizeAsync(Arg.Any<ClaimsPrincipal>(), Arg.Any<object>(), Arg.Any<IEnumerable<IAuthorizationRequirement>>())
                 .Returns(Task.FromResult(AuthorizationResult.Success()));
         }
 
