@@ -18,7 +18,7 @@ namespace TheGrid.Postgres.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.5")
+                .HasAnnotation("ProductVersion", "8.0.6")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -219,7 +219,7 @@ namespace TheGrid.Postgres.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("text");
 
-                    b.Property<string>("DefaultOrganizationId")
+                    b.Property<string>("CurrentOrganizationId")
                         .HasColumnType("text");
 
                     b.Property<string>("DisplayName")
@@ -268,7 +268,7 @@ namespace TheGrid.Postgres.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DefaultOrganizationId");
+                    b.HasIndex("CurrentOrganizationId");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -572,11 +572,11 @@ namespace TheGrid.Postgres.Migrations
 
             modelBuilder.Entity("TheGrid.Models.GridUser", b =>
                 {
-                    b.HasOne("TheGrid.Models.Organization", "DefaultOrganization")
+                    b.HasOne("TheGrid.Models.Organization", "CurrentOrganization")
                         .WithMany()
-                        .HasForeignKey("DefaultOrganizationId");
+                        .HasForeignKey("CurrentOrganizationId");
 
-                    b.Navigation("DefaultOrganization");
+                    b.Navigation("CurrentOrganization");
                 });
 
             modelBuilder.Entity("TheGrid.Models.Query", b =>

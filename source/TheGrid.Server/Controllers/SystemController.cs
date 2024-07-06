@@ -2,6 +2,7 @@
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
+using Asp.Versioning;
 using Hangfire;
 using Mapster;
 using Microsoft.AspNetCore.Mvc;
@@ -17,6 +18,7 @@ namespace TheGrid.Server.Controllers
     /// </summary>
     [Route("api/v{version:apiVersion}/[controller]")]
     [ApiController]
+    [ApiVersion("1.0")]
     public class SystemController : ControllerBase
     {
         private readonly ConnectorDiscoveryService _connectorDiscoveryService;

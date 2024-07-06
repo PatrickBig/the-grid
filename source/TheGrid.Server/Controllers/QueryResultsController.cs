@@ -4,6 +4,7 @@
 
 using Asp.Versioning;
 using Mapster;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
@@ -18,6 +19,7 @@ namespace TheGrid.Server.Controllers
     /// </summary>
     [Route("api/v{version:apiVersion}/[controller]")]
     [ApiController]
+    [Authorize]
     [Produces(MediaTypeNames.Application.Json)]
     [ApiVersion("1.0")]
     public class QueryResultsController : ControllerBase

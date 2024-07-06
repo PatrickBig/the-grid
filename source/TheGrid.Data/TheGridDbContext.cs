@@ -99,7 +99,7 @@ namespace TheGrid.Data
 
             // Set up default organization for users who have one set.
             builder.Entity<GridUser>()
-                .HasOne(u => u.DefaultOrganization);
+                .HasOne(u => u.CurrentOrganization);
 
             base.OnModelCreating(builder);
         }

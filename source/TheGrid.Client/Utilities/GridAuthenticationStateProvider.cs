@@ -180,9 +180,9 @@ namespace TheGrid.Client.Utilities
 
             _currentUser = new ClaimsPrincipal(identity);
 
-            if (userState.Information.DefaultOrganizationId != null)
+            if (userState.Information.CurrentOrganizationId != null)
             {
-                _userOrganizationService.SetOrganization(userState.Information.Organizations.First(o => o.OrganizationId == userState.Information.DefaultOrganizationId));
+                _userOrganizationService.SetOrganization(userState.Information.Organizations.First(o => o.OrganizationId == userState.Information.CurrentOrganizationId));
             }
         }
     }

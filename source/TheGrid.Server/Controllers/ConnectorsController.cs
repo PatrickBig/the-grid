@@ -3,6 +3,7 @@
 // </copyright>
 
 using Asp.Versioning;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Net.Mime;
@@ -15,6 +16,7 @@ namespace TheGrid.Server.Controllers
     /// </summary>
     [Route("api/v{version:apiVersion}/[controller]")]
     [ApiController]
+    [Authorize]
     [Produces(MediaTypeNames.Application.Json)]
     [ApiVersion("1.0")]
     public class ConnectorsController : ControllerBase

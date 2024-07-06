@@ -4,7 +4,10 @@
 
 using Hangfire;
 using Hangfire.Redis.StackExchange;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.OpenApi.Models;
 using StackExchange.Redis;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
@@ -12,6 +15,8 @@ using System.Text.Json.Serialization;
 using TheGrid.Data;
 using TheGrid.Models;
 using TheGrid.Models.Configuration;
+using TheGrid.Server.Security;
+using TheGrid.Services.Authorization;
 
 namespace TheGrid.Server
 {
@@ -46,6 +51,8 @@ namespace TheGrid.Server
             {
                 configuration.UseRedisStorage(redis);
             });
+
+            services.AddSingleton<IAuthorizationHandler, ConnectionAuthorizationHandler>();
         }
 
         /// <summary>
@@ -71,7 +78,9 @@ namespace TheGrid.Server
             {
             })
                 .AddRoles<IdentityRole>()
-                .AddEntityFrameworkStores<TheGridDbContext>();
+                .AddEntityFrameworkStores<TheGridDbContext>()
+                .AddClaimsPrincipalFactory<ApplicationUserClaimsPrincipalFactory>()
+                .AddDefaultTokenProviders();
 
             services.AddControllers(o =>
             {
@@ -89,14 +98,27 @@ namespace TheGrid.Server
                 // Add SignalR documentation
                 options.AddSignalRSwaggerGen(o =>
                 {
-                    o.ScanAssembly(Assembly.GetAssembly(typeof(TheGrid.Services.IQueryExecutor)));
+                    o.ScanAssembly(Assembly.GetAssembly(typeof(Services.IQueryExecutor)));
                 });
 
                 var apiProjectDocumentation = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, apiProjectDocumentation));
 
-                var sharedDocumentationXml = $"{nameof(TheGrid)}.{nameof(TheGrid.Shared)}.xml";
+                var sharedDocumentationXml = $"{nameof(TheGrid)}.{nameof(Shared)}.xml";
                 options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, sharedDocumentationXml));
+
+                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Scheme = "Bearer",
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer",
+                    },
+                    In = ParameterLocation.Header,
+                    Description = "ASP.NET Identity token required. Example: \"Bearer {token}\"",
+                });
             });
         }
 

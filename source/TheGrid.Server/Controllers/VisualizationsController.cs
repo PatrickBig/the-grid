@@ -4,6 +4,7 @@
 
 using Asp.Versioning;
 using Mapster;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using TheGrid.Models.Visualizations;
@@ -17,6 +18,7 @@ namespace TheGrid.Server.Controllers
     /// </summary>
     [Route("api/v{version:apiVersion}/[controller]")]
     [ApiController]
+    [Authorize]
     [ApiVersion("1.0")]
     public class VisualizationsController : ControllerBase
     {

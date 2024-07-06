@@ -40,6 +40,6 @@ namespace TheGrid.Shared.Models
         /// <summary>
         /// Gets or sets the default organization of the current user.
         /// </summary>
-        public string? DefaultOrganizationId { get; set; }
+        public string? CurrentOrganizationId { get; set; }
     }
 }
