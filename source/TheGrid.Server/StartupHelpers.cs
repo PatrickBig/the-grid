@@ -82,10 +82,6 @@ namespace TheGrid.Server
                 .AddClaimsPrincipalFactory<ApplicationUserClaimsPrincipalFactory>()
                 .AddDefaultTokenProviders();
 
-            //services.AddScoped<SignInManager<GridUser>, ApplicationUserSigninManager>();
-
-            //services.AddTransient<IClaimsTransformation, GridClaimTransformation>();
-
             services.AddControllers(o =>
             {
             }).AddJsonOptions(options =>
