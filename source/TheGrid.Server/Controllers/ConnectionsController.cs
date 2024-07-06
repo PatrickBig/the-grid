@@ -11,6 +11,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Net.Mime;
 using TheGrid.Data;
 using TheGrid.Models;
+using TheGrid.Services.Authorization;
 using TheGrid.Shared.Extensions;
 using TheGrid.Shared.Models;
 
@@ -52,8 +53,6 @@ namespace TheGrid.Server.Controllers
         [HttpPost]
         public async Task<ActionResult> Post([FromBody] CreateConnectionRequest request, CancellationToken cancellationToken = default)
         {
-            
-
             if (!await _db.Organizations.AnyAsync(d => d.Id == request.OrganizationId, cancellationToken))
             {
                 ModelState.AddModelError(nameof(request.OrganizationId), "No organization was found.");
@@ -67,6 +66,11 @@ namespace TheGrid.Server.Controllers
             }
 
             var connection = request.Adapt<Connection>();
+
+            if (!(await _authorizationService.AuthorizeAsync(User, connection, GridOperations.Create)).Succeeded)
+            {
+                return Unauthorized();
+            }
 
             _db.Connections.Add(connection);
             await _db.SaveChangesAsync(cancellationToken);
@@ -95,7 +99,7 @@ namespace TheGrid.Server.Controllers
                 return NotFound();
             }
 
-            if (!User.IsMemberOfOrganization(connection.OrganizationId))
+            if (!(await _authorizationService.AuthorizeAsync(User, connection, GridOperations.Create)).Succeeded)
             {
                 return Unauthorized();
             }

@@ -15,5 +15,10 @@ namespace TheGrid.Services.Authorization
         /// Operation requiring read acces to a resource.
         /// </summary>
         public static readonly OperationAuthorizationRequirement Read = new() { Name = nameof(Read) };
+
+        /// <summary>
+        /// Operation requiring create acces to a resource.
+        /// </summary>
+        public static readonly OperationAuthorizationRequirement Create = new() { Name = nameof(Create) };
     }
 }

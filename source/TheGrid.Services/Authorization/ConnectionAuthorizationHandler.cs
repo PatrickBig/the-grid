@@ -22,6 +22,11 @@ namespace TheGrid.Services.Authorization
                 context.Succeed(requirement);
             }
 
+            if (requirement.Name == GridOperations.Create.Name && context.User.IsMemberOfOrganization(resource.OrganizationId))
+            {
+                context.Succeed(requirement);
+            }
+
             return Task.CompletedTask;
         }
     }
