@@ -3,6 +3,7 @@
 // </copyright>
 
 using Npgsql;
+using System.Runtime.CompilerServices;
 using TheGrid.Connectors.Extensions;
 
 namespace TheGrid.Connectors
@@ -15,7 +16,7 @@ namespace TheGrid.Connectors
     [ConnectorParameter(CommonConnectionParameters.DatabaseName, ConnectionPropertyType.SingleLineText, Required = true)]
     [ConnectorParameter(CommonConnectionParameters.Username, ConnectionPropertyType.SingleLineText, Required = true)]
     [ConnectorParameter(CommonConnectionParameters.Password, ConnectionPropertyType.ProtectedText, Required = true)]
-    public class PostgreSqlConnector : ConnectorBase, ISchemaDiscovery, IConnectionTest
+    public class PostgreSqlConnector : ConnectorBase, ISchemaDiscovery, IConnectionTest, IPermissionTest
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="PostgreSqlConnector"/> class.
@@ -172,6 +173,41 @@ namespace TheGrid.Connectors
             await using var command = new NpgsqlCommand("select 1", connection);
 
             return true;
+        }
+
+        /// <inheritdoc/>
+        public async Task<bool> HasWritePermissionAsync(CancellationToken cancellationToken = default)
+        {
+            // This should work for any version of PostgreSQL after 7.2
+            const string permissionQuery =
+                @"SELECT 
+                  table_name,
+                  has_table_privilege(quote_ident(table_name), 'INSERT') as has_insert_permission,
+                  has_table_privilege(quote_ident(table_name), 'UPDATE') as has_update_permission,
+                  has_table_privilege(quote_ident(table_name), 'DELETE') as has_delete_permission
+                FROM information_schema.tables
+                WHERE table_schema = current_schema";
+
+            await using var connection = GetConnection(ConnectorParameters);
+
+            await connection.OpenAsync(cancellationToken);
+
+            await using var command = new NpgsqlCommand(permissionQuery, connection);
+
+            await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+
+            // Iterate over the results
+            while (await reader.ReadAsync(cancellationToken))
+            {
+                if (reader.GetFieldValue<bool>(reader.GetOrdinal("has_insert_permission")) ||
+                    reader.GetFieldValue<bool>(reader.GetOrdinal("has_update_permission")) ||
+                    reader.GetFieldValue<bool>(reader.GetOrdinal("has_delete_permission")))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private static Dictionary<string, string?> GetColumnAttributes(NpgsqlDataReader reader)
