@@ -17,7 +17,7 @@ namespace TheGrid.Data
     /// Initializes a new instance of the <see cref="TheGridDbContext"/> class.
     /// </remarks>
     /// <param name="options">Options for the database context.</param>
-    public class TheGridDbContext(DbContextOptions<TheGridDbContext> options) : IdentityDbContext<GridUser>(options)
+    public class TheGridDbContext(DbContextOptions<TheGridDbContext> options) : IdentityDbContext<GridUser, GridRole, string>(options)
     {
         /// <summary>
         /// Connections to various data sources.

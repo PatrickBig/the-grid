@@ -3,16 +3,30 @@
 
 <RadzenTemplateForm class="super-center" Data="_input" Submit="RegisterAsync" TItem="RegisterRequest">
     <RadzenCard class="rz-my-12 rz-mx-auto rz-p-4 rz-p-md-12" style="max-width: 800px;">
+        <RadzenText TextStyle="TextStyle.H4">
+            Register a new account
+        </RadzenText>
+        @if (_errors != null && _errors.Any())
+        {
+            <RadzenAlert AlertStyle="AlertStyle.Danger" Title="Registration error" AllowClose="false">
+                <ul>
+                    @foreach (var errorMessage in _errors)
+                    {
+                        <li>@errorMessage</li>
+                    }
+                </ul>
+            </RadzenAlert>
+        }
         <RadzenRow Gap="2rem">
             <RadzenColumn>
                 <RadzenStack>
-                    <RadzenFormField Text="Email" Component="Email">
+                    <RadzenFormField Text="Email" Component="Email" Style="width: 25em;">
                         <RadzenTextBox Name="Email" @bind-Value=_input.Email />
                         <RadzenRequiredValidator Component="Email" Popup />
                         <RadzenLengthValidator Component="Email" Max="256" Popup />
                     </RadzenFormField>
-                    <RadzenFormField Text="Password" Component="Password">
-                        <RadzenTextBox Name="Password" @bind-Value=_input.Password />
+                    <RadzenFormField Text="Password" Component="Password" Style="width: 25em;">
+                        <RadzenPassword Name="Password" @bind-Value=_input.Password />
                         <RadzenRequiredValidator Component="Password" Popup />
                         <RadzenLengthValidator Component="Password" Max="256" Popup />
                     </RadzenFormField>
@@ -24,25 +38,3 @@
         </RadzenStack>
     </RadzenCard>
 </RadzenTemplateForm>
-
-@code {
-    private RegisterRequest _input = new();
-
-    [Inject]
-    private HttpClient HttpClient { get; set; } = default!;
-
-    [Inject]
-    private ILogger<Register> Logger { get; set; } = default!;
-
-    public class RegisterRequest
-    {
-        public string? Email { get; set; }
-
-        public string? Password { get; set; }
-    }
-
-    private async Task RegisterAsync(RegisterRequest registerRequest)
-    {
-        var response = await HttpClient.PostAsJsonAsync("register", registerRequest);
-    }
-}

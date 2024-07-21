@@ -22,5 +22,15 @@ namespace TheGrid.Shared.Extensions
         {
             return user.HasClaim(c => c.Type == GridClaimTypes.Organization && c.Value.Equals(organization, StringComparison.InvariantCultureIgnoreCase));
         }
+
+        public static bool HasPermission(this ClaimsPrincipal user, string organizationId, ApplicationPermission permission)
+        {
+            return user.HasClaim(c => c.Type == GridClaimTypes.Permission && c.Value == permission.ToString() && c.Issuer == organizationId);
+        }
+
+        public static bool IsSystemAdministrator(this ClaimsPrincipal user)
+        {
+            return user.HasClaim(c => c.Type == GridClaimTypes.Permission && c.Value == ApplicationPermission.SystemAdministrator.ToString());
+        }
     }
 }

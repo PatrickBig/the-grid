@@ -13,6 +13,23 @@ namespace TheGrid.Models
     public class GridUser : IdentityUser
     {
         /// <summary>
+        /// Initializes a new instance of the <see cref="GridUser"/> class.
+        /// </summary>
+        public GridUser()
+            : base()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GridUser"/> class.
+        /// </summary>
+        /// <param name="userName">User name.</param>
+        public GridUser(string userName)
+            : base(userName)
+        {
+        }
+
+        /// <summary>
         /// Gets or sets the user's display name.
         /// </summary>
         [PersonalData]

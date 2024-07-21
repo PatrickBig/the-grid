@@ -13,5 +13,10 @@ namespace TheGrid.Shared.Constants
         /// System administrator has full access to the entire platform.
         /// </summary>
         public const string SystemAdministrator = "SystemAdministrator";
+
+        /// <summary>
+        /// The default role for new users.
+        /// </summary>
+        public const string DefaultRole = "Member";
     }
 }

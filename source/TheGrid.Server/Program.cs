@@ -12,6 +12,7 @@ using TheGrid.Data;
 using TheGrid.Models;
 using TheGrid.Models.Configuration;
 using TheGrid.Server.HealthChecks;
+using TheGrid.Server.Setup;
 using TheGrid.Services.Hubs;
 using TheGrid.Shared;
 
@@ -66,6 +67,12 @@ public static class Program
                _responseMimeTypes);
         });
 
+        if (Environment.GetCommandLineArgs().Contains("/setup"))
+        {
+            Console.WriteLine("AAAAAAAAAAAAAAAAAAAA SETUP TIME");
+            builder.Services.AddHostedService<SetupHostedService>();
+        }
+
         var app = builder.Build();
 
         if (!app.Environment.IsDevelopment())
@@ -78,11 +85,6 @@ public static class Program
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
-                // Apply migrations
-                using var scope = app.Services.CreateScope();
-                var dbContext = scope.ServiceProvider.GetRequiredService<TheGridDbContext>();
-                dbContext.Database.Migrate();
-
                 app.UseWebAssemblyDebugging();
                 app.UseSwagger();
                 app.UseSwaggerUI(o =>

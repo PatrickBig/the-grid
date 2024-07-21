@@ -81,7 +81,7 @@ namespace TheGrid.Client.Utilities
 
             if (!response.IsSuccessStatusCode)
             {
-                // Handle errors.
+                // Handle Errors.
                 if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                 {
                     _logger.LogError("Invalid username or password.");

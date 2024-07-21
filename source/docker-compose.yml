@@ -16,6 +16,15 @@ services:
     ports:
       - 20080:8080
       - 20443:8081
+  thegrid.setup:
+    image: ${DOCKER_REGISTRY-}thegridserver
+    build:
+      context: .
+      dockerfile: TheGrid.Server/Dockerfile
+    command: ["/setup"]
+    container_name: "TheGrid.Setup"
+    environment:
+      DEFAULT_ADMIN_PASSWORD: "TheGrid123!"
   redis:
     image: redis
   postgres:

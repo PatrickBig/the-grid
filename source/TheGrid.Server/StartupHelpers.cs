@@ -4,11 +4,13 @@
 
 using Hangfire;
 using Hangfire.Redis.StackExchange;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.OpenApi.Models;
 using StackExchange.Redis;
+using Stubble.Core;
+using Stubble.Core.Builders;
+using Stubble.Core.Interfaces;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text.Json.Serialization;
@@ -53,6 +55,10 @@ namespace TheGrid.Server
             });
 
             services.AddSingleton<IAuthorizationHandler, ConnectionAuthorizationHandler>();
+
+            services.AddSingleton(p => new StubbleBuilder().Build());
+            services.AddSingleton<IAsyncStubbleRenderer>(p => p.GetRequiredService<StubbleVisitorRenderer>());
+            services.AddSingleton<IStubbleRenderer>(p => p.GetRequiredService<StubbleVisitorRenderer>());
         }
 
         /// <summary>
@@ -77,7 +83,7 @@ namespace TheGrid.Server
             services.AddIdentityApiEndpoints<GridUser>(o =>
             {
             })
-                .AddRoles<IdentityRole>()
+                .AddRoles<GridRole>()
                 .AddEntityFrameworkStores<TheGridDbContext>()
                 .AddClaimsPrincipalFactory<ApplicationUserClaimsPrincipalFactory>()
                 .AddDefaultTokenProviders();

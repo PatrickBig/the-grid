@@ -1,0 +1,14 @@
+﻿@typeparam TEnum where TEnum: struct, Enum
+@using TheGrid.Shared.Models
+
+<RadzenDropDown
+    TValue="@ValueType"
+    TextProperty="@nameof(EnumSelectOption.DisplayName)"
+    ValueProperty="@ValuePropertyName"
+    Data="@_options"
+    AllowClear="@AllowClear"
+    Multiple="@Multiple"
+    Chips="@Chips"
+    >
+
+</RadzenDropDown>

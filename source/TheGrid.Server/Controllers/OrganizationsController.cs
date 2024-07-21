@@ -11,6 +11,7 @@ using System.Net.Mime;
 using System.Runtime.CompilerServices;
 using TheGrid.Data;
 using TheGrid.Models;
+using TheGrid.Services;
 using TheGrid.Shared.Models;
 
 namespace TheGrid.Server.Controllers
@@ -26,14 +27,17 @@ namespace TheGrid.Server.Controllers
     public class OrganizationsController : ControllerBase
     {
         private readonly TheGridDbContext _db;
+        private readonly IOrganizationManager _organizationManager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="OrganizationsController"/> class.
         /// </summary>
         /// <param name="db">Database context.</param>
-        public OrganizationsController(TheGridDbContext db)
+        /// <param name="organizationManager">Organization manager.</param>
+        public OrganizationsController(TheGridDbContext db, IOrganizationManager organizationManager)
         {
             _db = db;
+            _organizationManager = organizationManager;
         }
 
         /// <summary>
@@ -56,17 +60,9 @@ namespace TheGrid.Server.Controllers
                 return ValidationProblem(ModelState);
             }
 
-            var dto = new Organization
-            {
-                Id = request.Slug,
-                Name = request.Name,
-            };
+            var organization = await _organizationManager.CreateOrganizationAsync(request.Slug, request.Name, cancellationToken);
 
-            await _db.Organizations.AddAsync(dto, cancellationToken);
-
-            await _db.SaveChangesAsync(cancellationToken);
-
-            return CreatedAtAction(nameof(Get), new { organizationId = dto.Id }, new CreateOrganizationResponse { OrganizationId = dto.Id });
+            return CreatedAtAction(nameof(Get), new { organizationId = organization.Id }, new CreateOrganizationResponse { OrganizationId = organization.Id });
         }
 
         /// <summary>
