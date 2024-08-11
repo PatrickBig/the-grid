@@ -31,6 +31,11 @@ namespace TheGrid.Server
                 .NewConfig()
                 .Map(dest => dest, src => src.TableVisualizationOptions)
                 .Map(dest => dest.Columns, src => src.TableVisualizationOptions!.ColumnOptions);
+
+            TypeAdapterConfig<Group, GroupInformation>
+                .NewConfig()
+                .Map(dest => dest, src => src)
+                .Map(dest => dest.Permissions, src => src.Permissions.Select(p => p.Permission));
         }
     }
 }

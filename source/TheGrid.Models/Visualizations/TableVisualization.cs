@@ -12,7 +12,7 @@ namespace TheGrid.Models.Visualizations
         /// <summary>
         /// Column options for the visualization.
         /// </summary>
-        public Dictionary<string, TableColumn> Columns { get; set; } = new();
+        public Dictionary<string, TableColumn> Columns { get; set; } = [];
 
         /// <summary>
         /// Number of records to show in each page.

@@ -49,6 +49,11 @@ namespace TheGrid.Models
         /// <summary>
         /// Gets or sets the organizations that the user is a member of.
         /// </summary>
-        public IEnumerable<Organization> Organizations { get; set; } = new List<Organization>();
+        public virtual ICollection<Organization> Organizations { get; set; } = [];
+
+        /// <summary>
+        /// Gets or sets the groups that the user is a member of.
+        /// </summary>
+        public virtual ICollection<Group> Groups { get; set; } = [];
     }
 }

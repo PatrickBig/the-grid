@@ -1,9 +1,7 @@
-﻿using Microsoft.AspNetCore.Identity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// <copyright file="OrganizationManager.cs" company="BiglerNet">
+// Copyright (c) BiglerNet. All rights reserved.
+// </copyright>
+
 using TheGrid.Data;
 using TheGrid.Models;
 using TheGrid.Shared.Constants;
@@ -13,14 +11,15 @@ namespace TheGrid.Services
     public class OrganizationManager : IOrganizationManager
     {
         private readonly TheGridDbContext _db;
-        private readonly RoleManager<GridRole> _roleManager;
+        private readonly IGroupManager _groupManager;
 
-        public OrganizationManager(TheGridDbContext db, RoleManager<GridRole> roleManager)
+        public OrganizationManager(TheGridDbContext db, IGroupManager groupManager)
         {
             _db = db;
-            _roleManager = roleManager;
+            _groupManager = groupManager;
         }
 
+        /// <inheritdoc/>
         public async Task<Organization> CreateOrganizationAsync(string slug, string name, CancellationToken cancellationToken = default)
         {
             var organization = new Organization
@@ -33,20 +32,9 @@ namespace TheGrid.Services
             await _db.SaveChangesAsync(CancellationToken.None);
 
             // Create the default role for the organization
-            var role = new GridRole(GridRoles.DefaultRole)
-            {
-                IsBuiltIn = true,
-                OrganizationId = organization.Id,
-            };
+            var result = await _groupManager.CreateGroupAsync(BuiltInGroups.DefaultRole, slug, "Default group.", [ApplicationPermission.ViewDashboard, ApplicationPermission.ViewAlert, ApplicationPermission.ViewConnection, ApplicationPermission.ViewQuery], true, CancellationToken.None);
 
-            var result = await _roleManager.CreateAsync(role);
-
-            if (result.Succeeded)
-            {
-                return organization;
-            }
-
-            throw new NotImplementedException();
+            return organization;
         }
     }
 }

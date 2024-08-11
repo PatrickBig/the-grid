@@ -3,6 +3,7 @@
 // </copyright>
 
 using Asp.Versioning;
+using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -22,26 +23,56 @@ namespace TheGrid.Server.Controllers
     /// Controller for managing groups.
     /// </summary>
     /// <param name="dbContext">Database context.</param>
+    /// <param name="groupManager">Group manager.</param>
     [Route("api/v{version:apiVersion}/[controller]")]
     [ApiVersion("1.0")]
     [ApiController]
     [Authorize]
     [Produces(MediaTypeNames.Application.Json)]
-    public class GroupsController(TheGridDbContext dbContext, IGroupManager _groupManager) : ControllerBase
+    public class GroupsController(TheGridDbContext dbContext, IGroupManager groupManager) : ControllerBase
     {
+        private readonly IGroupManager _groupManager = groupManager;
+        private readonly TheGridDbContext _dbContext = dbContext;
+
+        /// <summary>
+        /// Creates a new group for an organization.
+        /// </summary>
+        /// <param name="request">Details for the new group..</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Details about the newly created group.</returns>
         [HttpPost]
-        public async Task<ActionResult> CreateGroupAsync([FromBody] CreateGroupRequest request, CancellationToken cancellationToken = default)
+        public async Task<ActionResult> CreateGroup([FromBody] CreateGroupRequest request, CancellationToken cancellationToken = default)
         {
             if (!CanAdministerGroups(request.OrganizationId))
             {
                 return Unauthorized();
             }
 
-            await _groupManager.CreateGroupAsync(request.Name, request.OrganizationId, request.Description, request.Permissions, cancellationToken);
-            return Created();
+            var group = await _groupManager.CreateGroupAsync(request.Name, request.OrganizationId, request.Description, request.Permissions, false, cancellationToken);
+
+            return CreatedAtAction(nameof(GetGroup), new { groupId = group.Id }, group.Adapt<GroupInformation>());
         }
 
+        /// <summary>
+        /// Gets information about a single group.
+        /// Users must be a member of the organization that the group belongs to or a system administrator.
+        /// </summary>
+        /// <param name="groupId">Unique identifier of the group.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>A status code indicating success or failure.</returns>
+        [HttpGet("{groupId}")]
+        public async Task<ActionResult> GetGroup([FromRoute] int groupId, CancellationToken cancellationToken = default)
+        {
+            var group = await _groupManager.GetGroupAsync(groupId, cancellationToken);
 
+            // Make sure the user is authorized to see the group.
+            if ((group.OrganizationId != null && !User.IsMemberOfOrganization(group.OrganizationId)) && !User.IsSystemAdministrator())
+            {
+                return Unauthorized();
+            }
+
+            return Ok(group.Adapt<GroupInformation>());
+        }
 
         /// <summary>
         /// Gets a list of groups available in the system.
@@ -60,17 +91,17 @@ namespace TheGrid.Server.Controllers
             [FromQuery][Range(1, 200)] int take = 25,
             CancellationToken cancellationToken = default)
         {
-            if (!User.IsMemberOfOrganization(organizationId) && !User.IsInRole(GridRoles.SystemAdministrator))
+            if (!User.IsMemberOfOrganization(organizationId) && !User.IsInRole(BuiltInGroups.SystemAdministrator))
             {
                 return Unauthorized();
             }
 
             var baseQuery =
-                from g in dbContext.Roles
+                from g in _dbContext.Groups
                 where g.OrganizationId == null || g.OrganizationId == organizationId
                 select new GroupInformation
                 {
-                    GroupName = g.Name,
+                    Name = g.Name,
                     Description = g.Description,
                     IsBuiltIn = g.IsBuiltIn,
 

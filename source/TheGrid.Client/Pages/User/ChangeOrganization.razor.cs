@@ -14,8 +14,8 @@ namespace TheGrid.Client.Pages.User
     /// </summary>
     public partial class ChangeOrganization
     {
-        private IEnumerable<UserOrganizationMembership> _userOrganizations { get; set; } = Array.Empty<UserOrganizationMembership>();
-        private InputModel _inputModel = new();
+        private readonly InputModel _inputModel = new();
+        private IEnumerable<UserOrganizationMembership> _userOrganizations = [];
 
         [Inject]
         private IUserOrganizationService OrganizationManager { get; set; } = default!;
@@ -47,7 +47,7 @@ namespace TheGrid.Client.Pages.User
             }
         }
 
-        private class InputModel
+        private sealed class InputModel
         {
             public string? OrganizationId { get; set; }
         }

@@ -53,6 +53,6 @@ namespace TheGrid.Models
         /// <remarks>
         /// This value is encrypted in the database when stored.
         /// </remarks>
-        public Dictionary<string, string?> ConnectionProperties { get; set; } = new();
+        public Dictionary<string, string?> ConnectionProperties { get; set; } = [];
     }
 }

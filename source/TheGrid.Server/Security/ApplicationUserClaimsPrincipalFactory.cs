@@ -39,7 +39,7 @@ namespace TheGrid.Server.Security
 
             var query = from u in _db.Users
                         where u.Id == user.Id
-                        join userRole in _db.UserRoles on u.Id equals userRole.UserId into userRoles
+                        join userGroup in _db.UserGroups on u.Id equals userGroup.UserId into userRoles
                         from ur in userRoles.DefaultIfEmpty()
                         join role in _db.Roles on ur.RoleId equals role.Id into roles
                         from r in roles.DefaultIfEmpty()

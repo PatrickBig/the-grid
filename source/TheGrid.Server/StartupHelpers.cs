@@ -83,7 +83,6 @@ namespace TheGrid.Server
             services.AddIdentityApiEndpoints<GridUser>(o =>
             {
             })
-                .AddRoles<GridRole>()
                 .AddEntityFrameworkStores<TheGridDbContext>()
                 .AddClaimsPrincipalFactory<ApplicationUserClaimsPrincipalFactory>()
                 .AddDefaultTokenProviders();

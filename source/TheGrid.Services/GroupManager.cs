@@ -1,61 +1,152 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿// <copyright file="GroupManager.cs" company="BiglerNet">
+// Copyright (c) BiglerNet. All rights reserved.
+// </copyright>
+
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using TheGrid.Data;
 using TheGrid.Models;
 using TheGrid.Shared.Constants;
 
 namespace TheGrid.Services
 {
-    public class GroupManager : IGroupManager
+    /// <summary>
+    /// Manages user groups.
+    /// </summary>
+    /// <param name="db">Database context.</param>
+    /// <param name="logger">Logger instance.</param>
+    public class GroupManager(TheGridDbContext db, ILogger<GroupManager> logger) : IGroupManager
     {
-        private readonly TheGridDbContext _db;
-        private readonly RoleManager<GridRole> _roleManager;
+        private readonly TheGridDbContext _db = db;
+        private readonly ILogger<GroupManager> _logger = logger;
 
-        public GroupManager(TheGridDbContext db, RoleManager<GridRole> roleManager)
+        /// <inheritdoc/>
+        public async Task<Group> CreateGroupAsync(string name, string organizationId, string? description, IEnumerable<ApplicationPermission> permissions, bool builtIn = false, CancellationToken cancellationToken = default)
         {
-            _db = db;
-            _roleManager = roleManager;
-        }
+            if (permissions.Contains(ApplicationPermission.SystemAdministrator))
+            {
+                throw new InvalidOperationException($"Cannot create a group with the System Administrator permission. Use {nameof(CreateSystemAdministratorGroupAsync)} instead.");
+            }
 
-        public async Task CreateGroupAsync(string name, string? organizationId, string? description, IEnumerable<ApplicationPermission> permissions, CancellationToken cancellationToken = default)
-        {
             // Verify that the group does not already exist.
-            if (await _db.Roles.AnyAsync(g => g.Name == name && g.OrganizationId == organizationId, cancellationToken))
+#pragma warning disable CA1862 // Use the 'StringComparison' method overloads to perform case-insensitive string comparisons
+            if (await _db.Groups.AnyAsync(g => g.NormalizedName == name.ToUpperInvariant() && g.OrganizationId == organizationId, cancellationToken))
             {
                 throw new InvalidOperationException($"Group {name} already exists.");
             }
+#pragma warning restore CA1862 // Use the 'StringComparison' method overloads to perform case-insensitive string comparisons
 
-            // The only "root level" groups that can be created are system admin groups. They should only have that permission.
-            if (organizationId == null && permissions.Count() != 1 && permissions.First() != ApplicationPermission.SystemAdministrator)
+            _logger.LogInformation("Creating new group named {GroupName} for organization ID {OrganizationId}", name, organizationId);
+
+            var group = new Group(name, description, organizationId, permissions, builtIn);
+
+            _db.Groups.Add(group);
+            await _db.SaveChangesAsync(cancellationToken);
+
+            return group;
+        }
+
+        /// <inheritdoc/>
+        public async Task<Group> CreateSystemAdministratorGroupAsync(string name, string? description, bool builtIn = false, CancellationToken cancellationToken = default)
+        {
+#pragma warning disable CA1862 // Use the 'StringComparison' method overloads to perform case-insensitive string comparisons
+            if (await _db.Groups.AnyAsync(g => g.NormalizedName == name.ToUpperInvariant(), cancellationToken))
             {
-                throw new InvalidOperationException($"Root level groups may only have the System Administrator permission.");
+                throw new InvalidOperationException($"Group {name} already exists.");
             }
+#pragma warning restore CA1862 // Use the 'StringComparison' method overloads to perform case-insensitive string comparisons
 
-            var group = new GridRole
+            var group = new Group
             {
                 Name = name,
-                OrganizationId = organizationId,
                 Description = description,
+                IsBuiltIn = builtIn,
+                Permissions =
+                [
+                    new GroupPermission
+                    {
+                        Permission = ApplicationPermission.SystemAdministrator,
+                    },
+                ],
             };
 
-            await _roleManager.CreateAsync(group);
+            _db.Groups.Add(group);
+            await _db.SaveChangesAsync(cancellationToken);
 
-            // Add the permissions
-            var claims = permissions.Select(p =>
-                new IdentityRoleClaim<string>
-                {
-                    ClaimType = GridClaimTypes.Permission,
-                    ClaimValue = p.ToString(),
-                    RoleId = group.Id,
-                });
+            return group;
+        }
 
-            await _db.RoleClaims.AddRangeAsync(claims, CancellationToken.None);
+        /// <inheritdoc/>
+        public Task<Group> GetGroupAsync(int groupId, CancellationToken cancellationToken = default)
+        {
+            return _db.Groups
+                .Where(g => g.Id == groupId)
+                .Include(g => g.Permissions)
+                .SingleAsync(cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public Task<bool> GroupExistsAsync(string name, string organizationId, CancellationToken cancellationToken = default)
+        {
+#pragma warning disable CA1862 // Use the 'StringComparison' method overloads to perform case-insensitive string comparisons
+            return _db.Groups.AnyAsync(g => g.NormalizedName == name.ToUpperInvariant() && g.OrganizationId == organizationId, cancellationToken);
+#pragma warning restore CA1862 // Use the 'StringComparison' method overloads to perform case-insensitive string comparisons
+        }
+
+        /// <inheritdoc/>
+        public Task<bool> SystemAdministratorGroupExistsAsync(string name, CancellationToken cancellationToken = default)
+        {
+#pragma warning disable CA1862 // Use the 'StringComparison' method overloads to perform case-insensitive string comparisons
+            return _db.Groups.AnyAsync(g => g.NormalizedName == name.ToUpperInvariant() && g.OrganizationId == null, cancellationToken);
+#pragma warning restore CA1862 // Use the 'StringComparison' method overloads to perform case-insensitive string comparisons
+        }
+
+        /// <inheritdoc/>
+        public async Task<Group> UpdateGroupInformationAsync(int groupId, string name, string? description, CancellationToken cancellationToken = default)
+        {
+            var group = await _db.Groups
+                .Where(g => g.Id == groupId)
+                .Include(g => g.Permissions)
+                .SingleAsync(cancellationToken);
+
+            // Do not modify built in groups.
+            if (group.IsBuiltIn)
+            {
+                throw new InvalidOperationException("Built-in groups cannot be modified.");
+            }
+
+            // Update the various properties
+            group.Name = name;
+            group.Description = description;
+
+            await _db.SaveChangesAsync(cancellationToken);
+
+            return group;
+        }
+
+        /// <inheritdoc/>
+        public async Task<IEnumerable<ApplicationPermission>> UpdateGroupPermissionsAsync(int groupId, IEnumerable<ApplicationPermission> permissions, CancellationToken cancellationToken = default)
+        {
+            var group = await _db.Groups
+                .Where(g => g.Id == groupId)
+                .Include(g => g.Permissions)
+                .SingleAsync(cancellationToken);
+
+            // Do not modify a system group.
+            if (group.OrganizationId == null)
+            {
+                throw new InvalidOperationException("Permissions cannot be modified for system administrator groups.");
+            }
+
+            group.Permissions = permissions.Select(p => new GroupPermission
+            {
+                Permission = p,
+                GroupId = groupId,
+            });
+
+            await _db.SaveChangesAsync(cancellationToken);
+
+            return permissions;
         }
     }
 }

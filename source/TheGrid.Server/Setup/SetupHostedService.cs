@@ -5,6 +5,7 @@ using System.Security.Claims;
 using TheGrid.Data;
 using TheGrid.Models;
 using TheGrid.Server.Controllers;
+using TheGrid.Services;
 using TheGrid.Shared.Constants;
 
 namespace TheGrid.Server.Setup
@@ -13,13 +14,13 @@ namespace TheGrid.Server.Setup
     /// Hosted service that runs when the application starts with the `/setup` argument supplied.
     /// This applies any database migrations, seeds data, prepares the file system, and exits the application.
     /// </summary>
-    public class SetupHostedService(RoleManager<GridRole> roleManager, UserManager<GridUser> userManager, ILogger<SetupHostedService> logger, TheGridDbContext dbContext) : IHostedService
+    public class SetupHostedService(IGroupManager groupManager, UserManager<GridUser> userManager, ILogger<SetupHostedService> logger, TheGridDbContext dbContext) : IHostedService
     {
         /// <inheritdoc/>
         public async Task StartAsync(CancellationToken cancellationToken)
         {
             await ApplyDatabaseMigrationsAsync();
-            await SetupRolesAsync();
+            await SetupDefaultGroupsAsync();
             await SetupUsersAsync();
 
             Environment.Exit(0);
@@ -58,7 +59,7 @@ namespace TheGrid.Server.Setup
 
                 if (result.Succeeded)
                 {
-                    await userManager.AddToRoleAsync(adminUser, GridRoles.SystemAdministrator);
+                    await userManager.AddToRoleAsync(adminUser, BuiltInGroups.SystemAdministrator);
                 }
                 else
                 {
@@ -68,28 +69,14 @@ namespace TheGrid.Server.Setup
             }
         }
 
-        private async Task SetupRolesAsync()
+        private async Task SetupDefaultGroupsAsync()
         {
-            logger.LogInformation("Seeding Roles");
-            if (!(await roleManager.RoleExistsAsync(GridRoles.SystemAdministrator)))
+            logger.LogInformation("Seeding default groups");
+            if (!(await groupManager.SystemAdministratorGroupExistsAsync(BuiltInGroups.SystemAdministrator)))
             {
                 logger.LogTrace("Creating System Administrator Role");
 
-                var systemAdminRole = new GridRole(GridRoles.SystemAdministrator)
-                {
-                    Description = "System Administrator",
-                    IsBuiltIn = true,
-                };
-
-                var role = await roleManager.CreateAsync(systemAdminRole);
-                if (role.Succeeded)
-                {
-                    await roleManager.AddClaimAsync(systemAdminRole, new Claim(GridClaimTypes.Permission, ApplicationPermission.SystemAdministrator.ToString(), ClaimValueTypes.String, "system"));
-                }
-                else
-                {
-                    logger.LogError("Unable to create System Administrator Role. Error = {Error}", string.Join(", ", role.Errors));
-                }
+                await groupManager.CreateSystemAdministratorGroupAsync(BuiltInGroups.SystemAdministrator, "Default system administrator group");
             }
         }
     }
