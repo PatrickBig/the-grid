@@ -91,7 +91,7 @@ namespace TheGrid.Server.Controllers
             [FromQuery][Range(1, 200)] int take = 25,
             CancellationToken cancellationToken = default)
         {
-            if (!User.IsMemberOfOrganization(organizationId) && !User.IsInRole(BuiltInGroups.SystemAdministrator))
+            if (!User.IsMemberOfOrganization(organizationId) && !User.IsSystemAdministrator())
             {
                 return Unauthorized();
             }
