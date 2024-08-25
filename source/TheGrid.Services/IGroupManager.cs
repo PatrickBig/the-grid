@@ -2,6 +2,7 @@
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
+using Microsoft.AspNetCore.Identity;
 using TheGrid.Models;
 using TheGrid.Shared.Constants;
 
@@ -63,6 +64,23 @@ namespace TheGrid.Services
         public Task<Group> GetGroupAsync(int groupId, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Fetches a single group from the database by name and organization.
+        /// </summary>
+        /// <param name="name">Name of the group to fetch.</param>
+        /// <param name="organizationId">Unique ID of the organization the group belongs too.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>The requested group. Returns null if the group does not exist.</returns>
+        public Task<Group?> GetGroupByNameAsync(string name, string organizationId, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Fetches a system group from the database by name.
+        /// </summary>
+        /// <param name="name">Name of the group to fetch.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>The requested group. Returns null if the group does not exist.</returns>
+        public Task<Group?> GetSystemAdministratorGroupByNameAsync(string name, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Updates an existing group. This method cannot update built in groups.
         /// </summary>
         /// <param name="groupId">Unique ID of the group to be updated.</param>
@@ -84,5 +102,15 @@ namespace TheGrid.Services
         /// <exception cref="ArgumentNullException">Thrown if there is no group with the given ID.</exception>
         /// <exception cref="InvalidOperationException">Thrown if the group is a system administrator group.</exception>
         public Task<IEnumerable<ApplicationPermission>> UpdateGroupPermissionsAsync(int groupId, IEnumerable<ApplicationPermission> permissions, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Adds a user to a group.
+        /// </summary>
+        /// <param name="groupId">Unique ID of the group to add the user to.</param>
+        /// <param name="userId">Unique identifier of the user to add to the group. Should be the <see cref="IdentityUser{String}.Id"/>.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns></returns>
+        public Task AddUserToGroupAsync(int groupId, string userId, CancellationToken cancellationToken = default);
+
     }
 }

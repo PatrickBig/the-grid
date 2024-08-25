@@ -1,10 +1,11 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿// <copyright file="SetupHostedService.cs" company="BiglerNet">
+// Copyright (c) BiglerNet. All rights reserved.
+// </copyright>
+
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using System.Security.Claims;
 using TheGrid.Data;
 using TheGrid.Models;
-using TheGrid.Server.Controllers;
 using TheGrid.Services;
 using TheGrid.Shared.Constants;
 
@@ -59,13 +60,22 @@ namespace TheGrid.Server.Setup
 
                 if (result.Succeeded)
                 {
-                    await userManager.AddToRoleAsync(adminUser, BuiltInGroups.SystemAdministrator);
+                    // Add the user to the group
+                    var systemAdminGroup = await groupManager.GetSystemAdministratorGroupByNameAsync(BuiltInGroups.SystemAdministrator);
+
+                    if (systemAdminGroup == null)
+                    {
+                        throw new InvalidOperationException("System administrator group not found.");
+                    }
+
+                    await groupManager.AddUserToGroupAsync(systemAdminGroup.Id, adminUser.Id);
+
+                    logger.LogInformation("System administrator was added to the default system admin group.");
                 }
                 else
                 {
                     logger.LogError("Unable to create System Administrator. Error = {Error}", string.Join(", ", result.Errors));
                 }
-
             }
         }
 
@@ -76,7 +86,7 @@ namespace TheGrid.Server.Setup
             {
                 logger.LogTrace("Creating System Administrator Role");
 
-                await groupManager.CreateSystemAdministratorGroupAsync(BuiltInGroups.SystemAdministrator, "Default system administrator group");
+                await groupManager.CreateSystemAdministratorGroupAsync(BuiltInGroups.SystemAdministrator, "Default system administrator group", true);
             }
         }
     }

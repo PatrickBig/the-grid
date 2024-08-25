@@ -38,39 +38,34 @@ namespace TheGrid.Server.Security
             var claimsIdentity = await base.GenerateClaimsAsync(user);
 
             var query = from u in _db.Users
-                        where u.Id == user.Id
-                        join userGroup in _db.UserGroups on u.Id equals userGroup.UserId into userRoles
-                        from ur in userRoles.DefaultIfEmpty()
-                        join role in _db.Roles on ur.RoleId equals role.Id into roles
-                        from r in roles.DefaultIfEmpty()
-                        join organization in _db.Organizations on r.OrganizationId equals organization.Id into organizations
-                        from o in organizations.DefaultIfEmpty()
-                        join roleClaim in _db.RoleClaims on r.Id equals roleClaim.RoleId into roleClaims
-                        from rc in roleClaims.DefaultIfEmpty()
+                        join ug in _db.UserGroups on u.Id equals ug.UserId
+                        join g in _db.Groups on ug.GroupId equals g.Id
+                        join gp in _db.GroupPermissions on g.Id equals gp.GroupId
                         select new
                         {
+                            UserId = u.Id,
                             u.UserName,
-                            RoleName = r.Name,
-                            OrganizationId = o.Id,
-                            rc.ClaimType,
-                            rc.ClaimValue,
+                            g.OrganizationId,
+                            GroupName = g.Name,
+                            gp.Permission,
                         };
+
 
             var userClaims = await query.ToListAsync();
 
             // Add each organization as it's own claim to the user principal.
             claimsIdentity.AddClaims(userClaims.GroupBy(u => u.OrganizationId).Where(u => u.Key != null).Select(u => new Claim(GridClaimTypes.Organization, u.Key)));
 
-            // Add all of the user's roles to the user principal.
-            claimsIdentity.AddClaims(userClaims.GroupBy(u => new { u.OrganizationId, u.RoleName }).Select(u =>
+            // Add all of the groups as claims to the user principal but use the "role" as the claim type.
+            claimsIdentity.AddClaims(userClaims.GroupBy(u => new { u.OrganizationId, u.GroupName }).Select(u =>
             {
-                return new Claim(ClaimTypes.Role, u.Key.RoleName, ClaimValueTypes.String, issuer: u.Key.OrganizationId);
+                return new Claim(ClaimTypes.Role, u.Key.GroupName, ClaimValueTypes.String, issuer: u.Key.OrganizationId);
             }));
 
-            // Now add all the remaining claims to the user principal.
-            claimsIdentity.AddClaims(userClaims.GroupBy(u => new { u.OrganizationId, u.ClaimType, u.ClaimValue }).Select(u =>
+            // Now add all the permissions as claims to the user principal.
+            claimsIdentity.AddClaims(userClaims.GroupBy(u => new { u.OrganizationId, u.Permission }).Select(u =>
             {
-                return new Claim(u.Key.ClaimType, u.Key.ClaimValue, ClaimValueTypes.String, issuer: u.Key.OrganizationId);
+                return new Claim(GridClaimTypes.Permission, u.Key.Permission.ToString(), ClaimValueTypes.String, issuer: u.Key.OrganizationId);
             }));
 
             return claimsIdentity;

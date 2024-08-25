@@ -67,7 +67,13 @@ namespace TheGrid.Models
         /// <summary>
         /// Gets the normalized name of the group.
         /// </summary>
-        public string NormalizedName => Name.ToUpperInvariant();
+        public string NormalizedName
+        {
+            get => Name.ToUpperInvariant();
+#pragma warning disable S1186, S3237, S108 // Disable warnings for the empty setter. This is to make sure we still have our "read only" type of property. https://github.com/dotnet/efcore/issues/13316#issuecomment-421052406
+            private set { }
+#pragma warning restore S1186, S3237, S108
+        }
 
         /// <summary>
         /// Gets or sets the description of the group.
@@ -94,11 +100,11 @@ namespace TheGrid.Models
         /// <summary>
         /// Gets or sets the permissions associated to the group.
         /// </summary>
-        public virtual IEnumerable<GroupPermission> Permissions { get; set; } = [];
+        public virtual IEnumerable<GroupPermission> Permissions { get; set; } = new List<GroupPermission>();
 
         /// <summary>
         /// Gets or sets the users associated to the group.
         /// </summary>
-        public virtual IEnumerable<GridUser> Users { get; set; } = [];
+        public virtual IEnumerable<GridUser> Users { get; set; } = new List<GridUser>();
     }
 }

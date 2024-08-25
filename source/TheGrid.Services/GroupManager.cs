@@ -8,6 +8,7 @@ using TheGrid.Data;
 using TheGrid.Models;
 using TheGrid.Shared.Constants;
 
+#pragma warning disable CA1862 // Use the 'StringComparison' method overloads to perform case-insensitive string comparisons
 namespace TheGrid.Services
 {
     /// <summary>
@@ -21,6 +22,20 @@ namespace TheGrid.Services
         private readonly ILogger<GroupManager> _logger = logger;
 
         /// <inheritdoc/>
+        public async Task AddUserToGroupAsync(int groupId, string userId, CancellationToken cancellationToken = default)
+        {
+            var groupMembership = new UserGroup
+            {
+                GroupId = groupId,
+                UserId = userId,
+            };
+
+            _db.UserGroups.Add(groupMembership);
+
+            await _db.SaveChangesAsync(cancellationToken);
+        }
+
+        /// <inheritdoc/>
         public async Task<Group> CreateGroupAsync(string name, string organizationId, string? description, IEnumerable<ApplicationPermission> permissions, bool builtIn = false, CancellationToken cancellationToken = default)
         {
             if (permissions.Contains(ApplicationPermission.SystemAdministrator))
@@ -29,12 +44,10 @@ namespace TheGrid.Services
             }
 
             // Verify that the group does not already exist.
-#pragma warning disable CA1862 // Use the 'StringComparison' method overloads to perform case-insensitive string comparisons
             if (await _db.Groups.AnyAsync(g => g.NormalizedName == name.ToUpperInvariant() && g.OrganizationId == organizationId, cancellationToken))
             {
                 throw new InvalidOperationException($"Group {name} already exists.");
             }
-#pragma warning restore CA1862 // Use the 'StringComparison' method overloads to perform case-insensitive string comparisons
 
             _logger.LogInformation("Creating new group named {GroupName} for organization ID {OrganizationId}", name, organizationId);
 
@@ -49,12 +62,10 @@ namespace TheGrid.Services
         /// <inheritdoc/>
         public async Task<Group> CreateSystemAdministratorGroupAsync(string name, string? description, bool builtIn = false, CancellationToken cancellationToken = default)
         {
-#pragma warning disable CA1862 // Use the 'StringComparison' method overloads to perform case-insensitive string comparisons
             if (await _db.Groups.AnyAsync(g => g.NormalizedName == name.ToUpperInvariant(), cancellationToken))
             {
                 throw new InvalidOperationException($"Group {name} already exists.");
             }
-#pragma warning restore CA1862 // Use the 'StringComparison' method overloads to perform case-insensitive string comparisons
 
             var group = new Group
             {
@@ -86,19 +97,35 @@ namespace TheGrid.Services
         }
 
         /// <inheritdoc/>
+        public async Task<Group?> GetGroupByNameAsync(string name, string organizationId, CancellationToken cancellationToken = default)
+        {
+            var normalizedName = name.ToUpperInvariant();
+            return await _db.Groups
+                .Include(g => g.Permissions)
+                .FirstOrDefaultAsync(g => g.NormalizedName == normalizedName && g.OrganizationId == organizationId, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public async Task<Group?> GetSystemAdministratorGroupByNameAsync(string name, CancellationToken cancellationToken = default)
+        {
+            var normalizedName = name.ToUpperInvariant();
+            return await _db.Groups
+                .Include(g => g.Permissions)
+                .FirstOrDefaultAsync(g => g.NormalizedName == normalizedName && g.OrganizationId == null, cancellationToken);
+        }
+
+        /// <inheritdoc/>
         public Task<bool> GroupExistsAsync(string name, string organizationId, CancellationToken cancellationToken = default)
         {
-#pragma warning disable CA1862 // Use the 'StringComparison' method overloads to perform case-insensitive string comparisons
-            return _db.Groups.AnyAsync(g => g.NormalizedName == name.ToUpperInvariant() && g.OrganizationId == organizationId, cancellationToken);
-#pragma warning restore CA1862 // Use the 'StringComparison' method overloads to perform case-insensitive string comparisons
+            var normalizedName = name.ToUpperInvariant();
+            return _db.Groups.AnyAsync(g => g.NormalizedName == normalizedName && g.OrganizationId == organizationId, cancellationToken);
         }
 
         /// <inheritdoc/>
         public Task<bool> SystemAdministratorGroupExistsAsync(string name, CancellationToken cancellationToken = default)
         {
-#pragma warning disable CA1862 // Use the 'StringComparison' method overloads to perform case-insensitive string comparisons
-            return _db.Groups.AnyAsync(g => g.NormalizedName == name.ToUpperInvariant() && g.OrganizationId == null, cancellationToken);
-#pragma warning restore CA1862 // Use the 'StringComparison' method overloads to perform case-insensitive string comparisons
+            var normalizedName = name.ToUpperInvariant();
+            return _db.Groups.AnyAsync(g => g.NormalizedName == normalizedName && g.OrganizationId == null, cancellationToken);
         }
 
         /// <inheritdoc/>
@@ -150,3 +177,4 @@ namespace TheGrid.Services
         }
     }
 }
+#pragma warning restore CA1862 // Use the 'StringComparison' method overloads to perform case-insensitive string comparisons

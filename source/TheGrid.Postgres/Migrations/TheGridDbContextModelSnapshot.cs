@@ -300,6 +300,10 @@ namespace TheGrid.Postgres.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
+                    b.Property<string>("NormalizedName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("OrganizationId")
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
