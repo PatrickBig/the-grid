@@ -49,7 +49,7 @@ namespace TheGrid.Services
             var messageBody = await GetEmailBodyAsync(parameters);
 
             // Queue the send email job
-            await _emailQueue.QueueEmailAsync(email, subject, messageBody);
+            await _emailQueue.QueueEmailAsync(messageBody, subject, email);
         }
 
         /// <inheritdoc/>
@@ -68,7 +68,7 @@ namespace TheGrid.Services
             var messageBody = await GetEmailBodyAsync(parameters);
 
             // Queue the send email job
-            await _emailQueue.QueueEmailAsync(email, subject, messageBody);
+            await _emailQueue.QueueEmailAsync(messageBody, subject, email);
         }
 
         /// <inheritdoc/>
@@ -87,7 +87,7 @@ namespace TheGrid.Services
             var messageBody = await GetEmailBodyAsync(parameters);
 
             // Queue the send email job
-            await _emailQueue.QueueEmailAsync(email, subject, messageBody);
+            await _emailQueue.QueueEmailAsync(messageBody, subject, email);
         }
 
         private async Task<string> GetEmailBodyAsync(Dictionary<string, object?> parameters, [CallerMemberName] string callerName = "")
@@ -95,13 +95,13 @@ namespace TheGrid.Services
             // Remove the "Async" suffix from the caller name and append the ".html" extension.
             var templateName = callerName.Substring(0, callerName.Length - 5);
 
-            if (!_templates.TryGetValue(callerName, out string? value))
+            if (!_templates.TryGetValue(templateName, out string? value))
             {
                 // Read the template from disk
                 var currentDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? throw new FileNotFoundException("Could not find the current directory.");
-                var template = await File.ReadAllTextAsync(Path.Combine(currentDirectory, "Templates", "UserManagement", callerName + ".html"));
+                var template = await File.ReadAllTextAsync(Path.Combine(currentDirectory, "Templates", "UserManagement", templateName + ".html"));
                 value = template;
-                _templates[callerName] = value;
+                _templates[templateName] = value;
             }
 
             return await _stubble.RenderAsync(value, parameters);
