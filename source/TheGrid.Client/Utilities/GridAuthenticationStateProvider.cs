@@ -171,9 +171,10 @@ namespace TheGrid.Client.Utilities
                 claims.Add(new Claim(ClaimTypes.Email, userState.Information.Email));
             }
 
-            foreach (var role in userState.Information.Roles)
+            // All other claims
+            foreach (var claim in userState.Information.Claims)
             {
-                claims.Add(new Claim(ClaimTypes.Role, role));
+                claims.Add(new Claim(claim.Type, claim.Value, ClaimValueTypes.String, claim.Issuer));
             }
 
             var identity = new ClaimsIdentity(claims, "ASP.NET Identity");

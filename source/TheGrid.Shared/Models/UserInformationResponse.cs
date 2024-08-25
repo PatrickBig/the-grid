@@ -28,11 +28,6 @@ namespace TheGrid.Shared.Models
         public string? Email { get; set; }
 
         /// <summary>
-        /// Gets or sets the roles the user is a member of.
-        /// </summary>
-        public IList<string> Roles { get; set; } = Array.Empty<string>();
-
-        /// <summary>
         /// Gets or sets the organizations the user is a member of.
         /// </summary>
         public IList<UserOrganizationMembership> Organizations { get; set; } = Array.Empty<UserOrganizationMembership>();
@@ -41,5 +36,34 @@ namespace TheGrid.Shared.Models
         /// Gets or sets the default organization of the current user.
         /// </summary>
         public string? CurrentOrganizationId { get; set; }
+
+        public List<UserClaim> Claims { get; set; } = new List<UserClaim>();
+
+        public class UserClaim
+        {
+            public UserClaim()
+            {
+
+            }
+
+            public UserClaim(string type, string value)
+            {
+                Type = type;
+                Value = value;
+            }
+
+            public UserClaim(string type, string value, string issuer)
+            {
+                Type = type;
+                Value = value;
+                Issuer = issuer;
+            }
+
+            public string Type { get; set; } = string.Empty;
+
+            public string Value { get; set; } = string.Empty;
+
+            public string? Issuer { get; set; }
+        }
     }
 }

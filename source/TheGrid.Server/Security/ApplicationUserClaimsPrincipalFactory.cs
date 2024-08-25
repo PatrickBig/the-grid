@@ -39,6 +39,7 @@ namespace TheGrid.Server.Security
                         join ug in _db.UserGroups on u.Id equals ug.UserId
                         join g in _db.Groups on ug.GroupId equals g.Id
                         join gp in _db.GroupPermissions on g.Id equals gp.GroupId
+                        where u.Id == user.Id
                         select new
                         {
                             UserId = u.Id,

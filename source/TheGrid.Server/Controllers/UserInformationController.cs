@@ -7,9 +7,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using TheGrid.Data;
 using TheGrid.Models;
+using TheGrid.Shared.Constants;
 using TheGrid.Shared.Models;
+using static TheGrid.Shared.Models.UserInformationResponse;
 
 namespace TheGrid.Server.Controllers
 {
@@ -39,11 +42,12 @@ namespace TheGrid.Server.Controllers
         /// <summary>
         /// Gets information about the currently logged in user.
         /// </summary>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>Returns information about the currently logged in user.</returns>
         [HttpGet]
         [ProducesResponseType(typeof(UserInformationResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(NotFoundResult), StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetUser()
+        public async Task<IActionResult> GetUser(CancellationToken cancellationToken = default)
         {
             var user = await _userManager.GetUserAsync(User);
 
@@ -60,7 +64,7 @@ namespace TheGrid.Server.Controllers
                     Name = o.Name,
                     OrganizationId = o.Id,
                 })
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
 
             var response = new UserInformationResponse
             {
@@ -71,7 +75,31 @@ namespace TheGrid.Server.Controllers
                 CurrentOrganizationId = user.CurrentOrganizationId,
             };
 
-            response.Roles = await _userManager.GetRolesAsync(user);
+            // Get all of claims to associate to the user.
+            var claimsQuery = from u in _db.Users
+                        join ug in _db.UserGroups on u.Id equals ug.UserId
+                        join g in _db.Groups on ug.GroupId equals g.Id
+                        join gp in _db.GroupPermissions on g.Id equals gp.GroupId
+                        where u.Id == user.Id
+                        select new
+                        {
+                            UserId = u.Id,
+                            u.UserName,
+                            g.OrganizationId,
+                            GroupName = g.Name,
+                            gp.Permission,
+                        };
+
+            var userClaims = await claimsQuery.ToListAsync(cancellationToken);
+
+            // Add each organization as it's own claim
+            response.Claims.AddRange(userClaims.GroupBy(u => u.OrganizationId).Where(u => u.Key != null).Select(u => new UserClaim(GridClaimTypes.Organization, u.Key)));
+
+            // Add all of the groups as claims using the "role" as the claim type.
+            response.Claims.AddRange(userClaims.GroupBy(u => new { u.OrganizationId, u.GroupName }).Select(u => new UserClaim(ClaimTypes.Role, u.Key.GroupName, u.Key.OrganizationId)));
+
+            // Now add all the permissions as claims
+            response.Claims.AddRange(userClaims.GroupBy(u => new { u.OrganizationId, u.Permission }).Select(u => new UserClaim(GridClaimTypes.Permission, u.Key.Permission.ToString(), u.Key.OrganizationId)));
 
             return Ok(response);
         }
