@@ -93,6 +93,11 @@ namespace TheGrid.Client.Shared
             base.OnInitialized();
 
             _options = EnumUtilities.GetSelectOptions<TEnum>();
+
+            if (Multiple)
+            {
+                throw new NotSupportedException("Multiple options is not yet supported");
+            }
         }
     }
 }
