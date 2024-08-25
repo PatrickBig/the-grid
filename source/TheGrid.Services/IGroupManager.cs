@@ -109,8 +109,7 @@ namespace TheGrid.Services
         /// <param name="groupId">Unique ID of the group to add the user to.</param>
         /// <param name="userId">Unique identifier of the user to add to the group. Should be the <see cref="IdentityUser{String}.Id"/>.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns></returns>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public Task AddUserToGroupAsync(int groupId, string userId, CancellationToken cancellationToken = default);
-
     }
 }

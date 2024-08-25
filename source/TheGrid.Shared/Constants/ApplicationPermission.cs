@@ -1,4 +1,4 @@
-﻿// <copyright file="ApplicationPermissions.cs" company="BiglerNet">
+﻿// <copyright file="ApplicationPermission.cs" company="BiglerNet">
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 

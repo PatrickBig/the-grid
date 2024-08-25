@@ -6,6 +6,9 @@ using TheGrid.Models;
 
 namespace TheGrid.Services
 {
+    /// <summary>
+    /// Manages organizations.
+    /// </summary>
     public interface IOrganizationManager
     {
         /// <summary>

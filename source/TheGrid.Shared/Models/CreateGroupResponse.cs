@@ -2,16 +2,16 @@
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace TheGrid.Shared.Models
 {
+    /// <summary>
+    /// Response after creating a new group.
+    /// </summary>
     public class CreateGroupResponse : CreateGroupRequest
     {
-        public string Id { get; set; }
+        /// <summary>
+        /// Unique ID of the newly created group.
+        /// </summary>
+        public string Id { get; set; } = string.Empty;
     }
 }

@@ -2,21 +2,33 @@
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
+using Microsoft.Extensions.Logging;
 using TheGrid.Data;
 using TheGrid.Models;
 using TheGrid.Shared.Constants;
 
 namespace TheGrid.Services
 {
+    /// <summary>
+    /// Manages organizations.
+    /// </summary>
     public class OrganizationManager : IOrganizationManager
     {
         private readonly TheGridDbContext _db;
         private readonly IGroupManager _groupManager;
+        private readonly ILogger<OrganizationManager> _logger;
 
-        public OrganizationManager(TheGridDbContext db, IGroupManager groupManager)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OrganizationManager"/> class.
+        /// </summary>
+        /// <param name="db">Database context.</param>
+        /// <param name="groupManager">Group manager.</param>
+        /// <param name="logger">Logger instance.</param>
+        public OrganizationManager(TheGridDbContext db, IGroupManager groupManager, ILogger<OrganizationManager> logger)
         {
             _db = db;
             _groupManager = groupManager;
+            _logger = logger;
         }
 
         /// <inheritdoc/>
@@ -33,6 +45,8 @@ namespace TheGrid.Services
 
             // Create the default role for the organization
             var result = await _groupManager.CreateGroupAsync(BuiltInGroups.DefaultRole, slug, "Default group.", [ApplicationPermission.ViewDashboard, ApplicationPermission.ViewAlert, ApplicationPermission.ViewConnection, ApplicationPermission.ViewQuery], true, CancellationToken.None);
+
+            _logger.LogInformation("Created new organization with ID {OrganizationId}", result.Id);
 
             return organization;
         }

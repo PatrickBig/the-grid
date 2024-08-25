@@ -13,9 +13,7 @@ using TheGrid.Shared.Constants;
 
 namespace TheGrid.Server.Security
 {
-    /// <summary>
-    /// 
-    /// </summary>
+    /// <inheritdoc/>
     public class ApplicationUserClaimsPrincipalFactory : UserClaimsPrincipalFactory<GridUser>
     {
         private readonly TheGridDbContext _db;
@@ -49,7 +47,6 @@ namespace TheGrid.Server.Security
                             GroupName = g.Name,
                             gp.Permission,
                         };
-
 
             var userClaims = await query.ToListAsync();
 

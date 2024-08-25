@@ -13,6 +13,7 @@ namespace TheGrid.Connectors
         /// Checks if the current user has write permission to the current connection.
         /// It is undesirable for connections to have write permissions.
         /// </summary>
+        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>Returns true if the connection has write permissions.</returns>
         public Task<bool> HasWritePermissionAsync(CancellationToken cancellationToken = default);
     }

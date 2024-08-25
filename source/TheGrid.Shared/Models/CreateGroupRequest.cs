@@ -1,24 +1,40 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// <copyright file="CreateGroupRequest.cs" company="BiglerNet">
+// Copyright (c) BiglerNet. All rights reserved.
+// </copyright>
+
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TheGrid.Shared.Constants;
 
 namespace TheGrid.Shared.Models
 {
+    /// <summary>
+    /// Request to create a new group.
+    /// </summary>
     public class CreateGroupRequest
     {
+        /// <summary>
+        /// Name of the new group to create.
+        /// </summary>
         [StringLength(150)]
         [Required]
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Description of the new group to create.
+        /// </summary>
         [StringLength(250)]
         public string? Description { get; set; }
 
-        public string OrganizationId { get; set; }
+        /// <summary>
+        /// Unique ID of the organization to add the group to.
+        /// </summary>
+        [Required]
+        [StringLength(20, MinimumLength = 3)]
+        public string OrganizationId { get; set; } = string.Empty;
 
-        public IEnumerable<ApplicationPermission> Permissions { get; set; }
+        /// <summary>
+        /// List of permissions to assign to the new group.
+        /// </summary>
+        public IEnumerable<ApplicationPermission> Permissions { get; set; } = new List<ApplicationPermission>();
     }
 }
