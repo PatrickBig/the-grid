@@ -12,6 +12,7 @@ using System.Linq.Dynamic.Core;
 using System.Net.Mime;
 using TheGrid.Data;
 using TheGrid.Server.Extensions;
+using TheGrid.Server.Security;
 using TheGrid.Services;
 using TheGrid.Shared.Constants;
 using TheGrid.Shared.Extensions;
@@ -27,7 +28,7 @@ namespace TheGrid.Server.Controllers
     [Route("api/v{version:apiVersion}/[controller]")]
     [ApiVersion("1.0")]
     [ApiController]
-    [Authorize]
+    [Authorize(Policy = OrganizationHandler.PolicyName)]
     [Produces(MediaTypeNames.Application.Json)]
     public class GroupsController(TheGridDbContext dbContext, IGroupManager groupManager) : ControllerBase
     {
@@ -85,17 +86,12 @@ namespace TheGrid.Server.Controllers
         /// <returns>A paginated list of groups.</returns>
         [HttpGet]
         public async Task<ActionResult> GetGroupsAsync(
-            [FromQuery][Required] string organizationId,
+            [FromHeader(Name = "Organization-Id")][Required] string organizationId,
             [FromQuery] Sort[]? sort,
             [FromQuery] int skip = 0,
             [FromQuery][Range(1, 200)] int take = 25,
             CancellationToken cancellationToken = default)
         {
-            if (!User.IsMemberOfOrganization(organizationId) && !User.IsSystemAdministrator())
-            {
-                return Unauthorized();
-            }
-
             var baseQuery =
                 from g in _dbContext.Groups
                 where g.OrganizationId == null || g.OrganizationId == organizationId

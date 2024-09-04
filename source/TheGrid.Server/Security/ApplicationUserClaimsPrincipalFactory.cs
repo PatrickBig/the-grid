@@ -35,6 +35,16 @@ namespace TheGrid.Server.Security
         {
             var claimsIdentity = await base.GenerateClaimsAsync(user);
 
+            // Add each organization as it's own claim to the user principal.
+            var userOrganizations = await _db.UserOrganizations
+                .Where(u => u.UserId == user.Id)
+                .ToListAsync();
+
+            claimsIdentity.AddClaims(userOrganizations.Select(o => new Claim(GridClaimTypes.Organization, o.OrganizationId)));
+
+            //claimsIdentity.AddClaims(userClaims.GroupBy(u => u.OrganizationId).Where(u => u.Key != null).Select(u => new Claim(GridClaimTypes.Organization, u.Key)));
+
+
             var query = from u in _db.Users
                         join ug in _db.UserGroups on u.Id equals ug.UserId
                         join g in _db.Groups on ug.GroupId equals g.Id
@@ -50,9 +60,6 @@ namespace TheGrid.Server.Security
                         };
 
             var userClaims = await query.ToListAsync();
-
-            // Add each organization as it's own claim to the user principal.
-            claimsIdentity.AddClaims(userClaims.GroupBy(u => u.OrganizationId).Where(u => u.Key != null).Select(u => new Claim(GridClaimTypes.Organization, u.Key)));
 
             // Add all of the groups as claims to the user principal but use the "role" as the claim type.
             claimsIdentity.AddClaims(userClaims.GroupBy(u => new { u.OrganizationId, u.GroupName }).Select(u =>

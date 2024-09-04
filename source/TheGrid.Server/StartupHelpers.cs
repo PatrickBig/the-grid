@@ -79,7 +79,9 @@ namespace TheGrid.Server
 
             services.AddResponseCaching();
 
-            services.AddAuthorization();
+            services.AddHttpContextAccessor();
+            services.AddAuthorizationBuilder()
+                .AddPolicy(OrganizationHandler.PolicyName, policy => policy.Requirements.Add(new OrganizationRequirement()));
             services.AddIdentityApiEndpoints<GridUser>(o =>
             {
             })
@@ -96,6 +98,8 @@ namespace TheGrid.Server
                 options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
                 options.JsonSerializerOptions.PropertyNamingPolicy = null;
             });
+
+            services.AddSingleton<IAuthorizationHandler, OrganizationHandler>();
 
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen(options =>
