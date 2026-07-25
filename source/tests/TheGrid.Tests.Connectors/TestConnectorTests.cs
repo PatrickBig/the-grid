@@ -22,7 +22,7 @@ namespace TheGrid.Tests.Connectors
             // Arrange
             var connector = new TestConnector(new Dictionary<string, string>
             {
-                ["NumberOfRows"] = "1000000",
+                ["numberOfRows"] = "1000000",
             });
 
             using var cts = new CancellationTokenSource();
@@ -56,7 +56,7 @@ namespace TheGrid.Tests.Connectors
             // Arrange
             var connector = new TestConnector(new Dictionary<string, string>
             {
-                ["NumberOfRows"] = "1000000000",
+                ["numberOfRows"] = "1000000000",
             });
 
             var rowsRead = 0;

@@ -42,7 +42,7 @@ namespace TheGrid.Connectors
             var missingParameters = new List<string>();
             var requiredParameters = this.GetConnectorParameterDefinitions().Where(p => p.Required);
 
-            foreach (var parameter in requiredParameters.Select(p => p.Name))
+            foreach (var parameter in requiredParameters.Select(p => p.Key))
             {
                 if (!connectorParameters.TryGetValue(parameter, out var parameterValue) || string.IsNullOrEmpty(parameterValue))
                 {

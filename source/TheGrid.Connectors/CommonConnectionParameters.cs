@@ -12,31 +12,31 @@ namespace TheGrid.Connectors
         /// <summary>
         /// Connection String.
         /// </summary>
-        public const string ConnectionString = "Connection String";
+        public const string ConnectionString = "connectionString";
 
         /// <summary>
         /// Database Name.
         /// </summary>
-        public const string DatabaseName = "Database Name";
+        public const string DatabaseName = "databaseName";
 
         /// <summary>
         /// Username.
         /// </summary>
-        public const string Username = "Username";
+        public const string Username = "username";
 
         /// <summary>
         /// Password.
         /// </summary>
-        public const string Password = "Password";
+        public const string Password = "password";
 
         /// <summary>
         /// Port Number.
         /// </summary>
-        public const string PortNumber = "Port Number";
+        public const string PortNumber = "portNumber";
 
         /// <summary>
         /// Database.
         /// </summary>
-        public const string Database = "Database";
+        public const string Database = "database";
     }
 }

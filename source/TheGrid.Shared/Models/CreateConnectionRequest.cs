@@ -32,7 +32,7 @@ namespace TheGrid.Shared.Models
         /// <summary>
         /// ID of the connector used to execute queries. This must be a valid connector ID.
         /// </summary>
-        /// <example>TheGrid.QueryRunners.PostgreSqlConnector</example>
+        /// <example>TheGrid.Connectors.PostgreSqlConnector</example>
         [Required]
         [StringLength(250)]
         public string ConnectorId { get; set; } = string.Empty;
@@ -43,7 +43,7 @@ namespace TheGrid.Shared.Models
         /// <remarks>
         /// Values for parameters the connector flags as secret (e.g. passwords) are encrypted before being stored; other values are stored as plaintext.
         /// </remarks>
-        /// <example>{ "Connection String": "Host=localhost;Port=5432;", "Database Name": "TestDb", "Username": "testuser", "Password": "mypassword123" }</example>
+        /// <example>{ "connectionString": "Host=localhost;Port=5432;", "databaseName": "TestDb", "username": "testuser", "password": "mypassword123" }</example>
         public Dictionary<string, string?> ConnectionProperties { get; set; } = new();
 #pragma warning restore SA1629 // Documentation text should end with a period
     }

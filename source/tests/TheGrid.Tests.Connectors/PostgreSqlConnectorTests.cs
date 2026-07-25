@@ -74,6 +74,47 @@ namespace TheGrid.Connectors.Integration.Tests
         }
 
         /// <summary>
+        /// Tests that <see cref="PostgreSqlConnector"/> resolves its required parameters correctly when the
+        /// supplied dictionary is keyed by each parameter's <c>Key</c> (e.g. <see cref="CommonConnectionParameters.ConnectionString"/>).
+        /// </summary>
+        [Fact]
+        public void Constructor_KeyKeyedParameters_Succeeds_Test()
+        {
+            // Arrange & Act
+            var connector = new PostgreSqlConnector(GetConnectionConfiguration());
+
+            // Assert
+            Assert.NotNull(connector);
+        }
+
+        /// <summary>
+        /// Tests that a dictionary keyed by the old display-name strings (e.g. <c>"Connection String"</c>) is no
+        /// longer recognized once parameter lookups switched to <c>Key</c>-based keys — this is the intended
+        /// breaking behavior of this change, asserted explicitly so it can't silently regress.
+        /// </summary>
+        [Fact]
+        public void Constructor_NameKeyedParameters_ThrowsConnectorParameterException_Test()
+        {
+            // Arrange
+            var nameKeyedParameters = new Dictionary<string, string>
+            {
+                { "Connection String", "Host=" + _fixture.Container.Hostname + ":" + _fixture.Container.GetMappedPublicPort(5432) },
+                { "Database Name", PostgreSqlFixture.DatabaseName },
+                { "Username", "postgres" },
+                { "Password", _fixture.Password },
+            };
+
+            // Act
+            var exception = Assert.Throws<ConnectorParameterException>(() => new PostgreSqlConnector(nameKeyedParameters));
+
+            // Assert
+            Assert.Contains(CommonConnectionParameters.ConnectionString, exception.Parameters);
+            Assert.Contains(CommonConnectionParameters.DatabaseName, exception.Parameters);
+            Assert.Contains(CommonConnectionParameters.Username, exception.Parameters);
+            Assert.Contains(CommonConnectionParameters.Password, exception.Parameters);
+        }
+
+        /// <summary>
         /// Tests that a query can return rows.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
@@ -223,11 +264,11 @@ namespace TheGrid.Connectors.Integration.Tests
                         PostgreSqlFixture.DatabaseName
                     },
                     {
-                        "Username",
+                        CommonConnectionParameters.Username,
                         "postgres"
                     },
                     {
-                        "Password",
+                        CommonConnectionParameters.Password,
                         _fixture.Password
                     },
                 };

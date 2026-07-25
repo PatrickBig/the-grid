@@ -154,7 +154,7 @@ namespace TheGrid.Tests.Services
                 ConnectorId = TheGrid.TestHelpers.Fixtures.OrganizationWithConnection.GetTestConnectorId(),
                 SecretProperties = new Dictionary<string, string?>
                 {
-                    ["NumberOfRows"] = _secretProtector.Protect(expectedRowCount.ToString()),
+                    ["numberOfRows"] = _secretProtector.Protect(expectedRowCount.ToString()),
                 },
             };
 
@@ -339,7 +339,7 @@ namespace TheGrid.Tests.Services
                 ConnectorId = TheGrid.TestHelpers.Fixtures.OrganizationWithConnection.GetTestConnectorId(),
                 ConnectionProperties = new Dictionary<string, string?>
                 {
-                    ["NumberOfRows"] = numberOfRows.ToString(),
+                    ["numberOfRows"] = numberOfRows.ToString(),
                 },
             };
 

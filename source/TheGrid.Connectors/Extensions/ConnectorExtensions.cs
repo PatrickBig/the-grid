@@ -27,7 +27,7 @@ namespace TheGrid.Connectors.Extensions
         }
 
         /// <summary>
-        /// Determines which connection parameter keys a connector type declares as secret (<see cref="ConnectionPropertyType.ProtectedText"/>).
+        /// Determines which connection parameter keys a connector type declares as secret (<see cref="ConnectorParameterAttribute.IsSecret"/> or <see cref="ConnectionPropertyType.ProtectedText"/>).
         /// </summary>
         /// <param name="connectorType">Connector type to inspect.</param>
         /// <returns>The set of parameter keys flagged as secret.</returns>
@@ -37,8 +37,8 @@ namespace TheGrid.Connectors.Extensions
 
             return attributes
                 .Cast<ConnectorParameterAttribute>()
-                .Where(a => a.Type == ConnectionPropertyType.ProtectedText)
-                .Select(a => a.Name)
+                .Where(a => a.IsSecret || a.Type == ConnectionPropertyType.ProtectedText)
+                .Select(a => a.Key)
                 .ToHashSet();
         }
     }

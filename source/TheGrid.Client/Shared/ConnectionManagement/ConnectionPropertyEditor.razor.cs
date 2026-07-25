@@ -23,7 +23,7 @@ namespace TheGrid.Client.Shared.ConnectionManagement
         /// </summary>
         [Parameter]
         [EditorRequired]
-        public EventCallback<(string Name, string? Value)> ValueChanged { get; set; }
+        public EventCallback<(string Key, string? Value)> ValueChanged { get; set; }
 
         /// <summary>
         /// Initial value to populate the field with, e.g. when editing an existing connection.
@@ -39,7 +39,7 @@ namespace TheGrid.Client.Shared.ConnectionManagement
         {
             if (ConnectionProperty != null)
             {
-                await ValueChanged.InvokeAsync((ConnectionProperty.Name, value));
+                await ValueChanged.InvokeAsync((ConnectionProperty.Key, value));
             }
         }
     }

@@ -13,8 +13,8 @@ namespace TheGrid.Connectors
     /// </summary>
     /// <param name="connectorParameters">Parameters used to connect to the test database.</param>
     [Connector("Test Connector", EditorLanguage = EditorLanguage.Sql)]
-    [ConnectorParameter(CommonConnectionParameters.ConnectionString, ConnectionPropertyType.SingleLineText)]
-    [ConnectorParameter("NumberOfRows", ConnectionPropertyType.Numeric)]
+    [ConnectorParameter(CommonConnectionParameters.ConnectionString, "Connection String", ConnectionPropertyType.SingleLineText)]
+    [ConnectorParameter("numberOfRows", "NumberOfRows", ConnectionPropertyType.Numeric)]
     [ExcludeFromCodeCoverage]
     public class TestConnector(Dictionary<string, string> connectorParameters) : ConnectorBase(connectorParameters)
     {
@@ -55,7 +55,7 @@ namespace TheGrid.Connectors
 
         private int NumberOfRowsToGenerate()
         {
-            if (ConnectorParameters.TryGetValue("NumberOfRows", out var rowValue) && int.TryParse(rowValue, out int numberOfRows))
+            if (ConnectorParameters.TryGetValue("numberOfRows", out var rowValue) && int.TryParse(rowValue, out int numberOfRows))
             {
                 return numberOfRows;
             }

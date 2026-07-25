@@ -25,6 +25,7 @@ namespace TheGrid.Tests.Client.Shared.ConnectionManagement
             // Arrange
             var connectionProperty = new ConnectionProperty
             {
+                Key = "singleLineTest",
                 Name = "Single Line Test",
                 Type = ConnectionPropertyType.SingleLineText,
                 HelpText = "Enter a single line of text here.",
@@ -34,7 +35,7 @@ namespace TheGrid.Tests.Client.Shared.ConnectionManagement
 
             var expectedValue = "sample text " + _random.Next(1, 1000);
 
-            string? propertyName = null;
+            string? propertyKey = null;
             string? textValue = null;
 
             var cut = RenderComponent<ConnectionPropertyEditor>(properties =>
@@ -42,13 +43,13 @@ namespace TheGrid.Tests.Client.Shared.ConnectionManagement
                 properties.Add(p => p.ConnectionProperty, connectionProperty);
                 properties.Add(p => p.ValueChanged, x =>
                 {
-                    propertyName = x.Name;
+                    propertyKey = x.Key;
                     textValue = x.Value;
                 });
             });
 
             // Act
-            var inputBox = cut.Find("input[id='" + HtmlUtility.GetSafeId(connectionProperty.Name) + "']");
+            var inputBox = cut.Find("input[id='" + HtmlUtility.GetSafeId(connectionProperty.Key) + "']");
             inputBox.Change(expectedValue);
 
             // Assert
@@ -64,6 +65,7 @@ namespace TheGrid.Tests.Client.Shared.ConnectionManagement
             // Arrange
             var connectionProperty = new ConnectionProperty
             {
+                Key = "protectedTextTest",
                 Name = "Protected Text Test",
                 Type = ConnectionPropertyType.ProtectedText,
                 HelpText = "Enter a password here.",
@@ -73,7 +75,7 @@ namespace TheGrid.Tests.Client.Shared.ConnectionManagement
 
             var expectedValue = "sample text " + _random.Next(1, 1000);
 
-            string? propertyName = null;
+            string? propertyKey = null;
             string? textValue = null;
 
             var cut = RenderComponent<ConnectionPropertyEditor>(properties =>
@@ -81,13 +83,13 @@ namespace TheGrid.Tests.Client.Shared.ConnectionManagement
                 properties.Add(p => p.ConnectionProperty, connectionProperty);
                 properties.Add(p => p.ValueChanged, x =>
                 {
-                    propertyName = x.Name;
+                    propertyKey = x.Key;
                     textValue = x.Value;
                 });
             });
 
             // Act
-            var inputBox = cut.Find("input[id='" + HtmlUtility.GetSafeId(connectionProperty.Name) + "']");
+            var inputBox = cut.Find("input[id='" + HtmlUtility.GetSafeId(connectionProperty.Key) + "']");
             inputBox.Change(expectedValue);
 
             // Assert
@@ -103,6 +105,7 @@ namespace TheGrid.Tests.Client.Shared.ConnectionManagement
             // Arrange
             var connectionProperty = new ConnectionProperty
             {
+                Key = "singleLineTest",
                 Name = "Single Line Test",
                 Type = ConnectionPropertyType.SingleLineText,
             };
@@ -117,7 +120,7 @@ namespace TheGrid.Tests.Client.Shared.ConnectionManagement
             });
 
             // Act
-            var inputBox = cut.Find("input[id='" + HtmlUtility.GetSafeId(connectionProperty.Name) + "']");
+            var inputBox = cut.Find("input[id='" + HtmlUtility.GetSafeId(connectionProperty.Key) + "']");
 
             // Assert
             Assert.Equal(existingValue, inputBox.GetAttribute("value"));
@@ -132,6 +135,7 @@ namespace TheGrid.Tests.Client.Shared.ConnectionManagement
             // Arrange
             var connectionProperty = new ConnectionProperty
             {
+                Key = "protectedTextTest",
                 Name = "Protected Text Test",
                 Type = ConnectionPropertyType.ProtectedText,
             };
@@ -144,7 +148,7 @@ namespace TheGrid.Tests.Client.Shared.ConnectionManagement
             });
 
             // Act
-            var inputBox = cut.Find("input[id='" + HtmlUtility.GetSafeId(connectionProperty.Name) + "']");
+            var inputBox = cut.Find("input[id='" + HtmlUtility.GetSafeId(connectionProperty.Key) + "']");
 
             // Assert
             Assert.True(string.IsNullOrEmpty(inputBox.GetAttribute("value")));

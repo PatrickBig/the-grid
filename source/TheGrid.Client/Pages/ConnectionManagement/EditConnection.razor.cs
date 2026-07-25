@@ -52,20 +52,21 @@ namespace TheGrid.Client.Pages.ConnectionManagement
                 return null;
             }
 
-            return _connection != null && _connection.ConnectionProperties.TryGetValue(parameter.Name, out var value) ? value : null;
+            return _connection != null && _connection.ConnectionProperties.TryGetValue(parameter.Key, out var value) ? value : null;
         }
 
-        private void ParameterValueChanged((string Name, string? Value) x)
+        private void ParameterValueChanged((string Key, string? Value) x)
         {
-            var isSecret = _selectedConnector?.Parameters.FirstOrDefault(p => p.Name == x.Name)?.Type == ConnectionPropertyType.ProtectedText;
+            var parameter = _selectedConnector?.Parameters.FirstOrDefault(p => p.Key == x.Key);
+            var isSecret = parameter != null && (parameter.IsSecret || parameter.Type == ConnectionPropertyType.ProtectedText);
 
             if (isSecret)
             {
-                _input.SecretProperties[x.Name] = x.Value;
+                _input.SecretProperties[x.Key] = x.Value;
             }
             else
             {
-                _input.ConnectionProperties[x.Name] = x.Value;
+                _input.ConnectionProperties[x.Key] = x.Value;
             }
         }
 
