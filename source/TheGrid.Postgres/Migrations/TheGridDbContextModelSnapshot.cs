@@ -198,6 +198,10 @@ namespace TheGrid.Postgres.Migrations
                         .IsRequired()
                         .HasColumnType("character varying(20)");
 
+                    b.Property<string>("SecretProperties")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ConnectorId");
@@ -418,6 +422,9 @@ namespace TheGrid.Postgres.Migrations
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
+
+                    b.Property<bool>("Truncated")
+                        .HasColumnType("boolean");
 
                     b.HasKey("Id");
 

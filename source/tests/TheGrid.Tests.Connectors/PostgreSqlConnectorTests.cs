@@ -2,6 +2,7 @@
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
+using TheGrid.Shared.Models;
 using TheGrid.Tests.Connectors.Fixtures;
 using Xunit.Abstractions;
 
@@ -38,15 +39,15 @@ namespace TheGrid.Connectors.Integration.Tests
             var connector = new PostgreSqlConnector(GetConnectionConfiguration());
 
             // Act
-            var results = await connector.GetDataAsync("SELECT * FROM " + _fixture.TestTableName, null);
+            var rows = await ToListAsync(connector.GetDataAsync("SELECT * FROM " + _fixture.TestTableName, null));
 
             // Assert
-            Assert.NotNull(results);
-            Assert.NotNull(results.Columns);
-            Assert.NotEmpty(results.Columns);
+            Assert.NotEmpty(rows);
+            Assert.NotNull(rows[0].Columns);
+            Assert.NotEmpty(rows[0].Columns);
 
             _output.WriteLine("Found the following columns:");
-            foreach (var column in results.Columns)
+            foreach (var column in rows[0].Columns)
             {
                 _output.WriteLine(column.Key);
             }
@@ -83,17 +84,15 @@ namespace TheGrid.Connectors.Integration.Tests
             var connector = new PostgreSqlConnector(GetConnectionConfiguration());
 
             // Act
-            var results = await connector.GetDataAsync("SELECT * FROM " + _fixture.TestTableName, null);
+            var rows = await ToListAsync(connector.GetDataAsync("SELECT * FROM " + _fixture.TestTableName, null));
 
             // Assert
-            Assert.NotNull(results);
-            Assert.NotNull(results.Rows);
-            Assert.NotEmpty(results.Rows);
+            Assert.NotEmpty(rows);
 
             _output.WriteLine("Found the following rows:");
-            foreach (var row in results.Rows)
+            foreach (var row in rows)
             {
-                _output.WriteLine(string.Join(", ", row.Values.Select(v => v == null ? "(null)" : v.ToString())));
+                _output.WriteLine(string.Join(", ", row.Data.Values.Select(v => v == null ? "(null)" : v.ToString())));
             }
         }
 
@@ -115,17 +114,15 @@ namespace TheGrid.Connectors.Integration.Tests
             };
 
             // Act
-            var results = await connector.GetDataAsync("SELECT * FROM " + _fixture.TestTableName + " where bool_field = @param", parameters);
+            var rows = await ToListAsync(connector.GetDataAsync("SELECT * FROM " + _fixture.TestTableName + " where bool_field = @param", parameters));
 
             // Assert
-            Assert.NotNull(results);
-            Assert.NotNull(results.Rows);
-            Assert.NotEmpty(results.Rows);
+            Assert.NotEmpty(rows);
 
             _output.WriteLine("Found the following rows:");
-            foreach (var row in results.Rows)
+            foreach (var row in rows)
             {
-                _output.WriteLine(string.Join(", ", row.Values.Select(v => v == null || (v is DBNull) ? "(null)" : v.ToString())));
+                _output.WriteLine(string.Join(", ", row.Data.Values.Select(v => v == null || (v is DBNull) ? "(null)" : v.ToString())));
             }
         }
 
@@ -199,6 +196,18 @@ namespace TheGrid.Connectors.Integration.Tests
 
             // Act & assert
             await Assert.ThrowsAnyAsync<Exception>(async () => await connector.TestConnectionAsync());
+        }
+
+        private static async Task<List<ConnectorRow>> ToListAsync(IAsyncEnumerable<ConnectorRow> rows)
+        {
+            var list = new List<ConnectorRow>();
+
+            await foreach (var row in rows)
+            {
+                list.Add(row);
+            }
+
+            return list;
         }
 
         private Dictionary<string, string> GetConnectionConfiguration(string host)

@@ -3,6 +3,8 @@
 // </copyright>
 
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
+using TheGrid.Shared.Models;
 
 namespace TheGrid.Connectors
 {
@@ -24,31 +26,31 @@ namespace TheGrid.Connectors
         private readonly Random _random = new();
 
         /// <inheritdoc/>
-        public override Task<QueryResult> GetDataAsync(string query, Dictionary<string, object?>? queryParameters, CancellationToken cancellationToken = default)
+        public override async IAsyncEnumerable<ConnectorRow> GetDataAsync(string query, Dictionary<string, object?>? queryParameters, [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             if (query == ThrowExceptionQuery)
             {
                 throw new InvalidOperationException("This query was expected to fail for tests.");
             }
 
-            var results = new QueryResult
+            var columns = new Dictionary<string, QueryResultColumn>
             {
-                Columns =
-                {
-                    { "TextField", new QueryResultColumn { Type = QueryResultColumnType.Text } },
-                    { "NumericField", new QueryResultColumn { Type = QueryResultColumnType.Integer } },
-                },
+                { "TextField", new QueryResultColumn { Type = QueryResultColumnType.Text } },
+                { "NumericField", new QueryResultColumn { Type = QueryResultColumnType.Integer } },
             };
 
-            // Generate some rows
+            // Generate some rows, one at a time, without pre-materializing the full set.
             var numberOfRowsToGenerate = NumberOfRowsToGenerate();
 
             for (int i = 0; i < numberOfRowsToGenerate; i++)
             {
-                results.Rows.Add(GenerateRow());
-            }
+                cancellationToken.ThrowIfCancellationRequested();
 
-            return Task.FromResult(results);
+                yield return new ConnectorRow(columns, GenerateRow());
+
+                // Yield control so an await foreach consumer can observe cancellation/early-stop between rows.
+                await Task.Yield();
+            }
         }
 
         private int NumberOfRowsToGenerate()

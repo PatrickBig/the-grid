@@ -5,6 +5,7 @@
 using Npgsql;
 using System.Runtime.CompilerServices;
 using TheGrid.Connectors.Extensions;
+using TheGrid.Shared.Models;
 
 namespace TheGrid.Connectors
 {
@@ -114,53 +115,41 @@ namespace TheGrid.Connectors
         }
 
         /// <inheritdoc/>
-        public override async Task<QueryResult> GetDataAsync(string query, Dictionary<string, object?>? queryParameters, CancellationToken cancellationToken = default)
+        public override async IAsyncEnumerable<ConnectorRow> GetDataAsync(string query, Dictionary<string, object?>? queryParameters, [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             await using var connection = GetConnection(ConnectorParameters);
 
             await connection.OpenAsync(cancellationToken);
 
-            var results = new QueryResult();
-            bool firstReadDone = false;
-
-            var rows = new List<Dictionary<string, object?>>();
+            Dictionary<string, QueryResultColumn>? columns = null;
 
             // Run the query
-            await using (var command = new NpgsqlCommand(query, connection))
+            await using var command = new NpgsqlCommand(query, connection);
+
+            if (queryParameters != null && queryParameters.Count != 0)
             {
-                if (queryParameters != null && queryParameters.Count != 0)
+                foreach (var parameter in queryParameters.Where(p => p.Value != null))
                 {
-                    foreach (var parameter in queryParameters.Where(p => p.Value != null))
-                    {
-                        command.Parameters.AddWithValue(parameter.Key, parameter.Value ?? DBNull.Value);
-                    }
+                    command.Parameters.AddWithValue(parameter.Key, parameter.Value ?? DBNull.Value);
                 }
-
-                await using var reader = await command.ExecuteReaderAsync(cancellationToken);
-
-                // Iterate over the results
-                while (await reader.ReadAsync(cancellationToken))
-                {
-                    if (!firstReadDone)
-                    {
-                        results.Columns = GetColumns(reader);
-                        firstReadDone = true;
-                    }
-
-                    var row = new Dictionary<string, object?>();
-
-                    for (int i = 0; i < reader.FieldCount; i++)
-                    {
-                        row.Add(reader.GetName(i), reader.GetValue(i));
-                    }
-
-                    rows.Add(row);
-                }
-
-                results.Rows = rows;
             }
 
-            return results;
+            await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+
+            // Iterate over the results
+            while (await reader.ReadAsync(cancellationToken))
+            {
+                columns ??= GetColumns(reader);
+
+                var row = new Dictionary<string, object?>();
+
+                for (int i = 0; i < reader.FieldCount; i++)
+                {
+                    row.Add(reader.GetName(i), reader.GetValue(i));
+                }
+
+                yield return new ConnectorRow(columns, row);
+            }
         }
 
         /// <inheritdoc/>

@@ -26,8 +26,13 @@ namespace TheGrid.Client.Shared.ConnectionManagement
         public EventCallback<(string Name, string? Value)> ValueChanged { get; set; }
 
         /// <summary>
-        /// Current value of the parameter.
+        /// Initial value to populate the field with, e.g. when editing an existing connection.
         /// </summary>
+        /// <remarks>
+        /// Ignored for <see cref="ConnectionPropertyType.ProtectedText"/> parameters, which always render blank
+        /// so a stored secret's presence is never echoed back to the client as if it were the real value.
+        /// </remarks>
+        [Parameter]
         public string? Value { get; set; }
 
         private async Task OnValueChangedAsync(string? value)

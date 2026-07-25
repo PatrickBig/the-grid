@@ -7,11 +7,14 @@ using Mapster;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System.Reflection;
 using TheGrid.Connectors;
 using TheGrid.Data;
 using TheGrid.Models;
+using TheGrid.Models.Configuration;
 using TheGrid.Services.Hubs;
+using TheGrid.Services.Security;
 using TheGrid.Shared.Models;
 
 namespace TheGrid.Services
@@ -24,6 +27,8 @@ namespace TheGrid.Services
         private readonly TheGridDbContext _db;
         private readonly ILogger<QueryExecutor> _logger;
         private readonly IHubContext<QueryDesignerHub, IQueryDesignerHub> _hubContext;
+        private readonly ISecretProtector _secretProtector;
+        private readonly ExecutionLimits _executionLimits;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="QueryExecutor"/> class.
@@ -31,11 +36,15 @@ namespace TheGrid.Services
         /// <param name="db">Database context.</param>
         /// <param name="logger">Logging instance.</param>
         /// <param name="hubContext">SignalR hub context for notifying clients when a query has refreshed.</param>
-        public QueryExecutor(TheGridDbContext db, ILogger<QueryExecutor> logger, IHubContext<QueryDesignerHub, IQueryDesignerHub> hubContext)
+        /// <param name="secretProtector">Used to decrypt secret connection parameter values.</param>
+        /// <param name="systemOptions">System configuration, used for the configured query execution limits.</param>
+        public QueryExecutor(TheGridDbContext db, ILogger<QueryExecutor> logger, IHubContext<QueryDesignerHub, IQueryDesignerHub> hubContext, ISecretProtector secretProtector, IOptions<SystemOptions> systemOptions)
         {
             _db = db;
             _logger = logger;
             _hubContext = hubContext;
+            _secretProtector = secretProtector;
+            _executionLimits = systemOptions.Value.ExecutionLimits;
         }
 
         /// <inheritdoc/>
@@ -53,6 +62,9 @@ namespace TheGrid.Services
                 throw new ArgumentException("Invalid query specified.", nameof(queryExecutionId));
             }
 
+            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(_executionLimits.TimeoutSeconds));
+            using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token);
+
             try
             {
                 await UpdateQueryExecutionRecordStatusAsync(queryExecution, cancellationToken);
@@ -60,23 +72,49 @@ namespace TheGrid.Services
                 // Create the connector
                 var connector = GetConnector(queryExecution.Query);
 
-                var results = await connector.GetDataAsync(queryExecution.Query.Command, null, cancellationToken);
+                Dictionary<string, QueryResultColumn>? resultColumns = null;
+                var rowCount = 0;
 
-                foreach (var row in results.Rows)
+                await foreach (var row in connector.GetDataAsync(queryExecution.Query.Command, null, linkedCts.Token).WithCancellation(linkedCts.Token))
                 {
+                    resultColumns ??= new Dictionary<string, QueryResultColumn>(row.Columns);
+
+                    if (rowCount >= _executionLimits.MaxRows)
+                    {
+                        queryExecution.Truncated = true;
+                        break;
+                    }
+
                     _db.QueryResultRows.Add(new QueryResultRow
                     {
                         QueryExecutionId = queryExecutionId,
-                        Data = row,
+                        Data = new Dictionary<string, object?>(row.Data),
                     });
 
-                    queryExecution.DateCompleted = DateTime.UtcNow;
-                    queryExecution.Status = QueryExecutionStatus.Complete;
+                    rowCount++;
+
+                    if (rowCount % _executionLimits.BatchSize == 0)
+                    {
+                        await _db.SaveChangesAsync(cancellationToken);
+
+                        // Clearing the tracker bounds memory for large result sets, but it also detaches queryExecution
+                        // (and its Query/Columns graph) which we still need to update below, so re-attach it.
+                        _db.ChangeTracker.Clear();
+                        _db.Attach(queryExecution);
+                    }
                 }
 
-                UpdateColumnDefinitions(queryExecution.Query, results.Columns);
+                queryExecution.DateCompleted = DateTime.UtcNow;
+                queryExecution.Status = QueryExecutionStatus.Complete;
+
+                UpdateColumnDefinitions(queryExecution.Query, resultColumns ?? new Dictionary<string, QueryResultColumn>());
 
                 await _hubContext.Clients.All.QueryResultsFinishedProcessing(queryExecutionId, queryExecution.QueryId);
+            }
+            catch (OperationCanceledException) when (timeoutCts.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
+            {
+                queryExecution.Status = QueryExecutionStatus.TimedOut;
+                _logger.LogWarning("Query execution {queryExecutionId} timed out after {timeoutSeconds} seconds.", queryExecutionId, _executionLimits.TimeoutSeconds);
             }
             catch (Exception ex)
             {
@@ -131,7 +169,18 @@ namespace TheGrid.Services
             var connectorAssembly = Assembly.GetAssembly(typeof(IConnector));
 
             var connectorType = connectorAssembly?.GetType(query.Connection!.ConnectorId) ?? throw new ArgumentException("No connector found.");
-            return Activator.CreateInstance(connectorType, query.Connection.ConnectionProperties) as IConnector ?? throw new InvalidCastException("Unable to create connector instance from type.");
+
+            var connectionProperties = new Dictionary<string, string?>(query.Connection.ConnectionProperties);
+
+            foreach (var property in query.Connection.SecretProperties)
+            {
+                if (!string.IsNullOrEmpty(property.Value))
+                {
+                    connectionProperties[property.Key] = _secretProtector.Unprotect(property.Value);
+                }
+            }
+
+            return Activator.CreateInstance(connectorType, connectionProperties) as IConnector ?? throw new InvalidCastException("Unable to create connector instance from type.");
         }
 
         /// <summary>

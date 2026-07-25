@@ -21,6 +21,11 @@
                     <ConnectorDisplay Name="@context.ConnectorName" ConnectorIcon="@context.ConnectorIcon" />
                 </Template>
             </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="ConnectionListItem" Title="" Sortable="false" Filterable="false">
+                <Template>
+                    <RadzenLink Path="@("/Connections/" + context.Id + "/Edit")" Text="Edit" />
+                </Template>
+            </RadzenDataGridColumn>
         </Columns>
     </RadzenDataGrid>
 }

@@ -48,11 +48,19 @@ namespace TheGrid.Models
         public Connector? Connector { get; set; }
 
         /// <summary>
-        /// Connection properties passed to the connector. This often contains connection strings, username, password, etc.
+        /// Non-secret connection properties passed to the connector. This often contains connection strings, database names, usernames, etc.
         /// </summary>
         /// <remarks>
-        /// This value is encrypted in the database when stored.
+        /// This value is stored as plaintext. Secret parameter values (e.g. passwords) are stored separately in <see cref="SecretProperties"/>.
         /// </remarks>
         public Dictionary<string, string?> ConnectionProperties { get; set; } = [];
+
+        /// <summary>
+        /// Secret connection properties passed to the connector, such as passwords.
+        /// </summary>
+        /// <remarks>
+        /// Each value is encrypted at rest. Values are never returned by the API — only their presence is exposed.
+        /// </remarks>
+        public Dictionary<string, string?> SecretProperties { get; set; } = [];
     }
 }

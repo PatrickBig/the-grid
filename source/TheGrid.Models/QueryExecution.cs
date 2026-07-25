@@ -65,5 +65,10 @@ namespace TheGrid.Models
         /// Error output from the database engine when supported.
         /// </summary>
         public string? ErrorOutput { get; set; }
+
+        /// <summary>
+        /// Whether the result set was cut off because it exceeded the configured maximum row count.
+        /// </summary>
+        public bool Truncated { get; set; }
     }
 }

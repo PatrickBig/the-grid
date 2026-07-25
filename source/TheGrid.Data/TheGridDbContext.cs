@@ -105,6 +105,10 @@ namespace TheGrid.Data
                 .Property(c => c.ConnectionProperties)
                 .HasConversion<JsonColumnConverter<Dictionary<string, string?>>>();
 
+            builder.Entity<Connection>()
+                .Property(c => c.SecretProperties)
+                .HasConversion<JsonColumnConverter<Dictionary<string, string?>>>();
+
             // Setup the many-to-many for users and organizations
             builder.Entity<Models.UserOrganization>()
                 .HasKey(ou => new { ou.UserId, ou.OrganizationId });

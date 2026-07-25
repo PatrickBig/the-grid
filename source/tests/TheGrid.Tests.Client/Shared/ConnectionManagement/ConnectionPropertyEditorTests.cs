@@ -93,5 +93,61 @@ namespace TheGrid.Tests.Client.Shared.ConnectionManagement
             // Assert
             Assert.Equal(expectedValue, textValue);
         }
+
+        /// <summary>
+        /// Tests that a <see cref="ConnectionPropertyType.SingleLineText"/> field is pre-filled from the <see cref="ConnectionPropertyEditor.Value"/> parameter, e.g. when editing an existing connection.
+        /// </summary>
+        [Fact]
+        public void ConnectionPropertyEditor_SingleLineText_PrefillsFromValue()
+        {
+            // Arrange
+            var connectionProperty = new ConnectionProperty
+            {
+                Name = "Single Line Test",
+                Type = ConnectionPropertyType.SingleLineText,
+            };
+
+            var existingValue = "existing value " + _random.Next(1, 1000);
+
+            var cut = RenderComponent<ConnectionPropertyEditor>(properties =>
+            {
+                properties.Add(p => p.ConnectionProperty, connectionProperty);
+                properties.Add(p => p.Value, existingValue);
+                properties.Add(p => p.ValueChanged, x => { });
+            });
+
+            // Act
+            var inputBox = cut.Find("input[id='" + HtmlUtility.GetSafeId(connectionProperty.Name) + "']");
+
+            // Assert
+            Assert.Equal(existingValue, inputBox.GetAttribute("value"));
+        }
+
+        /// <summary>
+        /// Tests that a <see cref="ConnectionPropertyType.ProtectedText"/> field always renders blank, even when a <see cref="ConnectionPropertyEditor.Value"/> is supplied, so a stored secret is never echoed back.
+        /// </summary>
+        [Fact]
+        public void ConnectionPropertyEditor_ProtectedText_IgnoresValue()
+        {
+            // Arrange
+            var connectionProperty = new ConnectionProperty
+            {
+                Name = "Protected Text Test",
+                Type = ConnectionPropertyType.ProtectedText,
+            };
+
+            var cut = RenderComponent<ConnectionPropertyEditor>(properties =>
+            {
+                properties.Add(p => p.ConnectionProperty, connectionProperty);
+                properties.Add(p => p.Value, "this must never be rendered");
+                properties.Add(p => p.ValueChanged, x => { });
+            });
+
+            // Act
+            var inputBox = cut.Find("input[id='" + HtmlUtility.GetSafeId(connectionProperty.Name) + "']");
+
+            // Assert
+            Assert.True(string.IsNullOrEmpty(inputBox.GetAttribute("value")));
+        }
     }
 }

@@ -77,5 +77,31 @@ namespace TheGrid.Models.Configuration
                 _agentQueues = value;
             }
         }
+
+        /// <summary>
+        /// Limits applied while a query is executing to bound memory usage and execution time.
+        /// </summary>
+        public ExecutionLimits ExecutionLimits { get; set; } = new();
+    }
+
+    /// <summary>
+    /// Limits applied while a query is executing.
+    /// </summary>
+    public class ExecutionLimits
+    {
+        /// <summary>
+        /// Maximum number of rows to persist for a single query execution before it is marked as truncated.
+        /// </summary>
+        public int MaxRows { get; set; } = 50_000;
+
+        /// <summary>
+        /// Maximum time, in seconds, a query execution is allowed to run before it is cancelled and marked as timed out.
+        /// </summary>
+        public int TimeoutSeconds { get; set; } = 120;
+
+        /// <summary>
+        /// Number of rows persisted per batch (<c>SaveChanges</c> call) while streaming results.
+        /// </summary>
+        public int BatchSize { get; set; } = 500;
     }
 }

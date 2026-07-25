@@ -1,0 +1,32 @@
+@page "/Connections/{ConnectionId:int}/Edit"
+
+<PageTitle>Edit Connection</PageTitle>
+
+@if (_connection != null && _selectedConnector != null)
+{
+    <RadzenTemplateForm TItem="UpdateConnectionRequest" Data="_input" Submit="SaveConnectionAsync">
+        <RadzenRow Gap="2rem">
+            <RadzenColumn>
+                <RadzenStack>
+                    @foreach (var parameter in _selectedConnector.Parameters.OrderBy(p => p.RenderOrder))
+                    {
+                        <ConnectionPropertyEditor
+                            ConnectionProperty="parameter"
+                            Value="@GetInitialValue(parameter)"
+                            ValueChanged="ParameterValueChanged" />
+                    }
+                </RadzenStack>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" Gap="1rem" class="rz-mt-8 rz-mb-4">
+            <RadzenButton Text="Cancel" ButtonType="ButtonType.Button" ButtonStyle=ButtonStyle.Light Icon="cancel" Click="@(() => NavigationManager.NavigateTo("/Connections"))" />
+            <RadzenButton Text="Save" ButtonType="ButtonType.Submit" Icon="save" />
+        </RadzenStack>
+    </RadzenTemplateForm>
+}
+else
+{
+    <div class="rz-m-12">
+        <RadzenProgressBar Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+    </div>
+}

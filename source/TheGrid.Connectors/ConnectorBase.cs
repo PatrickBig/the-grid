@@ -2,7 +2,9 @@
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
+using System.Runtime.CompilerServices;
 using TheGrid.Connectors.Extensions;
+using TheGrid.Shared.Models;
 
 namespace TheGrid.Connectors
 {
@@ -28,7 +30,7 @@ namespace TheGrid.Connectors
         protected Dictionary<string, string> ConnectorParameters { get; set; }
 
         /// <inheritdoc/>
-        public abstract Task<QueryResult> GetDataAsync(string query, Dictionary<string, object?>? queryParameters, CancellationToken cancellationToken = default);
+        public abstract IAsyncEnumerable<ConnectorRow> GetDataAsync(string query, Dictionary<string, object?>? queryParameters, [EnumeratorCancellation] CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Performs basic validation on connection parameters and throws an exception if needed.

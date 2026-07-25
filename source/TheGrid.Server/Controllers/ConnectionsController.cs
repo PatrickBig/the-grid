@@ -9,9 +9,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.Net.Mime;
+using System.Reflection;
+using TheGrid.Connectors;
+using TheGrid.Connectors.Extensions;
 using TheGrid.Data;
 using TheGrid.Models;
 using TheGrid.Services.Authorization;
+using TheGrid.Services.Security;
 using TheGrid.Shared.Extensions;
 using TheGrid.Shared.Models;
 
@@ -29,16 +33,19 @@ namespace TheGrid.Server.Controllers
     {
         private readonly TheGridDbContext _db;
         private readonly IAuthorizationService _authorizationService;
+        private readonly ISecretProtector _secretProtector;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConnectionsController"/> class.
         /// </summary>
         /// <param name="db">Database context.</param>
         /// <param name="authorizationService">Authorization service.</param>
-        public ConnectionsController(TheGridDbContext db, IAuthorizationService authorizationService)
+        /// <param name="secretProtector">Used to encrypt secret connection parameter values.</param>
+        public ConnectionsController(TheGridDbContext db, IAuthorizationService authorizationService, ISecretProtector secretProtector)
         {
             _db = db;
             _authorizationService = authorizationService;
+            _secretProtector = secretProtector;
         }
 
         /// <summary>
@@ -72,6 +79,26 @@ namespace TheGrid.Server.Controllers
                 return Unauthorized();
             }
 
+            var secretKeys = ResolveConnectorType(request.ConnectorId).GetSecretParameterKeys();
+
+            connection.ConnectionProperties = [];
+            connection.SecretProperties = [];
+
+            foreach (var property in request.ConnectionProperties)
+            {
+                if (secretKeys.Contains(property.Key))
+                {
+                    if (!string.IsNullOrEmpty(property.Value))
+                    {
+                        connection.SecretProperties[property.Key] = _secretProtector.Protect(property.Value);
+                    }
+                }
+                else
+                {
+                    connection.ConnectionProperties[property.Key] = property.Value;
+                }
+            }
+
             _db.Connections.Add(connection);
             await _db.SaveChangesAsync(cancellationToken);
 
@@ -86,11 +113,51 @@ namespace TheGrid.Server.Controllers
         /// <returns>Information about the connection.</returns>
         /// <response code="401">Unauthorized if the user is not a member of the given organization.</response>
         /// <response code="404">If the connection is not found.</response>
-        [ProducesResponseType(typeof(Connection), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(GetConnectionResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(UnauthorizedResult), StatusCodes.Status401Unauthorized)]
         [HttpGet("{connectionId:int}")]
         public async Task<ActionResult> Get([FromRoute] int connectionId, CancellationToken cancellationToken = default)
+        {
+            var connection = await _db.Connections.FirstOrDefaultAsync(d => d.Id == connectionId, cancellationToken);
+
+            if (connection == null)
+            {
+                return NotFound();
+            }
+
+            if (!(await _authorizationService.AuthorizeAsync(User, connection, GridOperations.Read)).Succeeded)
+            {
+                return Unauthorized();
+            }
+
+            var response = new GetConnectionResponse
+            {
+                Id = connection.Id,
+                Name = connection.Name,
+                OrganizationId = connection.OrganizationId,
+                ConnectorId = connection.ConnectorId,
+                ConnectionProperties = connection.ConnectionProperties,
+                SecretProperties = connection.SecretProperties.ToDictionary(p => p.Key, _ => true),
+            };
+
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// Updates an existing connection.
+        /// </summary>
+        /// <param name="connectionId">The ID of the connection to update.</param>
+        /// <param name="request">The properties to update on the connection.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>A success code indicating the connection was updated.</returns>
+        /// <response code="401">Unauthorized if the user is not a member of the connection's organization.</response>
+        /// <response code="404">If the connection is not found.</response>
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(UnauthorizedResult), StatusCodes.Status401Unauthorized)]
+        [HttpPut("{connectionId:int}")]
+        public async Task<ActionResult> Put([FromRoute] int connectionId, [FromBody] UpdateConnectionRequest request, CancellationToken cancellationToken = default)
         {
             var connection = await _db.Connections.FirstOrDefaultAsync(d => d.Id == connectionId, cancellationToken);
 
@@ -104,7 +171,23 @@ namespace TheGrid.Server.Controllers
                 return Unauthorized();
             }
 
-            return Ok(connection);
+            connection.ConnectionProperties = request.ConnectionProperties;
+
+            foreach (var property in request.SecretProperties)
+            {
+                if (string.IsNullOrEmpty(property.Value))
+                {
+                    connection.SecretProperties.Remove(property.Key);
+                }
+                else
+                {
+                    connection.SecretProperties[property.Key] = _secretProtector.Protect(property.Value);
+                }
+            }
+
+            await _db.SaveChangesAsync(cancellationToken);
+
+            return Ok();
         }
 
         /// <summary>
@@ -157,6 +240,13 @@ namespace TheGrid.Server.Controllers
             };
 
             return Ok(result);
+        }
+
+        private static Type ResolveConnectorType(string connectorId)
+        {
+            var connectorAssembly = Assembly.GetAssembly(typeof(IConnector));
+
+            return connectorAssembly?.GetType(connectorId) ?? throw new ArgumentException("No connector found.", nameof(connectorId));
         }
     }
 }

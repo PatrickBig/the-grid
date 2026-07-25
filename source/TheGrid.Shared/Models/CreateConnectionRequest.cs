@@ -41,7 +41,7 @@ namespace TheGrid.Shared.Models
         /// Extra properties passed to the connector used to connect. This often contains connection strings, username, password, etc.
         /// </summary>
         /// <remarks>
-        /// This value is encrypted in the database when stored.
+        /// Values for parameters the connector flags as secret (e.g. passwords) are encrypted before being stored; other values are stored as plaintext.
         /// </remarks>
         /// <example>{ "Connection String": "Host=localhost;Port=5432;", "Database Name": "TestDb", "Username": "testuser", "Password": "mypassword123" }</example>
         public Dictionary<string, string?> ConnectionProperties { get; set; } = new();

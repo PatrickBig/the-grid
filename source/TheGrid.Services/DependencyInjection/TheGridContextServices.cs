@@ -13,6 +13,7 @@ using TheGrid.Models;
 using TheGrid.Models.Configuration;
 using TheGrid.Postgres;
 using TheGrid.Services;
+using TheGrid.Services.Security;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -79,6 +80,8 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             services.Configure<SystemOptions>(configuration.GetSection(nameof(SystemOptions)));
             services.Configure<EmailOptions>(configuration.GetSection(nameof(EmailOptions)));
+            services.Configure<SecretProtectionOptions>(configuration.GetSection(nameof(SecretProtectionOptions)));
+            services.AddSingleton<ISecretProtector, AesGcmSecretProtector>();
             services.AddTransient<ConnectorDiscoveryService>();
             services.AddTransient<IQueryExecutor, QueryExecutor>();
             services.AddTransient<IQueryRefreshManager, QueryRefreshManager>();
