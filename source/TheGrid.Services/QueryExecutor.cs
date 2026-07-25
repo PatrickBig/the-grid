@@ -166,7 +166,7 @@ namespace TheGrid.Services
         {
             _logger.LogTrace("Creating connector for type: {connectorId}", query.Connection?.ConnectorId);
 
-            var connectorAssembly = Assembly.GetAssembly(typeof(IConnector));
+            var connectorAssembly = Assembly.GetAssembly(typeof(PostgreSqlConnector));
 
             var connectorType = connectorAssembly?.GetType(query.Connection!.ConnectorId) ?? throw new ArgumentException("No connector found.");
 

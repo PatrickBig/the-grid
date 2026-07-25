@@ -103,5 +103,30 @@ namespace TheGrid.Services.Tests
             var connectionStringParameter = Assert.Single(postgresConnector.Parameters, p => p.Name == "Connection String");
             Assert.Equal(CommonConnectionParameters.ConnectionString, connectionStringParameter.Key);
         }
+
+        /// <summary>
+        /// Regression guard for the <c>TheGrid.Connectors.Abstractions</c> split: discovery reflects over the
+        /// assembly anchored on <see cref="PostgreSqlConnector"/>, which must still be the assembly containing
+        /// every concrete connector, not just the one it's anchored on.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task RefreshConnectorsAsync_DiscoversAllConcreteConnectors_Test()
+        {
+            // Arrange
+            using var sqliteProvider = new SqliteProvider();
+            var db = sqliteProvider.Db;
+
+            var connectorRefreshService = new ConnectorDiscoveryService(db, _logger);
+
+            // Act
+            await connectorRefreshService.RefreshConnectorsAsync();
+
+            // Assert
+            var connectorIds = await db.Connectors.Where(c => !c.Disabled).Select(c => c.Id).ToListAsync();
+
+            Assert.Contains(typeof(PostgreSqlConnector).FullName, connectorIds);
+            Assert.Contains(typeof(TestConnector).FullName, connectorIds);
+        }
     }
 }

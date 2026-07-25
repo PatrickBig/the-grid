@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSubstitute;
+using TheGrid.Connectors;
 using TheGrid.Data;
 using TheGrid.Models;
 using TheGrid.Models.Configuration;
@@ -195,6 +196,81 @@ namespace TheGrid.Tests.Services
             var results = await _db.QueryResultRows.Where(r => r.QueryExecutionId == execution.Id).ToListAsync();
 
             Assert.Equal(expectedRowCount, results.Count);
+        }
+
+        /// <summary>
+        /// Regression guard for the <c>TheGrid.Connectors.Abstractions</c> split: <see cref="QueryExecutor"/>'s
+        /// internal connector-assembly resolution must still find and instantiate <see cref="PostgreSqlConnector"/>
+        /// by its <c>ConnectorId</c> (the connector's full type name), not just <see cref="TestConnector"/> (which
+        /// the other tests in this fixture already exercise). This uses an unreachable connection string so the
+        /// test stays fast/offline; what matters is that the failure happens while attempting to connect (proving
+        /// the type resolved and was instantiated), not while resolving "No connector found".
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task RefreshQueryResultsAsync_ResolvesPostgreSqlConnectorByConnectorId_Test()
+        {
+            // Arrange
+            IHubContext<QueryDesignerHub, IQueryDesignerHub> hubContext = Substitute.For<IHubContext<QueryDesignerHub, IQueryDesignerHub>>();
+
+            var connectorId = typeof(PostgreSqlConnector).FullName!;
+
+            if (!await _db.Connectors.AnyAsync(c => c.Id == connectorId))
+            {
+                _db.Connectors.Add(new TheGrid.Shared.Models.Connector { Id = connectorId, Name = "PostgreSQL" });
+                await _db.SaveChangesAsync();
+            }
+
+            var connection = new Connection
+            {
+                Name = "Postgres connection " + Guid.NewGuid(),
+                OrganizationId = _fixture.OrganizationId,
+                ConnectorId = connectorId,
+                ConnectionProperties = new Dictionary<string, string?>
+                {
+                    [CommonConnectionParameters.ConnectionString] = "Host=127.0.0.1;Port=1;Timeout=1",
+                    [CommonConnectionParameters.DatabaseName] = "does-not-matter",
+                    [CommonConnectionParameters.Username] = "does-not-matter",
+                },
+                SecretProperties = new Dictionary<string, string?>
+                {
+                    [CommonConnectionParameters.Password] = _secretProtector.Protect("does-not-matter"),
+                },
+            };
+
+            _db.Connections.Add(connection);
+            await _db.SaveChangesAsync();
+
+            var query = new Query
+            {
+                Name = "Query " + Guid.NewGuid(),
+                Command = "SELECT 1",
+                Description = "Test query targeting PostgreSqlConnector to prove connector-type resolution.",
+                ConnectionId = connection.Id,
+                Columns = [new() { Name = "Field1", Type = QueryResultColumnType.Text }],
+            };
+
+            _db.Queries.Add(query);
+            await _db.SaveChangesAsync();
+
+            var execution = new QueryExecution
+            {
+                JobId = Guid.NewGuid().ToString(),
+                QueryId = query.Id,
+            };
+
+            _db.QueryExecutions.Add(execution);
+            await _db.SaveChangesAsync();
+
+            var executor = new QueryExecutor(_db, _logger, hubContext, _secretProtector, _defaultSystemOptions);
+
+            // Act
+            await Assert.ThrowsAnyAsync<Exception>(async () => await executor.RefreshQueryResultsAsync(execution.Id));
+
+            // Assert: it must have failed trying to connect, not resolving the connector type.
+            var completedExecution = await _db.QueryExecutions.SingleAsync(e => e.Id == execution.Id);
+            Assert.Equal(TheGrid.Shared.Models.QueryExecutionStatus.Error, completedExecution.Status);
+            Assert.DoesNotContain("No connector found", completedExecution.ErrorOutput);
         }
 
         /// <summary>

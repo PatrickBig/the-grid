@@ -57,7 +57,9 @@ namespace TheGrid.Services
 
         private static IEnumerable<Type> GetConnectorTypes()
         {
-            var assembly = Assembly.GetAssembly(typeof(IConnector));
+            // Anchored on PostgreSqlConnector (not IConnector) since IConnector now lives in
+            // TheGrid.Connectors.Abstractions, which contains no concrete connectors.
+            var assembly = Assembly.GetAssembly(typeof(PostgreSqlConnector));
 
             if (assembly == null)
             {

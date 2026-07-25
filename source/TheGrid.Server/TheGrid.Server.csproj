@@ -31,6 +31,7 @@
     <ProjectReference Include="..\TheGrid.Data\TheGrid.Data.csproj" />
     <ProjectReference Include="..\TheGrid.Services\TheGrid.Services.csproj" />
     <ProjectReference Include="..\TheGrid.Shared\TheGrid.Shared.csproj" />
+    <ProjectReference Include="..\TheGrid.Connectors.Abstractions\TheGrid.Connectors.Abstractions.csproj" />
   </ItemGroup>
 
   <ItemGroup>

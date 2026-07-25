@@ -7,12 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Npgsql" Version="8.0.3" />
+    <PackageReference Include="Mapster" Version="7.4.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\TheGrid.Shared\TheGrid.Shared.csproj" />
-    <ProjectReference Include="..\TheGrid.Connectors.Abstractions\TheGrid.Connectors.Abstractions.csproj" />
   </ItemGroup>
 
 </Project>

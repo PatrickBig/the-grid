@@ -244,7 +244,7 @@ namespace TheGrid.Server.Controllers
 
         private static Type ResolveConnectorType(string connectorId)
         {
-            var connectorAssembly = Assembly.GetAssembly(typeof(IConnector));
+            var connectorAssembly = Assembly.GetAssembly(typeof(PostgreSqlConnector));
 
             return connectorAssembly?.GetType(connectorId) ?? throw new ArgumentException("No connector found.", nameof(connectorId));
         }
