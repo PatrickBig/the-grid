@@ -46,6 +46,26 @@ namespace TheGrid.Models
         /// Time / timespan value.
         /// </summary>
         Time,
+
+        /// <summary>
+        /// Globally unique identifier value.
+        /// </summary>
+        Guid,
+
+        /// <summary>
+        /// Binary value.
+        /// </summary>
+        Binary,
+
+        /// <summary>
+        /// JSON-shaped value.
+        /// </summary>
+        Json,
+
+        /// <summary>
+        /// Value whose type could not be determined.
+        /// </summary>
+        Unknown,
     }
 
     /// <summary>

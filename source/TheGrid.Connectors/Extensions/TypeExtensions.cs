@@ -18,41 +18,20 @@ namespace TheGrid.Connectors.Extensions
         {
             var underlyingType = Nullable.GetUnderlyingType(type) ?? type;
 
-            if (underlyingType == typeof(TimeSpan))
+            return underlyingType switch
             {
-                return QueryResultColumnType.Time;
-            }
-            else if (underlyingType == typeof(DateTime))
-            {
-                return QueryResultColumnType.DateTime;
-            }
-            else if (underlyingType == typeof(decimal))
-            {
-                return QueryResultColumnType.Decimal;
-            }
-            else if (underlyingType == typeof(long))
-            {
-                return QueryResultColumnType.Long;
-            }
-            else if (underlyingType == typeof(short)
-                || underlyingType == typeof(ushort)
-                || underlyingType == typeof(int))
-            {
-                return QueryResultColumnType.Integer;
-            }
-            else if (underlyingType == typeof(uint)
-                || underlyingType == typeof(long))
-            {
-                return QueryResultColumnType.Long;
-            }
-            else if (underlyingType == typeof(bool))
-            {
-                return QueryResultColumnType.Boolean;
-            }
-            else
-            {
-                return QueryResultColumnType.Text;
-            }
+                Type t when t == typeof(TimeSpan) => QueryResultColumnType.Time,
+                Type t when t == typeof(DateTime) => QueryResultColumnType.DateTime,
+                Type t when t == typeof(decimal) => QueryResultColumnType.Decimal,
+                Type t when t == typeof(long) || t == typeof(uint) => QueryResultColumnType.Long,
+                Type t when t == typeof(short) || t == typeof(ushort) || t == typeof(int) => QueryResultColumnType.Integer,
+                Type t when t == typeof(bool) => QueryResultColumnType.Boolean,
+                Type t when t == typeof(string) => QueryResultColumnType.Text,
+                Type t when t == typeof(Guid) => QueryResultColumnType.Guid,
+                Type t when t == typeof(byte[]) => QueryResultColumnType.Binary,
+                Type t when t == typeof(System.Text.Json.JsonElement) || t == typeof(System.Text.Json.JsonDocument) => QueryResultColumnType.Json,
+                _ => QueryResultColumnType.Unknown,
+            };
         }
     }
 }

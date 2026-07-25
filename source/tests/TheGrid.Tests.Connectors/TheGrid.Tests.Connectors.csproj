@@ -25,6 +25,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\TheGrid.Connectors\TheGrid.Connectors.csproj" />
+    <ProjectReference Include="..\..\TheGrid.Models\TheGrid.Models.csproj" />
   </ItemGroup>
 
 </Project>
