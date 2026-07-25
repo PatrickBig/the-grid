@@ -1,318 +1,393 @@
 # Creating a new connector
 
-Adding support for new query runners can be done in the `TheGrid.Connectors` project.
-
-
+Adding support for a new data source is done by adding a new connector class to the `TheGrid.Connectors` project.
 
 ## Getting started
 
-The `TheGrid.Connectors` includes a file named `GlobalUsings.cs` which include most of the required attributes and base classes needed to create new connectors.
+`TheGrid.Connectors` includes a `GlobalUsings.cs` file with global `using` statements for `TheGrid.Connectors.Attributes`, `TheGrid.Connectors.Models`, and `TheGrid.Shared.Models` — the namespaces most connector code needs.
 
-All query runners must meet the following minimum criteria:
+All connectors must meet the following minimum criteria:
 
-* Inherit from `TheGrid.QueryRunners.QueryRunnerBase`
-* Apply a `TheGrid.QueryRunners.Attributes.QueryRunnerAttribute`
+* Inherit from `TheGrid.Connectors.ConnectorBase`.
+* Apply a `TheGrid.Connectors.Attributes.ConnectorAttribute` to the class.
 
+Connectors are discovered automatically by `ConnectorDiscoveryService` — no manual registration step is needed. **Current limitation:** discovery only reflects over the single assembly that defines `IConnector` (`TheGrid.Connectors` itself, via `Assembly.GetAssembly(typeof(IConnector))`) — a connector class must live in that project to be found. A connector defined in a separate assembly is invisible to the platform today.
 
-### Define the runner
+### Define the connector
 
-For this exercise we will create an example runner that will produce some results by connect to a fictional database engine, run a query against it and return the results.
+Rather than inventing a fictional example class, this guide walks through the real `PostgreSqlConnector` (`source/TheGrid.Connectors/PostgreSqlConnector.cs`), which ships with The Grid today. Quoting a real, compiling connector means this guide can't silently drift out of sync the way a hand-written example can — if the excerpts below stop matching the file, the file is the one that's authoritative.
 
-
-First lets setup our base class and inherit from `QueryRunnerBase`.
+Here is the class declaration, attributes, and constructor, quoted directly from `PostgreSqlConnector.cs`:
 
 ```csharp
-using DatabaseProvider.Driver;
-
-namespace TheGrid.Connectors
+[Connector("PostgreSQL", EditorLanguage = EditorLanguage.PgSql, IconFileName = "postgresql.png")]
+[ConnectorParameter(CommonConnectionParameters.ConnectionString, ConnectionPropertyType.SingleLineText, Required = true, HelpText = "Standard [PostgreSQL connection string](https://www.connectionstrings.com/postgresql/).")]
+[ConnectorParameter(CommonConnectionParameters.DatabaseName, ConnectionPropertyType.SingleLineText, Required = true)]
+[ConnectorParameter(CommonConnectionParameters.Username, ConnectionPropertyType.SingleLineText, Required = true)]
+[ConnectorParameter(CommonConnectionParameters.Password, ConnectionPropertyType.ProtectedText, Required = true)]
+public class PostgreSqlConnector : ConnectorBase, ISchemaDiscovery, IConnectionTest, IPermissionTest
 {
     /// <summary>
-    /// Connects to a MyDatabase instance and runs a query against the specified datasource.
+    /// Initializes a new instance of the <see cref="PostgreSqlConnector"/> class.
     /// </summary>
-    [QueryRunner("My Database")]
-    public class MyDatabaseRunner : QueryRunnerBase
+    /// <param name="connectorParameters">Properties used to initiate the connection to the PostgreSQL database.</param>
+    public PostgreSqlConnector(Dictionary<string, string> connectorParameters)
+        : base(connectorParameters)
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MyDatabaseRunner"/> class.
-        /// </summary>
-        /// <param name="runnerParameters">Properties used to connect to the file as a source.</param>
-        public MyDatabaseRunner(Dictionary<string, string> runnerParameters)
-            : base(runnerParameters)
-        {
-        }
-
-        /// <summary>
-        /// Runs a query using the runner properties.
-        /// </summary>
-        /// <param name="query">Query to be executed.</param>
-        /// <param name="queryParameters">Parameters to pass to the query.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>Results from the execution of the query.</returns>
-        public override async Task<QueryResult> RunQueryAsync(string query, Dictionary<string, object>? queryParameters, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
     }
+
+    // ... GetSchemaAsync, GetDataAsync, TestConnectionAsync, HasWritePermissionAsync (see below)
 }
 ```
 
-This is the minimum level of code needed to define a new runner. Since we throw a `NotImplementedException` it will just error out when it is used.
+Breaking this down we have four elements: the `Connector` attribute, one or more `ConnectorParameter` attributes, the constructor, and the capability interfaces (`ISchemaDiscovery`, `IConnectionTest`, `IPermissionTest`) implemented on top of the required `ConnectorBase`/`GetDataAsync` contract.
 
-Breaking this down we have three elements.
+#### The Connector attribute
 
-#### The QueryRunner attribute
-
-The `QueryRunner` attribute applied to the `MyDatabaseRunner` class is used to define metadata about the runner and can be useful for hints in the UI for users when editing queries or defining the data source.
+The `[Connector]` attribute (`TheGrid.Connectors.Attributes.ConnectorAttribute`) applied to the class defines metadata used to identify the connector and hint the UI when users create connections or write queries.
 
 ```csharp
-[QueryRunner("My Text File")]
+[Connector("PostgreSQL", EditorLanguage = EditorLanguage.PgSql, IconFileName = "postgresql.png")]
 ```
 
-**QueryRunnerAttribute properties**
-|Attribute property |Description                                       |Required |
-|-------------------|--------------------------------------------------|---------|
-|`Name`             |Display name for the query runner.                |Yes      |
-|`EditorLanguage`   |Language used by the IDE / editor component.      |No       |
-|`IconFileName`     |Icon used in the user interface for the runner.   |No       |
+**ConnectorAttribute properties**
+|Attribute property |Description                                                                                   |Required |
+|-------------------|-----------------------------------------------------------------------------------------------|---------|
+|`Name`             |Display name for the connector.                                                                |Yes      |
+|`EditorLanguage`   |Language used by the query editor component. Common values are defined as constants on `TheGrid.Shared.Models.EditorLanguage` (e.g. `EditorLanguage.PgSql`). |No       |
+|`IconFileName`     |Icon used in the user interface for the connector. Defaults to `"undefined.png"`.               |No       |
+
+`[Connector]` may only be applied once per class (`AllowMultiple = false`).
 
 #### The constructor
 
-All classes must use and call the constructor in the base class. The `runnerParameters` will contain all of the required information defined in your data source for connecting to whatever it uses to produce data. For most database sources this might include a connection string, authentication information, etc.
+Every connector must have a constructor that accepts a `Dictionary<string, string> connectorParameters` and passes it to the `ConnectorBase` constructor:
 
 ```csharp
-public MyTextFileRunner(Dictionary<string, string> runnerParameters)
-    : base(runnerParameters)
+public PostgreSqlConnector(Dictionary<string, string> connectorParameters)
+    : base(connectorParameters)
 {
 }
 ```
 
-#### The RunQueryAsync method
+`ConnectorBase`'s constructor stores the dictionary on the protected `ConnectorParameters` property and immediately calls `ValidateParameters`, which checks that every `[ConnectorParameter]` marked `Required = true` has a non-empty value in the dictionary — throwing `ConnectorParameterException` if any are missing. This validation runs before your own constructor body (if you add one), so by the time your code runs, required parameters are guaranteed present.
 
-The main functionality for implementing your runner will be in the `RunQueryAsync` method.
+#### The GetDataAsync method
 
-This is where you would write the code to actually connect to your data source, read the results, and provide the output.
+The only method required by `IConnector` (and left abstract on `ConnectorBase`) is `GetDataAsync`. Its real signature, from `ConnectorBase.cs`:
+
 ```csharp
-public override async Task<QueryResult> RunQueryAsync(string query, Dictionary<string, object>? queryParameters, CancellationToken cancellationToken = default)
+public abstract IAsyncEnumerable<ConnectorRow> GetDataAsync(string query, Dictionary<string, object?>? queryParameters, [EnumeratorCancellation] CancellationToken cancellationToken = default);
 ```
 
-It is recommended to use `async` methods whenever possible, and pass the cancellation token where appropriate.
+This is a **streaming** method, not one that builds up an in-memory result object and returns it. You implement it as an `async IAsyncEnumerable<ConnectorRow>` iterator method using `yield return` once per row, so a consumer using `await foreach` can start processing rows before the entire result set has been read from the data source (and can stop early / cancel without you having buffered rows that are never used).
 
-The `queryParameters` provides any additional parameters posted to the query by the execution engine.
-
-This could be used for running [parameterized queries](https://learn.microsoft.com/en-us/aspnet/web-forms/overview/data-access/accessing-the-database-directly-from-an-aspnet-page/using-parameterized-queries-with-the-sqldatasource-cs) when supported by your database driver.
-
-
-### Add functionality to produce data
-
-Since our example runner doesn't really do much besides throw an exception lets mock up some functionality.
-
-In order to do this we need to build our `QueryResult` object to return.
-
-|Property Name  |Type                               |Description                                                      |
-|---------------|-----------------------------------|-----------------------------------------------------------------|
-|Columns        |`List<string>`                     |Provides a list of column names available in the result set.     |
-|Rows           |`List<Dictionary<string, object>>` |A list of key/values for each column. Each list item is a row with each key/value pair representing the column name and the corresponding value.|
+Here is `PostgreSqlConnector.GetDataAsync` in full, quoted from `PostgreSqlConnector.cs`:
 
 ```csharp
-[QueryRunner("My Database")]
-public class MyDatabaseRunner : QueryRunnerBase
+/// <inheritdoc/>
+public override async IAsyncEnumerable<ConnectorRow> GetDataAsync(string query, Dictionary<string, object?>? queryParameters, [EnumeratorCancellation] CancellationToken cancellationToken = default)
 {
-    // ... constructor
+    await using var connection = GetConnection(ConnectorParameters);
 
-    /// <inheritdoc />
-    public override async Task<QueryResult> RunQueryAsync(string query, Dictionary<string, object>? queryParameters, CancellationToken cancellationToken = default)
+    await connection.OpenAsync(cancellationToken);
+
+    Dictionary<string, QueryResultColumn>? columns = null;
+
+    // Run the query
+    await using var command = new NpgsqlCommand(query, connection);
+
+    if (queryParameters != null && queryParameters.Count != 0)
     {
-        // Build our connection
-        using var connection = new MyDatabaseConnection("host=localhost;port=1234;database=test_db;");
-
-        await connection.OpenAsync(cancellationToken);
-
-        bool firstReadDone = false;
-        var results = new QueryResult();
-
-        await using (var command = new MyDatabaseCommand(query, connection))
+        foreach (var parameter in queryParameters.Where(p => p.Value != null))
         {
-            if (queryParameters != null && queryParameters.Any())
-            {
-                foreach (var parameter in queryParameters)
-                {
-                    command.Parameters.Add(parameter.Key, parameter.Value);
-                }
-            }
+            command.Parameters.AddWithValue(parameter.Key, parameter.Value ?? DBNull.Value);
+        }
+    }
 
-            await using var reader = await command.ExecuteQueryAsync(cancellationToken);
+    await using var reader = await command.ExecuteReaderAsync(cancellationToken);
 
-            // Iterate over the results and add them to the results
-            while (await reader.ReadStreamAsync(cancellationToken))
-            {
-                if (!firstReadDone)
-                {
-                    results.Columns = reader.Fields.Select(f => f.Name).ToList();
-                    firstReadDone = true;
-                }
+    // Iterate over the results
+    while (await reader.ReadAsync(cancellationToken))
+    {
+        columns ??= GetColumns(reader);
 
-                // Create each row
-                var row = new Dictionary<string, object>();
+        var row = new Dictionary<string, object?>();
 
-                foreach (var fieldName in results.Columns)
-                {
-                    row.Add(fieldName, reader.GetValue(fieldName));
-                }
-
-                results.Add(row);
-            }
+        for (int i = 0; i < reader.FieldCount; i++)
+        {
+            row.Add(reader.GetName(i), reader.GetValue(i));
         }
 
-        return results;
+        yield return new ConnectorRow(columns, row);
     }
 }
 ```
 
+A few things worth calling out about this pattern:
 
-Now our query runner can execute a query and return the results.
+* Declaring the method with the `async IAsyncEnumerable<ConnectorRow>` return type and using `[EnumeratorCancellation] CancellationToken cancellationToken` lets the framework properly propagate cancellation into the iterator — match this signature exactly (including the attribute) when overriding.
+* `columns` is built exactly once, from the first row read (`columns ??= GetColumns(reader)`), and that same `Dictionary<string, QueryResultColumn>` instance is reused for every subsequent `ConnectorRow` yielded in the stream — column metadata isn't recomputed per row.
+* `queryParameters` (when supplied) are added to the underlying command's parameter collection, enabling [parameterized queries](https://learn.microsoft.com/en-us/aspnet/web-forms/overview/data-access/accessing-the-database-directly-from-an-aspnet-page/using-parameterized-queries-with-the-sqldatasource-cs) when your driver supports them.
+* Each `yield return new ConnectorRow(columns, row)` streams one row at a time to the caller.
 
+##### ConnectorRow
 
-### Use runner parameters to provide connection information
+`GetDataAsync` yields `TheGrid.Shared.Models.ConnectorRow`, defined as:
 
-In our last step you might notice that it we have a connection string hard coded into the runner. This is really only helpful to our users if the database will always have the same host.
+```csharp
+public sealed record ConnectorRow(IReadOnlyDictionary<string, QueryResultColumn> Columns, IReadOnlyDictionary<string, object?> Data);
+```
 
-We can make use of the `QueryRunnerParameterAttribute` to let the query engine know what parameters are available for the data source.
+|Property |Type                                              |Description                                                                          |
+|---------|---------------------------------------------------|--------------------------------------------------------------------------------------|
+|`Columns`|`IReadOnlyDictionary<string, QueryResultColumn>`   |Column metadata for the result set, keyed by column name. Built once and the same reference is shared across every row in the stream. |
+|`Data`   |`IReadOnlyDictionary<string, object?>`             |The row's values, keyed by column name.                                              |
 
-Some common ones for a typical relational database might be **Connection String**, **Database**, **Username**, and **Password**.
+`QueryResultColumn` (`TheGrid.Shared.Models`) currently exposes a single `Type` property (`QueryResultColumnType`, e.g. `Text`, `Integer`, `Long`, `Decimal`, `DateTime`, `Time`, `Guid`, `Binary`, `Json`, `Boolean`, `Unknown`) describing the value's data type. `PostgreSqlConnector`'s private `GetColumns` helper builds this dictionary from the `NpgsqlDataReader`'s field names and types (via a `GetQueryResultColumnTypeForType()` extension method) the first time a row is read.
 
-It is recommended to split authentication parameters (especially passwords) from the connection string. This way it can be hidden from users who are viewing the data source.
+### Use connector parameters to provide connection information
 
-**QueryRunnerParameterAttribute properties**
+A connector's constructor receives a `Dictionary<string, string> connectorParameters` containing whatever values a user supplied when setting up a connection. You declare what parameters exist — and how they should be rendered in the UI — using one `[ConnectorParameter]` attribute per parameter, applied to the connector class (`AllowMultiple = true`, so you can stack as many as you need).
+
+Some common ones for a typical relational database are **Connection String**, **Database Name**, **Username**, and **Password**. It's recommended to keep secrets like passwords as a separate parameter from the connection string so they can be handled specially in the UI (e.g. masked/hidden).
+
+**ConnectorParameterAttribute properties**
 |Attribute property |Description                                                                                       |Required |
 |-------------------|--------------------------------------------------------------------------------------------------|---------|
-|`Name`             |Name for parameter.                                                                               |Yes      |
-|`Type`             |Input type used in the UI for the parameter.                                                      |Yes      |
-|`RenderOrder`      |Used when rendering the UI to show the items in a specific order if desired.                      |No       |
-|`HelpText`         |Short text for the property to display to the user. Supports markdown, limited to 200 characters. |No       |
-|`Required`         |Set to true if the user must supply a value when setting up the data source using this runner.    |No       |
+|`Name`             |Name used to render the label for the control, and (currently) the literal key this parameter's value is stored/looked up under — see the note below. May only contain letters, numbers, spaces, underscores, and hyphens (enforced in the attribute constructor). |Yes      |
+|`Type`             |Input type used in the UI for the parameter, a `ConnectionPropertyType` value.                    |Yes      |
+|`RenderOrder`      |Used when rendering the UI to show the items in a specific order. Defaults to `100`.               |No       |
+|`HelpText`         |Short text for the property to display to the user. Must be 200 characters or fewer (enforced by the attribute; longer values throw `ArgumentException`).|No       |
+|`Required`         |Set to `true` if the user must supply a value when setting up a connection using this connector. Enforced by `ConnectorBase`'s constructor via `ValidateParameters`. |No       |
 
-The `Type` property is an enum with the following values
+`Type` is a `TheGrid.Shared.Models.ConnectionPropertyType` enum with the following values:
 
-**QueryRunnerParameterType** values
-|Enum Value                  |Description                                                       |
-|----------------------------|------------------------------------------------------------------|
-|`SingleLineText`            |Single line of text for input.                                    |
-|`MultipleLineText`          |Multiple lines of text for input.                                 |
-|`ProtectedText`             |Password type input, users will not be able to view this content. |
-|`Numeric`                   |Numeric input allowed only.                                       |
-|`Boolean`                   |Checkbox yes/no style input.                                      |
+**ConnectionPropertyType** values
+|Enum Value          |Description                                                       |
+|---------------------|-------------------------------------------------------------------|
+|`SingleLineText`     |Single line of text for input.                                     |
+|`MultipleLineText`   |Multiple lines of text for input.                                  |
+|`ProtectedText`      |Password-style input; users will not be able to view this content. |
+|`Numeric`            |Numeric input only.                                                |
+|`Boolean`            |Checkbox yes/no style input.                                       |
 
-
-Lets add our attributes to the `MyDatabaseRunner` class so we can accept the common **Connection String**, **Database**, **Username**, and **Password** parameters.
-
-For the `Name` property on the `QueryRunnerParameterAttribute` you can either enter a string, or make use of the `CommonConnectionParameters` class which contain some constants for commonly used connection properties.
+`PostgreSqlConnector` declares its four parameters like this:
 
 ```csharp
-[QueryRunner("My Database")]
-[QueryRunnerParameter(CommonConnectionParameters.ConnectionString, QueryRunnerParameterType.SingleLineText, Required = true)]
-[QueryRunnerParameter(CommonConnectionParameters.Username, QueryRunnerParameterType.SingleLineText, Required = true)]
-[QueryRunnerParameter(CommonConnectionParameters.Password, QueryRunnerParameterType.SingleLineText, Required = true)]
-public class MyDatabaseRunner : QueryRunnerBase
+[ConnectorParameter(CommonConnectionParameters.ConnectionString, ConnectionPropertyType.SingleLineText, Required = true, HelpText = "Standard [PostgreSQL connection string](https://www.connectionstrings.com/postgresql/).")]
+[ConnectorParameter(CommonConnectionParameters.DatabaseName, ConnectionPropertyType.SingleLineText, Required = true)]
+[ConnectorParameter(CommonConnectionParameters.Username, ConnectionPropertyType.SingleLineText, Required = true)]
+[ConnectorParameter(CommonConnectionParameters.Password, ConnectionPropertyType.ProtectedText, Required = true)]
+```
+
+For the `Name` argument you can pass any string meeting the character restriction above, but it's recommended to use the constants on `TheGrid.Connectors.CommonConnectionParameters` (`ConnectionString`, `DatabaseName`, `Username`, `Password`, `PortNumber`, `Database`) for commonly-needed parameters, both to avoid typos and to keep naming consistent across connectors.
+
+#### Current behavior: parameters are keyed by their display `Name`
+
+There is currently no separate "machine key" distinct from the display `Name` — the string you pass as `[ConnectorParameter]`'s `Name` argument is **the same string** used as the dictionary key in `ConnectorParameters` (and in the `connectorParameters` dictionary passed to your constructor) at runtime. For example, `CommonConnectionParameters.Password` is the literal string `"Password"`, and that literal string is exactly what you look up:
+
+```csharp
+if (properties.TryGetValue(CommonConnectionParameters.Password, out string? password))
 {
+    builder.Password = password;
 }
 ```
 
-In order to make use of these parameters in the `RunQueryAsync` method you can consume the `RunnerParameters` property, which is a protected property on the `QueryRunnerBase` class.
+This is current behavior, not a bug this guide is glossing over: **renaming a `[ConnectorParameter]`'s `Name` is a breaking change** for any connection that already has a stored value under the old name, since the stored dictionary key won't match the new attribute's `Name` anymore. Use the `CommonConnectionParameters` constants where they apply so you don't have to invent (and later rename) your own literal strings.
 
-
-Lets build our connection string using these parameters.
-
+Consuming parameters inside your connector means reading from the protected `ConnectorParameters` dictionary (set by `ConnectorBase`'s constructor). `PostgreSqlConnector`'s private `GetConnection` helper shows the pattern:
 
 ```csharp
-[QueryRunner("My Database")]
-[QueryRunnerParameter(CommonConnectionParameters.ConnectionString, QueryRunnerParameterType.SingleLineText, Required = true)]
-[QueryRunnerParameter(CommonConnectionParameters.Username, QueryRunnerParameterType.SingleLineText, Required = true)]
-[QueryRunnerParameter(CommonConnectionParameters.Password, QueryRunnerParameterType.SingleLineText, Required = true)]
-public class MyDatabaseRunner : QueryRunnerBase
+private static NpgsqlConnection GetConnection(Dictionary<string, string> properties)
 {
-    // ... constructor
+    // Attempt to build a connection based on the information
+    var builder = new NpgsqlConnectionStringBuilder(properties[CommonConnectionParameters.ConnectionString]);
 
-    /// <inheritdoc />
-    public override async Task<QueryResult> RunQueryAsync(string query, Dictionary<string, object>? queryParameters, CancellationToken cancellationToken = default)
+    // If there is a username or password, try using those to update the settings.
+    if (properties.TryGetValue(CommonConnectionParameters.Password, out string? password))
     {
-        var connection = GetConnection();
-
-        // ... implementation goes here.
-
-        return results;
+        builder.Password = password;
     }
 
-    private MyDatabaseConnection GetConnection()
+    if (properties.TryGetValue(CommonConnectionParameters.Username, out string? username))
     {
-        var connectionStringBuilder = new MyDatabaseConnectionStringBuilder(RunnerParameters[CommonConnectionParameters.ConnectionString]);
-
-        // If there is a username or password, try using those to update the settings.
-        if (properties.TryGetValue(CommonConnectionParameters.Password, out string? password))
-        {
-            builder.Password = password;
-        }
-
-        if (properties.TryGetValue(CommonConnectionParameters.Username, out string? username))
-        {
-            builder.Username = username;
-        }
-
-        return new MyDatabaseConnection(connectionStringBuilder.ConnectionString);
+        builder.Username = username;
     }
+
+    if (properties.TryGetValue(CommonConnectionParameters.DatabaseName, out string? databaseName))
+    {
+        builder.Database = databaseName;
+    }
+
+    return new NpgsqlConnection(builder.ConnectionString);
 }
 ```
 
-# Adding database schema discovery support
+## Adding database schema discovery support
 
-If your query runner connects to a database it might have a defined schema. For things like SQL database providers this would be things like tables, fields/columns, and attributes for those objects.
-
-For the query runner framework to know your runner supports discoverying database schema you should implement the `ISchemaDiscovery` interface.
-
-This will introduce the `public async Task<DatabaseSchema> GetSchemaAsync(CancellationToken cancellationToken = default)` method.
-
-The `GetSchemaAsync` method should return a `DatabaseSchema` object.
+If your connector talks to a data source with a defined schema — tables, columns, and their attributes, for example — implement `TheGrid.Connectors.ISchemaDiscovery` on your connector class:
 
 ```csharp
-[QueryRunner("My Database")]
-[QueryRunnerParameter(CommonConnectionParameters.ConnectionString, QueryRunnerParameterType.SingleLineText, Required = true)]
-[QueryRunnerParameter(CommonConnectionParameters.Username, QueryRunnerParameterType.SingleLineText, Required = true)]
-[QueryRunnerParameter(CommonConnectionParameters.Password, QueryRunnerParameterType.SingleLineText, Required = true)]
-public class MyDatabaseRunner : QueryRunnerBase, ISchemaDiscovery
+public interface ISchemaDiscovery
 {
-    /// ... implementation
+    public Task<DatabaseSchema> GetSchemaAsync(CancellationToken cancellationToken = default);
+}
+```
 
-    public async Task<DatabaseSchema> GetSchemaAsync(CancellationToken cancellationToken = default)
+`PostgreSqlConnector` implements this by querying `information_schema.columns`/`information_schema.tables`, quoted here from `PostgreSqlConnector.cs`:
+
+```csharp
+/// <inheritdoc/>
+public async Task<DatabaseSchema> GetSchemaAsync(CancellationToken cancellationToken = default)
+{
+    await using var connection = GetConnection(ConnectorParameters);
+
+    await connection.OpenAsync(cancellationToken);
+
+    var results = new DatabaseSchema
     {
-        var connection = GetConnection();
+        DatabaseName = connection.Database,
+    };
 
-        await connection.OpenAsync(cancellationToken);
+    // List all the tables
+    var tables = new List<DatabaseObject>();
 
-        var result = new DatabaseShema();
-        
-        var tables = new List<DatabaseObject>();
+    await using var command = new NpgsqlCommand(
+        @"select
+        t.table_schema,
+        t.table_name,
+        t.table_type,
+        c.column_name,
+        c.data_type,
+        c.udt_name,
+        c.is_nullable,
+        c.character_maximum_length,
+        c.is_identity
+        from information_schema.columns as c
+        inner join information_schema.tables as t on t.table_name = c.table_name
+        where t.table_schema not in ('pg_catalog', 'information_schema')
+        order by t.table_catalog, t.table_schema, t.table_name, c.column_name",
+        connection);
 
-        await using (var command = new MyDatabaseCommand("SELECT name, type FROM system.schema WHERE type = 'TABLE' OR type = 'VIEW'", connection))
+    await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+
+    // Iterate over the results
+    var currentTable = new DatabaseObject();
+    while (await reader.ReadAsync(cancellationToken))
+    {
+        var schemaName = reader.GetFieldValue<string?>(reader.GetOrdinal("table_schema"));
+        var tableName = reader.GetFieldValue<string>(reader.GetOrdinal("table_name"));
+
+        if (currentTable.Name != tableName || currentTable.Schema != schemaName)
         {
-            await using var reader = await command.ExecuteQueryAsync(cancellationToken);
+            var objectTypeName = reader.GetFieldValue<string>(reader.GetOrdinal("table_type"));
 
-            while (await reader.ReadStreamAsync(cancellationToken))
+            // Setup a new table.
+            currentTable = new()
             {
-                var table = new DatabaseObject
-                {
-                    Name = reader.GetValue("name"),
-                    ObjectTypeName = reader.GetValue("type"),
-                };
+                Schema = schemaName,
+                Name = tableName,
+                ObjectTypeName = objectTypeName == "BASE TABLE" ? "TABLE" : objectTypeName,
+            };
 
-                // You can also get fields/columns and add them to the DatabaseObject
-                table.Fields = GetFieldsForTable(tableName);
-
-                tables.Add(table);
-            }
+            tables.Add(currentTable);
         }
 
-        result.DatabaseObjects = tables;
+        // Add a new column
+        var column = new DatabaseObjectColumn
+        {
+            Name = reader.GetFieldValue<string>(reader.GetOrdinal("column_name")),
+        };
 
-        return result;
+        // ... (data type / attribute handling omitted here for brevity — see PostgreSqlConnector.cs)
+
+        currentTable.Fields.Add(column);
     }
+
+    results.DatabaseObjects = tables;
+
+    return results;
 }
 ```
+
+The important shape to notice: the reader is iterated once, in order, and a new `DatabaseObject` (table/view) is only appended to `tables` when the `(schema, table_name)` pair changes from the previous row — every row belonging to the same table just adds another `DatabaseObjectColumn` to `currentTable.Fields`. `DatabaseSchema`, `DatabaseObject`, and `DatabaseObjectColumn` live in `TheGrid.Connectors.Models`.
+
+## Additional capability interfaces
+
+Beyond `ISchemaDiscovery`, a connector can opt into two more capabilities by implementing additional interfaces from `TheGrid.Connectors`. As of this writing, implementing these records the capability on the connector's metadata (see below) for future UI/API use — there is no endpoint yet that actually invokes `TestConnectionAsync` or `HasWritePermissionAsync` against a live connection.
+
+### IConnectionTest
+
+```csharp
+public interface IConnectionTest
+{
+    public Task<bool> TestConnectionAsync(CancellationToken cancellationToken = default);
+}
+```
+
+Implement this to let users verify a connection's parameters are valid before saving/using it. `PostgreSqlConnector`'s implementation simply opens the connection and runs a trivial query:
+
+```csharp
+/// <inheritdoc/>
+public async Task<bool> TestConnectionAsync(CancellationToken cancellationToken = default)
+{
+    await using var connection = GetConnection(ConnectorParameters);
+
+    await connection.OpenAsync(cancellationToken);
+
+    await using var command = new NpgsqlCommand("select 1", connection);
+
+    return true;
+}
+```
+
+### IPermissionTest
+
+```csharp
+public interface IPermissionTest
+{
+    public Task<bool> HasWritePermissionAsync(CancellationToken cancellationToken = default);
+}
+```
+
+Implement this to let The Grid warn users when a connection's credentials have write access — connections used purely for querying/reporting should ideally be read-only. `PostgreSqlConnector`'s implementation checks `information_schema.tables` via PostgreSQL's `has_table_privilege` function:
+
+```csharp
+/// <inheritdoc/>
+public async Task<bool> HasWritePermissionAsync(CancellationToken cancellationToken = default)
+{
+    // This should work for any version of PostgreSQL after 7.2
+    const string permissionQuery =
+        @"SELECT 
+          table_name,
+          has_table_privilege(quote_ident(table_name), 'INSERT') as has_insert_permission,
+          has_table_privilege(quote_ident(table_name), 'UPDATE') as has_update_permission,
+          has_table_privilege(quote_ident(table_name), 'DELETE') as has_delete_permission
+        FROM information_schema.tables
+        WHERE table_schema = current_schema";
+
+    await using var connection = GetConnection(ConnectorParameters);
+
+    await connection.OpenAsync(cancellationToken);
+
+    await using var command = new NpgsqlCommand(permissionQuery, connection);
+
+    await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+
+    // Iterate over the results
+    while (await reader.ReadAsync(cancellationToken))
+    {
+        if (reader.GetFieldValue<bool>(reader.GetOrdinal("has_insert_permission")) ||
+            reader.GetFieldValue<bool>(reader.GetOrdinal("has_update_permission")) ||
+            reader.GetFieldValue<bool>(reader.GetOrdinal("has_delete_permission")))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+```
+
+Both interfaces are entirely optional — a minimal connector only needs `ConnectorBase` + `GetDataAsync`. Implement whichever capability interfaces make sense for your data source. `ConnectorDiscoveryService` reflects over each connector type at discovery time (`type.ImplementsInterface<ISchemaDiscovery>()`, `type.ImplementsInterface<IConnectionTest>()`) and records the result as `SupportsSchemaDiscovery`/`SupportsConnectionTest` flags on the connector's metadata — there is currently no equivalent discovery-time flag for `IPermissionTest`.
