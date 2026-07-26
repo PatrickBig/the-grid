@@ -135,9 +135,12 @@ namespace TheGrid.Server
         /// Adds services required when running the application in agent mode.
         /// </summary>
         /// <param name="services">Service collection.</param>
-        public static void AddAgentServices(IServiceCollection services)
+        /// <param name="systemOptions">System configuration, used to determine which job queues this instance listens to.</param>
+        public static void AddAgentServices(IServiceCollection services, SystemOptions systemOptions)
         {
-            services.AddHangfireServer();
+            var queues = systemOptions.AgentQueues.Length > 0 ? systemOptions.AgentQueues : [JobQueues.Default];
+
+            services.AddHangfireServer(options => options.Queues = queues);
         }
     }
 }

@@ -55,7 +55,7 @@ public static class Program
         // Add services based on the run mode.
         if (systemOptions.RunMode is RunMode.Mixed or RunMode.Agent)
         {
-            StartupHelpers.AddAgentServices(builder.Services);
+            StartupHelpers.AddAgentServices(builder.Services, systemOptions);
         }
 
         builder.Services.AddSignalR()
@@ -69,7 +69,6 @@ public static class Program
 
         if (Environment.GetCommandLineArgs().Contains("/setup"))
         {
-            Console.WriteLine("AAAAAAAAAAAAAAAAAAAA SETUP TIME");
             builder.Services.AddHostedService<SetupHostedService>();
         }
 

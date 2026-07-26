@@ -71,5 +71,26 @@ namespace TheGrid.Tests.Services
             Assert.Equal(expectedJobId, response.BackgroundProcessingJobId);
             Assert.True(response.QueryRefreshJobId > 0);
         }
+
+        /// <summary>
+        /// Regression test: <see cref="QueryRefreshManager"/> enqueues jobs via
+        /// <c>Enqueue&lt;IQueryExecutor&gt;(...)</c>, so Hangfire's queue resolution reflects
+        /// <see cref="IQueryExecutor.RefreshQueryResultsAsync"/> itself, not the <see cref="QueryExecutor"/>
+        /// implementation. The <see cref="QueueAttribute"/> previously lived only on the implementation and
+        /// was silently never applied, sending every refresh job to Hangfire's "default" queue.
+        /// </summary>
+        [Fact]
+        public void RefreshQueryResultsAsync_InterfaceMethodDeclaresQueryRefreshQueue_Test()
+        {
+            // Arrange
+            var interfaceMethod = typeof(IQueryExecutor).GetMethod(nameof(IQueryExecutor.RefreshQueryResultsAsync));
+
+            // Act
+            var queueAttribute = interfaceMethod?.GetCustomAttributes(typeof(QueueAttribute), false).SingleOrDefault() as QueueAttribute;
+
+            // Assert
+            Assert.NotNull(queueAttribute);
+            Assert.Equal(JobQueues.QueryRefresh, queueAttribute.Queue);
+        }
     }
 }

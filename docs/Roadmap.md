@@ -2,6 +2,11 @@
 
 _Last updated: 2026-07-23. Author: architecture review pass after project dormancy._
 
+> **Progress note (2026-07-26):** Phase 0 and Phase 1 below are both complete — see
+> `docs/roadmap/ChangeSpecs.md` for per-item status and what shipped for each. Next up is Phase 2
+> (§7). This file's narrative/analysis content is unchanged and still accurate; only ChangeSpecs.md
+> tracks live status.
+
 This document evaluates the current state of The Grid, identifies the gap between where it is
 and the stated goal — **a more secure, more stable, more enterprise-friendly Redash** — and lays
 out a prioritized roadmap. The **Connectors SDK gets the deepest treatment** because that is the

@@ -78,11 +78,8 @@ namespace TheGrid.Services.Tests
         [Fact]
         public async Task RefreshConnectorsAsync_MapsKeyAndIsSecret_Test()
         {
-            // Arrange: use an isolated database rather than the class fixture's shared context — calling
-            // RefreshConnectorsAsync a second time against a DbContext that already tracked (or previously
-            // persisted) the same connector rows trips a pre-existing entity-tracking conflict in
-            // ConnectorDiscoveryService unrelated to this change, so this test avoids sharing state with
-            // RefreshConnectorsAsync_Test above.
+            // Arrange: use an isolated database rather than the class fixture's shared context so this
+            // test doesn't depend on ordering relative to RefreshConnectorsAsync_Test above.
             using var sqliteProvider = new SqliteProvider();
             var db = sqliteProvider.Db;
 
@@ -158,6 +155,34 @@ namespace TheGrid.Services.Tests
                 .AsNoTracking()
                 .SingleAsync(c => c.Id == typeof(TestConnector).FullName);
             Assert.False(testConnector.SupportsWriteAccessProbe);
+        }
+
+        /// <summary>
+        /// Regression test: running discovery a second time against a database that already has
+        /// <see cref="Connector"/> rows previously threw an EF Core "entity already tracked" exception
+        /// because a freshly-built <see cref="Connector"/> instance was attached under the same Id as an
+        /// already-tracked row. Discovery must update the tracked instance in place instead.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task RefreshConnectorsAsync_CanRunTwiceAgainstSameDatabase_Test()
+        {
+            // Arrange
+            using var sqliteProvider = new SqliteProvider();
+            var db = sqliteProvider.Db;
+
+            var connectorRefreshService = new ConnectorDiscoveryService(db, _logger);
+            await connectorRefreshService.RefreshConnectorsAsync();
+
+            // Act
+            var exception = await Record.ExceptionAsync(() => connectorRefreshService.RefreshConnectorsAsync());
+
+            // Assert
+            Assert.Null(exception);
+
+            var connectorIds = await db.Connectors.Where(c => !c.Disabled).Select(c => c.Id).ToListAsync();
+            Assert.Contains(typeof(PostgreSqlConnector).FullName, connectorIds);
+            Assert.Contains(typeof(TestConnector).FullName, connectorIds);
         }
     }
 }

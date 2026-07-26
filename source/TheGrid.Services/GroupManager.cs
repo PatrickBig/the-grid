@@ -169,7 +169,7 @@ namespace TheGrid.Services
             {
                 Permission = p,
                 GroupId = groupId,
-            });
+            }).ToList();
 
             await _db.SaveChangesAsync(cancellationToken);
 

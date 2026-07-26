@@ -47,7 +47,7 @@ namespace TheGrid.Models
             Permissions = permissions.Select(p => new GroupPermission
             {
                 Permission = p,
-            });
+            }).ToList();
         }
 
         /// <summary>
@@ -100,11 +100,11 @@ namespace TheGrid.Models
         /// <summary>
         /// Gets or sets the permissions associated to the group.
         /// </summary>
-        public virtual IEnumerable<GroupPermission> Permissions { get; set; } = new List<GroupPermission>();
+        public virtual ICollection<GroupPermission> Permissions { get; set; } = new List<GroupPermission>();
 
         /// <summary>
         /// Gets or sets the users associated to the group.
         /// </summary>
-        public virtual IEnumerable<GridUser> Users { get; set; } = new List<GridUser>();
+        public virtual ICollection<GridUser> Users { get; set; } = new List<GridUser>();
     }
 }

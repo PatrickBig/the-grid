@@ -2,7 +2,6 @@
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
-using Hangfire;
 using Mapster;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
@@ -50,7 +49,6 @@ namespace TheGrid.Services
         }
 
         /// <inheritdoc/>
-        [Queue(JobQueues.QueryRefresh)]
         public async Task RefreshQueryResultsAsync(long queryExecutionId, CancellationToken cancellationToken = default)
         {
             var queryExecution = await _db.QueryExecutions
