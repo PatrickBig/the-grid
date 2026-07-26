@@ -82,7 +82,9 @@ namespace Microsoft.Extensions.DependencyInjection
             services.Configure<EmailOptions>(configuration.GetSection(nameof(EmailOptions)));
             services.Configure<SecretProtectionOptions>(configuration.GetSection(nameof(SecretProtectionOptions)));
             services.AddSingleton<ISecretProtector, AesGcmSecretProtector>();
+            services.AddHttpClient();
             services.AddTransient<ConnectorDiscoveryService>();
+            services.AddTransient<IConnectorFactory, ConnectorFactory>();
             services.AddTransient<IQueryExecutor, QueryExecutor>();
             services.AddTransient<IQueryRefreshManager, QueryRefreshManager>();
             services.AddTransient<IVisualizationInformation, VisualizationInformation>();

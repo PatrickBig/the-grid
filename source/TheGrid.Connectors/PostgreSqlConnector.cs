@@ -22,9 +22,9 @@ namespace TheGrid.Connectors
         /// <summary>
         /// Initializes a new instance of the <see cref="PostgreSqlConnector"/> class.
         /// </summary>
-        /// <param name="connectorParameters">Properties used to initiate the connection to the PostgreSQL database.</param>
-        public PostgreSqlConnector(Dictionary<string, string> connectorParameters)
-            : base(connectorParameters)
+        /// <param name="context">Shared infrastructure and connection properties used to initiate the connection to the PostgreSQL database.</param>
+        public PostgreSqlConnector(ConnectorContext context)
+            : base(context)
         {
         }
 

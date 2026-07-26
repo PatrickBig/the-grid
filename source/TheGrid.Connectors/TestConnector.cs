@@ -11,12 +11,12 @@ namespace TheGrid.Connectors
     /// <summary>
     /// This is a simulation connector used for tests only. There is a special exclusion to prevent this connector from being made available.
     /// </summary>
-    /// <param name="connectorParameters">Parameters used to connect to the test database.</param>
+    /// <param name="context">Shared infrastructure and parameters used to connect to the test database.</param>
     [Connector("Test Connector", EditorLanguage = EditorLanguage.Sql)]
     [ConnectorParameter(CommonConnectionParameters.ConnectionString, "Connection String", ConnectionPropertyType.SingleLineText)]
     [ConnectorParameter("numberOfRows", "NumberOfRows", ConnectionPropertyType.Numeric)]
     [ExcludeFromCodeCoverage]
-    public class TestConnector(Dictionary<string, string> connectorParameters) : ConnectorBase(connectorParameters)
+    public class TestConnector(ConnectorContext context) : ConnectorBase(context)
     {
         /// <summary>
         /// Query to use to force no columns to be returned in the result, which can generate errors.

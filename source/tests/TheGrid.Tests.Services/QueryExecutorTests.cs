@@ -6,8 +6,10 @@ using Meziantou.Extensions.Logging.Xunit;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
+using System.Net.Http;
 using TheGrid.Connectors;
 using TheGrid.Data;
 using TheGrid.Models;
@@ -75,7 +77,7 @@ namespace TheGrid.Tests.Services
             await _db.SaveChangesAsync();
 
             // Act
-            var executor = new QueryExecutor(_db, _logger, hubContext, _secretProtector, _defaultSystemOptions);
+            var executor = new QueryExecutor(_db, _logger, hubContext, _secretProtector, CreateConnectorFactory(), _defaultSystemOptions);
 
             await executor.RefreshQueryResultsAsync(execution.Id);
 
@@ -97,7 +99,7 @@ namespace TheGrid.Tests.Services
 
             long executionId = -1;
 
-            var executor = new QueryExecutor(_db, _logger, hubContext, _secretProtector, _defaultSystemOptions);
+            var executor = new QueryExecutor(_db, _logger, hubContext, _secretProtector, CreateConnectorFactory(), _defaultSystemOptions);
 
             // Act & Assert
             await Assert.ThrowsAsync<ArgumentException>(async () => await executor.RefreshQueryResultsAsync(executionId));
@@ -123,7 +125,7 @@ namespace TheGrid.Tests.Services
             await _db.SaveChangesAsync();
 
             // Act
-            var executor = new QueryExecutor(_db, _logger, hubContext, _secretProtector, _defaultSystemOptions);
+            var executor = new QueryExecutor(_db, _logger, hubContext, _secretProtector, CreateConnectorFactory(), _defaultSystemOptions);
 
             var exception = await Assert.ThrowsAnyAsync<Exception>(async () => await executor.RefreshQueryResultsAsync(execution.Id));
 
@@ -187,7 +189,7 @@ namespace TheGrid.Tests.Services
             _db.QueryExecutions.Add(execution);
             await _db.SaveChangesAsync();
 
-            var executor = new QueryExecutor(_db, _logger, hubContext, _secretProtector, _defaultSystemOptions);
+            var executor = new QueryExecutor(_db, _logger, hubContext, _secretProtector, CreateConnectorFactory(), _defaultSystemOptions);
 
             // Act
             await executor.RefreshQueryResultsAsync(execution.Id);
@@ -262,7 +264,7 @@ namespace TheGrid.Tests.Services
             _db.QueryExecutions.Add(execution);
             await _db.SaveChangesAsync();
 
-            var executor = new QueryExecutor(_db, _logger, hubContext, _secretProtector, _defaultSystemOptions);
+            var executor = new QueryExecutor(_db, _logger, hubContext, _secretProtector, CreateConnectorFactory(), _defaultSystemOptions);
 
             // Act
             await Assert.ThrowsAnyAsync<Exception>(async () => await executor.RefreshQueryResultsAsync(execution.Id));
@@ -291,7 +293,7 @@ namespace TheGrid.Tests.Services
                 ExecutionLimits = new ExecutionLimits { MaxRows = maxRows, TimeoutSeconds = 120, BatchSize = 50 },
             });
 
-            var executor = new QueryExecutor(_db, _logger, hubContext, _secretProtector, options);
+            var executor = new QueryExecutor(_db, _logger, hubContext, _secretProtector, CreateConnectorFactory(), options);
 
             // Act
             await executor.RefreshQueryResultsAsync(executionId);
@@ -323,7 +325,7 @@ namespace TheGrid.Tests.Services
                 ExecutionLimits = new ExecutionLimits { MaxRows = 100, TimeoutSeconds = 120, BatchSize = 50 },
             });
 
-            var executor = new QueryExecutor(_db, _logger, hubContext, _secretProtector, options);
+            var executor = new QueryExecutor(_db, _logger, hubContext, _secretProtector, CreateConnectorFactory(), options);
 
             // Act
             await executor.RefreshQueryResultsAsync(executionId);
@@ -353,7 +355,7 @@ namespace TheGrid.Tests.Services
                 ExecutionLimits = new ExecutionLimits { MaxRows = int.MaxValue, TimeoutSeconds = 0, BatchSize = 500 },
             });
 
-            var executor = new QueryExecutor(_db, _logger, hubContext, _secretProtector, options);
+            var executor = new QueryExecutor(_db, _logger, hubContext, _secretProtector, CreateConnectorFactory(), options);
 
             // Act
             await executor.RefreshQueryResultsAsync(executionId);
@@ -381,7 +383,7 @@ namespace TheGrid.Tests.Services
                 ExecutionLimits = new ExecutionLimits { MaxRows = 100_000, TimeoutSeconds = 60, BatchSize = 100 },
             });
 
-            var executor = new QueryExecutor(_db, _logger, hubContext, _secretProtector, options);
+            var executor = new QueryExecutor(_db, _logger, hubContext, _secretProtector, CreateConnectorFactory(), options);
 
             var saveCount = 0;
             void OnSavingChanges(object? sender, SavingChangesEventArgs e) => saveCount++;
@@ -399,6 +401,25 @@ namespace TheGrid.Tests.Services
 
             // Assert: initial status save + several mid-stream batch saves + final save, not just one.
             Assert.True(saveCount > 2, $"Expected more than 2 SaveChanges calls to prove batching, but got {saveCount}.");
+        }
+
+        /// <summary>
+        /// Builds a mocked <see cref="IConnectorFactory"/> that forwards <see cref="IConnectorFactory.Create"/>
+        /// calls to a real <see cref="ConnectorFactory"/> (backed by a no-op logger/HTTP client factory), so
+        /// tests exercise genuine connector construction and behavior rather than a hard-coded fake.
+        /// </summary>
+        /// <returns>A mocked <see cref="IConnectorFactory"/> that delegates to a real implementation.</returns>
+        private static IConnectorFactory CreateConnectorFactory()
+        {
+            var realConnectorFactory = new ConnectorFactory(NullLoggerFactory.Instance, Substitute.For<IHttpClientFactory>());
+
+            var connectorFactory = Substitute.For<IConnectorFactory>();
+
+            connectorFactory
+                .Create(Arg.Any<string>(), Arg.Any<Dictionary<string, string>>())
+                .Returns(callInfo => realConnectorFactory.Create(callInfo.ArgAt<string>(0), callInfo.ArgAt<Dictionary<string, string>>(1)));
+
+            return connectorFactory;
         }
 
         /// <summary>

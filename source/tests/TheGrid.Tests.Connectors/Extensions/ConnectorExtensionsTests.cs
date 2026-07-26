@@ -6,6 +6,7 @@ using TheGrid.Connectors;
 using TheGrid.Connectors.Attributes;
 using TheGrid.Connectors.Extensions;
 using TheGrid.Shared.Models;
+using TheGrid.Tests.Connectors;
 
 namespace TheGrid.Tests.Connectors.Extensions
 {
@@ -67,13 +68,13 @@ namespace TheGrid.Tests.Connectors.Extensions
         public void GetConnectorParameterDefinitions_MapsterAdapt_CarriesKeyAndIsSecret_Test()
         {
             // Arrange
-            IConnector connector = new PostgreSqlConnector(new Dictionary<string, string>
+            IConnector connector = new PostgreSqlConnector(ConnectorContextTestHelper.Create(new Dictionary<string, string>
             {
                 [CommonConnectionParameters.ConnectionString] = "Host=localhost",
                 [CommonConnectionParameters.DatabaseName] = "test",
                 [CommonConnectionParameters.Username] = "user",
                 [CommonConnectionParameters.Password] = "pass",
-            });
+            }));
 
             // Act
             var definitions = connector.GetConnectorParameterDefinitions().ToList();

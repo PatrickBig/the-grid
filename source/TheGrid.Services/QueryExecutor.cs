@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.Reflection;
 using TheGrid.Connectors;
 using TheGrid.Data;
 using TheGrid.Models;
@@ -28,6 +27,7 @@ namespace TheGrid.Services
         private readonly ILogger<QueryExecutor> _logger;
         private readonly IHubContext<QueryDesignerHub, IQueryDesignerHub> _hubContext;
         private readonly ISecretProtector _secretProtector;
+        private readonly IConnectorFactory _connectorFactory;
         private readonly ExecutionLimits _executionLimits;
 
         /// <summary>
@@ -37,13 +37,15 @@ namespace TheGrid.Services
         /// <param name="logger">Logging instance.</param>
         /// <param name="hubContext">SignalR hub context for notifying clients when a query has refreshed.</param>
         /// <param name="secretProtector">Used to decrypt secret connection parameter values.</param>
+        /// <param name="connectorFactory">Used to construct connector instances.</param>
         /// <param name="systemOptions">System configuration, used for the configured query execution limits.</param>
-        public QueryExecutor(TheGridDbContext db, ILogger<QueryExecutor> logger, IHubContext<QueryDesignerHub, IQueryDesignerHub> hubContext, ISecretProtector secretProtector, IOptions<SystemOptions> systemOptions)
+        public QueryExecutor(TheGridDbContext db, ILogger<QueryExecutor> logger, IHubContext<QueryDesignerHub, IQueryDesignerHub> hubContext, ISecretProtector secretProtector, IConnectorFactory connectorFactory, IOptions<SystemOptions> systemOptions)
         {
             _db = db;
             _logger = logger;
             _hubContext = hubContext;
             _secretProtector = secretProtector;
+            _connectorFactory = connectorFactory;
             _executionLimits = systemOptions.Value.ExecutionLimits;
         }
 
@@ -166,11 +168,7 @@ namespace TheGrid.Services
         {
             _logger.LogTrace("Creating connector for type: {connectorId}", query.Connection?.ConnectorId);
 
-            var connectorAssembly = Assembly.GetAssembly(typeof(PostgreSqlConnector));
-
-            var connectorType = connectorAssembly?.GetType(query.Connection!.ConnectorId) ?? throw new ArgumentException("No connector found.");
-
-            var connectionProperties = new Dictionary<string, string?>(query.Connection.ConnectionProperties);
+            var connectionProperties = new Dictionary<string, string?>(query.Connection!.ConnectionProperties);
 
             foreach (var property in query.Connection.SecretProperties)
             {
@@ -180,7 +178,9 @@ namespace TheGrid.Services
                 }
             }
 
-            return Activator.CreateInstance(connectorType, connectionProperties) as IConnector ?? throw new InvalidCastException("Unable to create connector instance from type.");
+            var parameters = connectionProperties.ToDictionary(kv => kv.Key, kv => kv.Value ?? string.Empty);
+
+            return _connectorFactory.Create(query.Connection.ConnectorId, parameters);
         }
 
         /// <summary>

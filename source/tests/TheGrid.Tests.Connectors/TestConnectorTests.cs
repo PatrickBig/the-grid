@@ -3,6 +3,7 @@
 // </copyright>
 
 using System.Diagnostics;
+using System.Reflection;
 using TheGrid.Connectors;
 
 namespace TheGrid.Tests.Connectors
@@ -20,10 +21,10 @@ namespace TheGrid.Tests.Connectors
         public async Task GetDataAsync_CancelMidEnumeration_StopsProducingRows_Test()
         {
             // Arrange
-            var connector = new TestConnector(new Dictionary<string, string>
+            var connector = new TestConnector(ConnectorContextTestHelper.Create(new Dictionary<string, string>
             {
                 ["numberOfRows"] = "1000000",
-            });
+            }));
 
             using var cts = new CancellationTokenSource();
 
@@ -54,10 +55,10 @@ namespace TheGrid.Tests.Connectors
         public async Task GetDataAsync_StopsEarly_DoesNotPreMaterializeRemainingRows_Test()
         {
             // Arrange
-            var connector = new TestConnector(new Dictionary<string, string>
+            var connector = new TestConnector(ConnectorContextTestHelper.Create(new Dictionary<string, string>
             {
                 ["numberOfRows"] = "1000000000",
-            });
+            }));
 
             var rowsRead = 0;
             var stopwatch = Stopwatch.StartNew();
@@ -90,7 +91,7 @@ namespace TheGrid.Tests.Connectors
         public async Task GetDataAsync_ThrowExceptionQuery_ThrowsDuringEnumeration_Test()
         {
             // Arrange
-            var connector = new TestConnector(new Dictionary<string, string>());
+            var connector = new TestConnector(ConnectorContextTestHelper.Create(new Dictionary<string, string>()));
 
             // Act
             var enumerable = connector.GetDataAsync(TestConnector.ThrowExceptionQuery, null);
@@ -102,6 +103,24 @@ namespace TheGrid.Tests.Connectors
                 {
                 }
             });
+        }
+
+        /// <summary>
+        /// Tests that a <see cref="ConnectorBase"/>-derived connector exposes a non-null <c>LoggerFactory</c>
+        /// and <c>HttpClientFactory</c> (both protected on <see cref="ConnectorBase"/>) after construction.
+        /// </summary>
+        [Fact]
+        public void Constructor_ExposesLoggerFactoryAndHttpClientFactory_Test()
+        {
+            // Arrange & Act
+            var connector = new TestConnector(ConnectorContextTestHelper.Create(new Dictionary<string, string>()));
+
+            var loggerFactory = typeof(ConnectorBase).GetProperty("LoggerFactory", BindingFlags.NonPublic | BindingFlags.Instance)!.GetValue(connector);
+            var httpClientFactory = typeof(ConnectorBase).GetProperty("HttpClientFactory", BindingFlags.NonPublic | BindingFlags.Instance)!.GetValue(connector);
+
+            // Assert
+            Assert.NotNull(loggerFactory);
+            Assert.NotNull(httpClientFactory);
         }
     }
 }

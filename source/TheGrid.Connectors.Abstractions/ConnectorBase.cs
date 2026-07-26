@@ -2,6 +2,8 @@
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
+using Microsoft.Extensions.Logging;
+using System.Net.Http;
 using System.Runtime.CompilerServices;
 using TheGrid.Connectors.Extensions;
 using TheGrid.Shared.Models;
@@ -16,18 +18,30 @@ namespace TheGrid.Connectors
         /// <summary>
         /// Initializes a new instance of the <see cref="ConnectorBase"/> class.
         /// </summary>
-        /// <param name="connectorParameters">Parameters used by the connector to execute the query.</param>
-        protected ConnectorBase(Dictionary<string, string> connectorParameters)
+        /// <param name="context">Shared infrastructure and parameters used by the connector.</param>
+        protected ConnectorBase(ConnectorContext context)
         {
-            ConnectorParameters = connectorParameters;
+            ConnectorParameters = context.Parameters;
+            LoggerFactory = context.LoggerFactory;
+            HttpClientFactory = context.HttpClientFactory;
 
-            ValidateParameters(connectorParameters);
+            ValidateParameters(context.Parameters);
         }
 
         /// <summary>
         /// Parameters used by the connector to execute queries. Typically contains connection string information.
         /// </summary>
         protected Dictionary<string, string> ConnectorParameters { get; set; }
+
+        /// <summary>
+        /// Logger factory available for connectors to create their own loggers.
+        /// </summary>
+        protected ILoggerFactory LoggerFactory { get; }
+
+        /// <summary>
+        /// HTTP client factory available for connectors that need to make outbound HTTP calls.
+        /// </summary>
+        protected IHttpClientFactory HttpClientFactory { get; }
 
         /// <inheritdoc/>
         public abstract IAsyncEnumerable<ConnectorRow> GetDataAsync(string query, Dictionary<string, object?>? queryParameters, [EnumeratorCancellation] CancellationToken cancellationToken = default);

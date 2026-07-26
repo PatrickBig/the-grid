@@ -3,6 +3,7 @@
 // </copyright>
 
 using TheGrid.Shared.Models;
+using TheGrid.Tests.Connectors;
 using TheGrid.Tests.Connectors.Fixtures;
 using Xunit.Abstractions;
 
@@ -36,7 +37,7 @@ namespace TheGrid.Connectors.Integration.Tests
         public async Task RunQueryAsync_Has_Columns_Test()
         {
             // Arrange
-            var connector = new PostgreSqlConnector(GetConnectionConfiguration());
+            var connector = new PostgreSqlConnector(ConnectorContextTestHelper.Create(GetConnectionConfiguration()));
 
             // Act
             var rows = await ToListAsync(connector.GetDataAsync("SELECT * FROM " + _fixture.TestTableName, null));
@@ -66,7 +67,7 @@ namespace TheGrid.Connectors.Integration.Tests
             connectionParameters.Remove(CommonConnectionParameters.ConnectionString);
 
             // Act
-            var exception = Assert.Throws<ConnectorParameterException>(() => new PostgreSqlConnector(connectionParameters));
+            var exception = Assert.Throws<ConnectorParameterException>(() => new PostgreSqlConnector(ConnectorContextTestHelper.Create(connectionParameters)));
 
             // Assert
             Assert.NotEmpty(exception.Parameters);
@@ -81,7 +82,7 @@ namespace TheGrid.Connectors.Integration.Tests
         public void Constructor_KeyKeyedParameters_Succeeds_Test()
         {
             // Arrange & Act
-            var connector = new PostgreSqlConnector(GetConnectionConfiguration());
+            var connector = new PostgreSqlConnector(ConnectorContextTestHelper.Create(GetConnectionConfiguration()));
 
             // Assert
             Assert.NotNull(connector);
@@ -105,7 +106,7 @@ namespace TheGrid.Connectors.Integration.Tests
             };
 
             // Act
-            var exception = Assert.Throws<ConnectorParameterException>(() => new PostgreSqlConnector(nameKeyedParameters));
+            var exception = Assert.Throws<ConnectorParameterException>(() => new PostgreSqlConnector(ConnectorContextTestHelper.Create(nameKeyedParameters)));
 
             // Assert
             Assert.Contains(CommonConnectionParameters.ConnectionString, exception.Parameters);
@@ -122,7 +123,7 @@ namespace TheGrid.Connectors.Integration.Tests
         public async Task RunQueryAsync_Has_Rows_Test()
         {
             // Arrange
-            var connector = new PostgreSqlConnector(GetConnectionConfiguration());
+            var connector = new PostgreSqlConnector(ConnectorContextTestHelper.Create(GetConnectionConfiguration()));
 
             // Act
             var rows = await ToListAsync(connector.GetDataAsync("SELECT * FROM " + _fixture.TestTableName, null));
@@ -145,7 +146,7 @@ namespace TheGrid.Connectors.Integration.Tests
         public async Task RunQueryAsync_Params_Test()
         {
             // Arrange
-            var connector = new PostgreSqlConnector(GetConnectionConfiguration());
+            var connector = new PostgreSqlConnector(ConnectorContextTestHelper.Create(GetConnectionConfiguration()));
             var parameters = new Dictionary<string, object?>
             {
                 {
@@ -175,7 +176,7 @@ namespace TheGrid.Connectors.Integration.Tests
         public async Task DiscoverSchema_Test()
         {
             // Arrange
-            var connector = new PostgreSqlConnector(GetConnectionConfiguration());
+            var connector = new PostgreSqlConnector(ConnectorContextTestHelper.Create(GetConnectionConfiguration()));
 
             // Act
             var schema = await connector.GetSchemaAsync();
@@ -216,7 +217,7 @@ namespace TheGrid.Connectors.Integration.Tests
         public async Task TestConnection_Test()
         {
             // Arrange
-            var connector = new PostgreSqlConnector(GetConnectionConfiguration());
+            var connector = new PostgreSqlConnector(ConnectorContextTestHelper.Create(GetConnectionConfiguration()));
 
             // Act
             var result = await connector.TestConnectionAsync();
@@ -233,7 +234,7 @@ namespace TheGrid.Connectors.Integration.Tests
         {
             // Arrange
             var connectionInformation = GetConnectionConfiguration("bad host");
-            var connector = new PostgreSqlConnector(connectionInformation);
+            var connector = new PostgreSqlConnector(ConnectorContextTestHelper.Create(connectionInformation));
 
             // Act & assert
             await Assert.ThrowsAnyAsync<Exception>(async () => await connector.TestConnectionAsync());
