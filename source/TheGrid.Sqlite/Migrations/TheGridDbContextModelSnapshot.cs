@@ -523,6 +523,9 @@ namespace TheGrid.Sqlite.Migrations
                     b.Property<bool>("SupportsSchemaDiscovery")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("SupportsWriteAccessProbe")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.ToTable("Connectors");

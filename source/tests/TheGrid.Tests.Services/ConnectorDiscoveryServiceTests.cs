@@ -128,5 +128,36 @@ namespace TheGrid.Services.Tests
             Assert.Contains(typeof(PostgreSqlConnector).FullName, connectorIds);
             Assert.Contains(typeof(TestConnector).FullName, connectorIds);
         }
+
+        /// <summary>
+        /// Tests that <see cref="Connector.SupportsWriteAccessProbe"/> is set for connectors implementing
+        /// <see cref="IWriteAccessProbe"/> (<see cref="PostgreSqlConnector"/>) and left <see langword="false"/>
+        /// for connectors that do not (<see cref="TestConnector"/>), mirroring existing coverage for
+        /// <see cref="Connector.SupportsConnectionTest"/>/<see cref="Connector.SupportsSchemaDiscovery"/>.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task RefreshConnectorsAsync_SetsSupportsWriteAccessProbe_Test()
+        {
+            // Arrange
+            using var sqliteProvider = new SqliteProvider();
+            var db = sqliteProvider.Db;
+
+            var connectorRefreshService = new ConnectorDiscoveryService(db, _logger);
+
+            // Act
+            await connectorRefreshService.RefreshConnectorsAsync();
+
+            // Assert
+            var postgresConnector = await db.Connectors
+                .AsNoTracking()
+                .SingleAsync(c => c.Id == typeof(PostgreSqlConnector).FullName);
+            Assert.True(postgresConnector.SupportsWriteAccessProbe);
+
+            var testConnector = await db.Connectors
+                .AsNoTracking()
+                .SingleAsync(c => c.Id == typeof(TestConnector).FullName);
+            Assert.False(testConnector.SupportsWriteAccessProbe);
+        }
     }
 }

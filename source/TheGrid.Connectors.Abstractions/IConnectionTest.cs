@@ -13,7 +13,7 @@ namespace TheGrid.Connectors
         /// Tests connectivity to the connection.
         /// </summary>
         /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>A boolean indicating a successful connection test.</returns>
-        public Task<bool> TestConnectionAsync(CancellationToken cancellationToken = default);
+        /// <returns>A <see cref="ConnectionTestResult"/> describing the outcome of the connection test.</returns>
+        public Task<ConnectionTestResult> TestConnectionAsync(CancellationToken cancellationToken = default);
     }
 }

@@ -545,6 +545,9 @@ namespace TheGrid.Postgres.Migrations
                     b.Property<bool>("SupportsSchemaDiscovery")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("SupportsWriteAccessProbe")
+                        .HasColumnType("boolean");
+
                     b.HasKey("Id");
 
                     b.ToTable("Connectors");

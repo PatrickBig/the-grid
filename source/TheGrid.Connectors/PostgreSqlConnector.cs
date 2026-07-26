@@ -3,6 +3,7 @@
 // </copyright>
 
 using Npgsql;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using TheGrid.Connectors.Extensions;
 using TheGrid.Shared.Models;
@@ -17,7 +18,7 @@ namespace TheGrid.Connectors
     [ConnectorParameter(CommonConnectionParameters.DatabaseName, "Database Name", ConnectionPropertyType.SingleLineText, Required = true)]
     [ConnectorParameter(CommonConnectionParameters.Username, "Username", ConnectionPropertyType.SingleLineText, Required = true)]
     [ConnectorParameter(CommonConnectionParameters.Password, "Password", ConnectionPropertyType.ProtectedText, Required = true)]
-    public class PostgreSqlConnector : ConnectorBase, ISchemaDiscovery, IConnectionTest, IPermissionTest
+    public class PostgreSqlConnector : ConnectorBase, ISchemaDiscovery, IConnectionTest, IWriteAccessProbe
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="PostgreSqlConnector"/> class.
@@ -153,19 +154,30 @@ namespace TheGrid.Connectors
         }
 
         /// <inheritdoc/>
-        public async Task<bool> TestConnectionAsync(CancellationToken cancellationToken = default)
+        public async Task<ConnectionTestResult> TestConnectionAsync(CancellationToken cancellationToken = default)
         {
-            await using var connection = GetConnection(ConnectorParameters);
+            var stopwatch = Stopwatch.StartNew();
 
-            await connection.OpenAsync(cancellationToken);
+            try
+            {
+                await using var connection = GetConnection(ConnectorParameters);
 
-            await using var command = new NpgsqlCommand("select 1", connection);
+                await connection.OpenAsync(cancellationToken);
 
-            return true;
+                await using var command = new NpgsqlCommand("select 1", connection);
+
+                await command.ExecuteScalarAsync(cancellationToken);
+
+                return new ConnectionTestResult(true, null, stopwatch.Elapsed);
+            }
+            catch (Exception ex)
+            {
+                return new ConnectionTestResult(false, ex.Message, stopwatch.Elapsed);
+            }
         }
 
         /// <inheritdoc/>
-        public async Task<bool> HasWritePermissionAsync(CancellationToken cancellationToken = default)
+        public async Task<bool> HasWriteAccessAsync(CancellationToken cancellationToken = default)
         {
             // This should work for any version of PostgreSQL after 7.2
             const string permissionQuery =

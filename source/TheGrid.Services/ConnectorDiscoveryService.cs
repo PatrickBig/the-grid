@@ -112,6 +112,7 @@ namespace TheGrid.Services
 
                 details.SupportsConnectionTest = connectorType.ImplementsInterface<IConnectionTest>();
                 details.SupportsSchemaDiscovery = connectorType.ImplementsInterface<ISchemaDiscovery>();
+                details.SupportsWriteAccessProbe = connectorType.ImplementsInterface<IWriteAccessProbe>();
 
                 yield return details;
             }

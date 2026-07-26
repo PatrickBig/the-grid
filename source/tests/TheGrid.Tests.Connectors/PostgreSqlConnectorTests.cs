@@ -222,11 +222,13 @@ namespace TheGrid.Connectors.Integration.Tests
             // Act
             var result = await connector.TestConnectionAsync();
 
-            Assert.True(result);
+            // Assert
+            Assert.True(result.Success);
+            Assert.True(result.Elapsed >= TimeSpan.Zero);
         }
 
         /// <summary>
-        /// Tests that an exception is thrown when the connection test fails.
+        /// Tests that a failed connection test reports failure as data rather than throwing.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
@@ -236,8 +238,12 @@ namespace TheGrid.Connectors.Integration.Tests
             var connectionInformation = GetConnectionConfiguration("bad host");
             var connector = new PostgreSqlConnector(ConnectorContextTestHelper.Create(connectionInformation));
 
-            // Act & assert
-            await Assert.ThrowsAnyAsync<Exception>(async () => await connector.TestConnectionAsync());
+            // Act
+            var result = await connector.TestConnectionAsync();
+
+            // Assert
+            Assert.False(result.Success);
+            Assert.NotNull(result.Message);
         }
 
         private static async Task<List<ConnectorRow>> ToListAsync(IAsyncEnumerable<ConnectorRow> rows)
