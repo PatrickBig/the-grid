@@ -28,16 +28,32 @@ Run a single test (xunit fully-qualified name):
 dotnet test tests/TheGrid.Tests.Services/TheGrid.Tests.Services.csproj --filter "FullyQualifiedName~QueryManagerTests.MethodName"
 ```
 
-Add an EF Core migration (must specify provider + connection string; only `postgresql` is currently supported per `docs/AddingMigrations.md`):
+Add an EF Core migration (must specify provider + connection string; providers are `postgresql` and `sqlite` per `docs/AddingMigrations.md`):
 ```
-dotnet ef migrations add {MigrationName} --project TheGrid.Postgres\TheGrid.Postgres.csproj -- {ProviderName} {ConnectionString}
+dotnet ef migrations add {MigrationName} --project TheGrid.Postgres\TheGrid.Postgres.csproj --startup-project TheGrid.Server\TheGrid.Server.csproj -- {ProviderName} {ConnectionString}
 ```
 
-Local dev stack (Postgres, Redis, Adminer, server) via Docker Compose:
+**Schema is still unstable (pre-v1): do not add incremental migrations.** On a schema change, delete
+the existing migration(s) for both providers and regenerate a single fresh `Initial` migration, then
+wipe the local dev DB rather than trying to apply an incremental one on top of stale data —
+`scripts/dev.sh remigrate && scripts/dev.sh reset-db` does both steps. Switch to normal incremental
+migrations once the schema stabilizes (post-v1 / once there's real data worth preserving).
+
+## Dev workflow helper
+
+`scripts/dev.sh <command>` wraps the common local dev tasks (docker-compose stack, `/setup`, DB reset,
+test-org seeding, migration regeneration) behind a small fixed set of subcommands, so the whole script
+can be allowlisted once instead of prompting per docker-compose/dotnet invocation. Run
+`scripts/dev.sh help` for the full list; the commands are: `up`, `down`, `status`, `setup`, `reset-db`,
+`seed-test-org [name] [slug]`, `remigrate`. Prefer this over raw `docker-compose`/`dotnet ef` calls for
+anything it already covers.
+
+Local dev stack (Postgres, Redis, Adminer, server) via Docker Compose — `scripts/dev.sh up` / `down`,
+or directly:
 ```
 docker-compose -f source/docker-compose.yml -f source/docker-compose.override.yml up
 ```
-The `thegrid.setup` service runs the server with the `/setup` argument to apply migrations and seed the default admin user/group (`DEFAULT_ADMIN_PASSWORD` env var). `RunMode` (`Server`, `Agent`, `Mixed`) in `SystemOptions` controls which services a given process instance runs — see `TheGrid.Server/Program.cs` and `StartupHelpers.cs`.
+The `thegrid.setup` service runs the server with the `/setup` argument to apply migrations and seed the default admin user/group (`DEFAULT_ADMIN_PASSWORD` env var, default `TheGrid123!` in `docker-compose.yml`). `thegrid.setup`/`thegrid.server` both wait on Postgres's healthcheck (`depends_on: condition: service_healthy`) before starting — needed because a fresh/wiped volume takes longer to initialize than a warm one. `RunMode` (`Server`, `Agent`, `Mixed`) in `SystemOptions` controls which services a given process instance runs — see `TheGrid.Server/Program.cs` and `StartupHelpers.cs`.
 
 CI (`.github/workflows/sonar-scan.yml`) builds and tests the whole solution and uploads coverage/SonarCloud analysis on pushes to `main` and PRs touching `source/**`.
 
