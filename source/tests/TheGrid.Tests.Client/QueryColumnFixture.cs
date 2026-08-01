@@ -80,6 +80,11 @@ namespace TheGrid.Tests.Client
         public const string TextColumnName = "TextColumn";
 
         /// <summary>
+        /// The column name for a JSON column.
+        /// </summary>
+        public const string JsonColumnName = "JsonColumn";
+
+        /// <summary>
         /// Gets the columns used in query result tests.
         /// </summary>
         /// <returns>Test data used for columns.</returns>
@@ -127,6 +132,12 @@ namespace TheGrid.Tests.Client
                     TextColumnName, new Column
                     {
                         Type = QueryResultColumnType.Text,
+                    }
+                },
+                {
+                    JsonColumnName, new Column
+                    {
+                        Type = QueryResultColumnType.Json,
                     }
                 },
             };

@@ -42,16 +42,16 @@ namespace TheGrid.Client.Pages.ConnectionManagement
             {
                 foreach (var parameter in _selectedConnector.Parameters)
                 {
-                    _input.ConnectionProperties.Add(parameter.Name, null);
+                    _input.ConnectionProperties.Add(parameter.Key, null);
                 }
             }
 
             _input.ConnectorId = connectorId;
         }
 
-        private void ParameterValueChanged((string Name, string? Value) x)
+        private void ParameterValueChanged((string Key, string? Value) x)
         {
-            _input.ConnectionProperties[x.Name] = x.Value;
+            _input.ConnectionProperties[x.Key] = x.Value;
         }
 
         private async Task CreateConnectionAsync(CreateConnectionRequest request)

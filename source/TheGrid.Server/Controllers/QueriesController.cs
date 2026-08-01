@@ -19,26 +19,20 @@ namespace TheGrid.Server.Controllers
     /// <summary>
     /// Controller for managing queries available.
     /// </summary>
+    /// <remarks>
+    /// Initializes a new instance of the <see cref="QueriesController"/> class.
+    /// </remarks>
+    /// <param name="db">Database context.</param>
+    /// <param name="queryManager">Query manager.</param>
     [Route("api/v{version:apiVersion}/[controller]")]
     [ApiController]
     [Authorize]
     [Produces(MediaTypeNames.Application.Json)]
     [ApiVersion("1.0")]
-    public class QueriesController : ControllerBase
+    public class QueriesController(TheGridDbContext db, IQueryManager queryManager) : ControllerBase
     {
-        private readonly TheGridDbContext _db;
-        private readonly IQueryManager _queryManager;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="QueriesController"/> class.
-        /// </summary>
-        /// <param name="db">Database context.</param>
-        /// <param name="queryManager">Query manager.</param>
-        public QueriesController(TheGridDbContext db, IQueryManager queryManager)
-        {
-            _db = db;
-            _queryManager = queryManager;
-        }
+        private readonly TheGridDbContext _db = db;
+        private readonly IQueryManager _queryManager = queryManager;
 
         /// <summary>
         /// Creates a new query.

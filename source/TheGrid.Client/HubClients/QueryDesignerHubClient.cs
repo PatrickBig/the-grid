@@ -24,19 +24,17 @@ namespace TheGrid.Client.HubClients
         /// <inheritdoc/>
         public void OnQueryResultsFinishedProcessing(Func<long, int, Task> action)
         {
-            if (Started)
-            {
-                HubConnection.On("QueryResultsFinishedProcessing", action);
-            }
+            // Handlers can be registered before the connection starts; SignalR queues dispatch to them
+            // regardless of connection state, so subscribers don't need to coordinate startup themselves.
+            HubConnection.On("QueryResultsFinishedProcessing", action);
+            EnsureStarted();
         }
 
         /// <inheritdoc/>
         public void OnVisualizationOptionsUpdated(Func<int, Task> action)
         {
-            if (Started)
-            {
-                HubConnection.On("VisualizationOptionsUpdated", action);
-            }
+            HubConnection.On("VisualizationOptionsUpdated", action);
+            EnsureStarted();
         }
     }
 }

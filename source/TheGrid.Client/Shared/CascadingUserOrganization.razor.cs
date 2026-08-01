@@ -14,6 +14,7 @@ namespace TheGrid.Client.Shared
     public partial class CascadingUserOrganization
     {
         private UserOrganizationMembership? _currentUserOrganizationMembership;
+        private bool _isResolved;
 
         /// <summary>
         /// Gets or sets the child content to render inside the component.
@@ -38,7 +39,7 @@ namespace TheGrid.Client.Shared
         {
             var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
 
-            if (_currentUserOrganizationMembership == null && authState.User.Identity != null && authState.User.Identity.IsAuthenticated)
+            if (authState.User.Identity != null && authState.User.Identity.IsAuthenticated)
             {
                 Logger.LogInformation("User is authenticated. Checking organization membership.");
 
@@ -48,8 +49,14 @@ namespace TheGrid.Client.Shared
                 {
                     Logger.LogInformation("User has not set their organization. Redirecting to organization selection page.");
                     NavigationManager.NavigateTo("/change-organization");
+
+                    // Don't render ChildContent (and the page components underneath, which assume
+                    // the organization cascading parameter is non-null) while navigating away.
+                    return;
                 }
             }
+
+            _isResolved = true;
 
             await base.OnInitializedAsync();
         }

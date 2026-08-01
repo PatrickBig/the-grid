@@ -12,6 +12,7 @@ using TheGrid.Data;
 using TheGrid.Models;
 using TheGrid.Models.Configuration;
 using TheGrid.Server.HealthChecks;
+using TheGrid.Server.Setup;
 using TheGrid.Services.Hubs;
 using TheGrid.Shared;
 
@@ -54,7 +55,7 @@ public static class Program
         // Add services based on the run mode.
         if (systemOptions.RunMode is RunMode.Mixed or RunMode.Agent)
         {
-            StartupHelpers.AddAgentServices(builder.Services);
+            StartupHelpers.AddAgentServices(builder.Services, systemOptions);
         }
 
         builder.Services.AddSignalR()
@@ -65,6 +66,11 @@ public static class Program
             opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
                _responseMimeTypes);
         });
+
+        if (Environment.GetCommandLineArgs().Contains("/setup"))
+        {
+            builder.Services.AddHostedService<SetupHostedService>();
+        }
 
         var app = builder.Build();
 
@@ -78,11 +84,6 @@ public static class Program
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
-                // Apply migrations
-                using var scope = app.Services.CreateScope();
-                var dbContext = scope.ServiceProvider.GetRequiredService<TheGridDbContext>();
-                dbContext.Database.Migrate();
-
                 app.UseWebAssemblyDebugging();
                 app.UseSwagger();
                 app.UseSwaggerUI(o =>

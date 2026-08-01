@@ -17,11 +17,15 @@ namespace TheGrid.Models
         /// </summary>
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        [StringLength(20, MinimumLength = 3)]
+        [Required]
         public string Id { get; set; } = string.Empty;
 
         /// <summary>
         /// The display name of the organization.
         /// </summary>
+        [StringLength(100, MinimumLength = 3)]
+        [Required]
         public string Name { get; set; } = string.Empty;
 
         /// <summary>
@@ -32,11 +36,11 @@ namespace TheGrid.Models
         /// <summary>
         /// The connections associated to this organization.
         /// </summary>
-        public List<Connection> Connections { get; set; } = new();
+        public List<Connection> Connections { get; set; } = [];
 
         /// <summary>
         /// Gets or sets the users associated to this organization.
         /// </summary>
-        public ICollection<GridUser> Users { get; set; } = new List<GridUser>();
+        public ICollection<GridUser> Users { get; set; } = [];
     }
 }

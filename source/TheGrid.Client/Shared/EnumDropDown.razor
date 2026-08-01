@@ -1,0 +1,34 @@
+﻿@typeparam TEnum where TEnum : struct, Enum
+@using TheGrid.Shared.Models
+
+@if (ValueBinding == ValueBindingType.Numeric)
+{
+    <RadzenDropDown TValue="int?"
+                    TextProperty="@nameof(EnumSelectOption.DisplayName)"
+                    ValueProperty="@ValuePropertyName"
+                    Data="@_options"
+                    AllowClear="@AllowClear"
+                    Multiple="@Multiple"
+                    Chips="@Chips"
+                    DisabledProperty="@nameof(EnumSelectOption.IsDisabled)"
+                    Value="@NumericValue"
+                    ValueChanged="NumericValueChanged">
+
+    </RadzenDropDown>
+}
+else
+{
+    <RadzenDropDown TValue="string"
+                    TextProperty="@nameof(EnumSelectOption.DisplayName)"
+                    ValueProperty="@ValuePropertyName"
+                    Data="@_options"
+                    AllowClear="@AllowClear"
+                    Multiple="@Multiple"
+                    Chips="@Chips"
+                    DisabledProperty="@nameof(EnumSelectOption.IsDisabled)"
+                    Value="@NameValue"
+                    ValueChanged="NameValueChanged">
+
+    </RadzenDropDown>
+
+}

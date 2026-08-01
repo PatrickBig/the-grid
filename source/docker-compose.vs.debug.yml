@@ -1,0 +1,4 @@
+services:
+  thegrid.setup:
+    labels:
+      com.microsoft.visualstudio.debuggee.arguments: " --additionalProbingPath /.nuget/packages --additionalProbingPath /.nuget/fallbackpackages  \"/app/bin/Debug/net8.0/TheGrid.Server.dll\" /setup"

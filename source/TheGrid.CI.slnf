@@ -1,0 +1,23 @@
+{
+  "solution": {
+    "path": "TheGrid.sln",
+    "projects": [
+      "TheGrid.Server\\TheGrid.Server.csproj",
+      "TheGrid.Connectors\\TheGrid.Connectors.csproj",
+      "TheGrid.Connectors.Abstractions\\TheGrid.Connectors.Abstractions.csproj",
+      "TheGrid.Shared\\TheGrid.Shared.csproj",
+      "TheGrid.Services\\TheGrid.Services.csproj",
+      "TheGrid.Models\\TheGrid.Models.csproj",
+      "TheGrid.Data\\TheGrid.Data.csproj",
+      "TheGrid.Postgres\\TheGrid.Postgres.csproj",
+      "TheGrid.Client\\TheGrid.Client.csproj",
+      "TheGrid.Sqlite\\TheGrid.Sqlite.csproj",
+      "tests\\TheGrid.Tests.Connectors\\TheGrid.Tests.Connectors.csproj",
+      "tests\\TheGrid.Tests.Shared\\TheGrid.Tests.Shared.csproj",
+      "tests\\TheGrid.Tests.Services\\TheGrid.Tests.Services.csproj",
+      "tests\\TheGrid.TestHelpers\\TheGrid.TestHelpers.csproj",
+      "tests\\TheGrid.Tests.Client\\TheGrid.Tests.Client.csproj",
+      "tests\\TheGrid.Tests.Server\\TheGrid.Tests.Server.csproj"
+    ]
+  }
+}

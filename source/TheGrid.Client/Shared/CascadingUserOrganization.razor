@@ -1,4 +1,7 @@
-﻿<CascadingValue Value="_currentUserOrganizationMembership">
-    @ChildContent
-</CascadingValue>
+﻿@if (_isResolved)
+{
+    <CascadingValue Value="_currentUserOrganizationMembership">
+        @ChildContent
+    </CascadingValue>
+}
 

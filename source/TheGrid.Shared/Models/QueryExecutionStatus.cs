@@ -28,5 +28,10 @@ namespace TheGrid.Shared.Models
         /// Last execution threw some type of error.
         /// </summary>
         Error,
+
+        /// <summary>
+        /// Execution was cancelled because it exceeded the configured timeout.
+        /// </summary>
+        TimedOut,
     }
 }

@@ -2,14 +2,18 @@
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Npgsql;
 using System.Diagnostics.CodeAnalysis;
 using TheGrid.Data;
+using TheGrid.Models;
 using TheGrid.Models.Configuration;
 using TheGrid.Postgres;
 using TheGrid.Services;
+using TheGrid.Services.Security;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -75,12 +79,23 @@ namespace Microsoft.Extensions.DependencyInjection
         public static IServiceCollection AddTheGridBackendServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.Configure<SystemOptions>(configuration.GetSection(nameof(SystemOptions)));
+            services.Configure<EmailOptions>(configuration.GetSection(nameof(EmailOptions)));
+            services.Configure<SecretProtectionOptions>(configuration.GetSection(nameof(SecretProtectionOptions)));
+            services.AddSingleton<ISecretProtector, AesGcmSecretProtector>();
+            services.AddHttpClient();
             services.AddTransient<ConnectorDiscoveryService>();
+            services.AddTransient<IConnectorFactory, ConnectorFactory>();
             services.AddTransient<IQueryExecutor, QueryExecutor>();
             services.AddTransient<IQueryRefreshManager, QueryRefreshManager>();
             services.AddTransient<IVisualizationInformation, VisualizationInformation>();
             services.AddTransient<VisualizationManagerFactory>();
             services.AddTransient<IQueryManager, QueryManager>();
+            services.AddTransient<IOrganizationManager, OrganizationManager>();
+            services.AddTransient<IGroupManager, GroupManager>();
+
+            // Email services
+            services.AddTransient<IEmailSender<GridUser>, GridUserEmailSender>();
+            services.AddTransient<IEmailQueue, Emailer>();
 
             return services;
         }

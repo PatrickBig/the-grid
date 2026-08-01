@@ -39,6 +39,11 @@ namespace TheGrid.Shared.Models
         public bool SupportsSchemaDiscovery { get; set; }
 
         /// <summary>
+        /// When true this connector supports probing for write access.
+        /// </summary>
+        public bool SupportsWriteAccessProbe { get; set; }
+
+        /// <summary>
         /// Disabled connectors cannot execute any queries.
         /// </summary>
         public bool Disabled { get; set; }

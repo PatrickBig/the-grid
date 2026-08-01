@@ -5,6 +5,7 @@
 using Meziantou.Extensions.Logging.Xunit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using TheGrid.Connectors;
 using TheGrid.Data;
 using TheGrid.Shared.Models;
 using TheGrid.TestHelpers;
@@ -66,6 +67,122 @@ namespace TheGrid.Services.Tests
             // Make sure our test connector is disabled
             var disabledConnectors = await _db.Connectors.Where(c => c.Disabled).ToListAsync();
             Assert.True(await _db.Connectors.Where(c => c.Id == disableConnector.Id && c.Disabled).AnyAsync());
+        }
+
+        /// <summary>
+        /// Tests that discovering <see cref="PostgreSqlConnector"/>'s declared parameters carries each attribute's
+        /// <c>Key</c> and <c>IsSecret</c> through to the resulting <see cref="ConnectionProperty"/>, proving Mapster's
+        /// unconfigured <c>attribute.Adapt&lt;ConnectionProperty&gt;()</c> call maps these new properties by convention.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task RefreshConnectorsAsync_MapsKeyAndIsSecret_Test()
+        {
+            // Arrange: use an isolated database rather than the class fixture's shared context so this
+            // test doesn't depend on ordering relative to RefreshConnectorsAsync_Test above.
+            using var sqliteProvider = new SqliteProvider();
+            var db = sqliteProvider.Db;
+
+            var connectorRefreshService = new ConnectorDiscoveryService(db, _logger);
+
+            // Act
+            await connectorRefreshService.RefreshConnectorsAsync();
+
+            // Assert
+            var postgresConnector = await db.Connectors
+                .AsNoTracking()
+                .SingleAsync(c => c.Id == typeof(PostgreSqlConnector).FullName);
+
+            var passwordParameter = Assert.Single(postgresConnector.Parameters, p => p.Name == "Password");
+            Assert.Equal(CommonConnectionParameters.Password, passwordParameter.Key);
+            Assert.True(passwordParameter.IsSecret || passwordParameter.Type == ConnectionPropertyType.ProtectedText);
+
+            var connectionStringParameter = Assert.Single(postgresConnector.Parameters, p => p.Name == "Connection String");
+            Assert.Equal(CommonConnectionParameters.ConnectionString, connectionStringParameter.Key);
+        }
+
+        /// <summary>
+        /// Regression guard for the <c>TheGrid.Connectors.Abstractions</c> split: discovery reflects over the
+        /// assembly anchored on <see cref="PostgreSqlConnector"/>, which must still be the assembly containing
+        /// every concrete connector, not just the one it's anchored on.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task RefreshConnectorsAsync_DiscoversAllConcreteConnectors_Test()
+        {
+            // Arrange
+            using var sqliteProvider = new SqliteProvider();
+            var db = sqliteProvider.Db;
+
+            var connectorRefreshService = new ConnectorDiscoveryService(db, _logger);
+
+            // Act
+            await connectorRefreshService.RefreshConnectorsAsync();
+
+            // Assert
+            var connectorIds = await db.Connectors.Where(c => !c.Disabled).Select(c => c.Id).ToListAsync();
+
+            Assert.Contains(typeof(PostgreSqlConnector).FullName, connectorIds);
+            Assert.Contains(typeof(TestConnector).FullName, connectorIds);
+        }
+
+        /// <summary>
+        /// Tests that <see cref="Connector.SupportsWriteAccessProbe"/> is set for connectors implementing
+        /// <see cref="IWriteAccessProbe"/> (<see cref="PostgreSqlConnector"/>) and left <see langword="false"/>
+        /// for connectors that do not (<see cref="TestConnector"/>), mirroring existing coverage for
+        /// <see cref="Connector.SupportsConnectionTest"/>/<see cref="Connector.SupportsSchemaDiscovery"/>.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task RefreshConnectorsAsync_SetsSupportsWriteAccessProbe_Test()
+        {
+            // Arrange
+            using var sqliteProvider = new SqliteProvider();
+            var db = sqliteProvider.Db;
+
+            var connectorRefreshService = new ConnectorDiscoveryService(db, _logger);
+
+            // Act
+            await connectorRefreshService.RefreshConnectorsAsync();
+
+            // Assert
+            var postgresConnector = await db.Connectors
+                .AsNoTracking()
+                .SingleAsync(c => c.Id == typeof(PostgreSqlConnector).FullName);
+            Assert.True(postgresConnector.SupportsWriteAccessProbe);
+
+            var testConnector = await db.Connectors
+                .AsNoTracking()
+                .SingleAsync(c => c.Id == typeof(TestConnector).FullName);
+            Assert.False(testConnector.SupportsWriteAccessProbe);
+        }
+
+        /// <summary>
+        /// Regression test: running discovery a second time against a database that already has
+        /// <see cref="Connector"/> rows previously threw an EF Core "entity already tracked" exception
+        /// because a freshly-built <see cref="Connector"/> instance was attached under the same Id as an
+        /// already-tracked row. Discovery must update the tracked instance in place instead.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task RefreshConnectorsAsync_CanRunTwiceAgainstSameDatabase_Test()
+        {
+            // Arrange
+            using var sqliteProvider = new SqliteProvider();
+            var db = sqliteProvider.Db;
+
+            var connectorRefreshService = new ConnectorDiscoveryService(db, _logger);
+            await connectorRefreshService.RefreshConnectorsAsync();
+
+            // Act
+            var exception = await Record.ExceptionAsync(() => connectorRefreshService.RefreshConnectorsAsync());
+
+            // Assert
+            Assert.Null(exception);
+
+            var connectorIds = await db.Connectors.Where(c => !c.Disabled).Select(c => c.Id).ToListAsync();
+            Assert.Contains(typeof(PostgreSqlConnector).FullName, connectorIds);
+            Assert.Contains(typeof(TestConnector).FullName, connectorIds);
         }
     }
 }

@@ -2,6 +2,10 @@
 
 ## Permission Flags
 
+## `SystemAdministrator`
+
+## `OrganizationAdministrator`
+
 ## `CreateConnection`
 
 ## `CreateDashboard`
@@ -17,6 +21,8 @@
 ## `ModifyQuery`
 
 ## `ModifyAlert`
+
+## `ManageFolders`
 
 ## `ApproveConnection`
 
@@ -37,3 +43,4 @@
 When you first setup your organization you will have the opportunity to choose one of a few permission models.
 
 This determines the default configuration for new groups.
+ 

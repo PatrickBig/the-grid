@@ -2,13 +2,13 @@
 
 # This is done to as a workaround for https://github.com/microsoft/DockerTools/issues/409
 # Using the pattern NCarlsonMSFT suggested as a workaround until issue is fixed.
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS debug
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS debug
 USER app
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
@@ -21,6 +21,7 @@ COPY ["TheGrid.Models/TheGrid.Models.csproj", "TheGrid.Models/"]
 COPY ["TheGrid.Services/TheGrid.Services.csproj", "TheGrid.Services/"]
 COPY ["TheGrid.Postgres/TheGrid.Postgres.csproj", "TheGrid.Postgres/"]
 COPY ["TheGrid.Connectors/TheGrid.Connectors.csproj", "TheGrid.Connectors/"]
+COPY ["TheGrid.Connectors.Abstractions/TheGrid.Connectors.Abstractions.csproj", "TheGrid.Connectors.Abstractions/"]
 
 RUN dotnet restore "./TheGrid.Server/TheGrid.Server.csproj"
 
@@ -33,7 +34,7 @@ ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./TheGrid.Server.csproj" -c "$BUILD_CONFIGURATION" -o /app/publish /p:UseAppHost=false
 
 # Use the chiseled image for production use.
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-jammy-chiseled AS final
+FROM mcr.microsoft.com/dotnet/aspnet:10.0-noble-chiseled AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "TheGrid.Server.dll"]

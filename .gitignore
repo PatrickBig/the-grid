@@ -352,3 +352,6 @@ MigrationBackup/
 # Draw.io files
 *.drawio.bkp
 *.drawio.dtmp
+
+# Claude Code local settings (personal, not shared)
+.claude/settings.local.json

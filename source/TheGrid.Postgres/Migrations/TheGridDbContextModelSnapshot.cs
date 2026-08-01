@@ -18,7 +18,7 @@ namespace TheGrid.Postgres.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.6")
+                .HasAnnotation("ProductVersion", "10.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -196,6 +196,10 @@ namespace TheGrid.Postgres.Migrations
 
                     b.Property<string>("OrganizationId")
                         .IsRequired()
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("SecretProperties")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -220,7 +224,7 @@ namespace TheGrid.Postgres.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("CurrentOrganizationId")
-                        .HasColumnType("text");
+                        .HasColumnType("character varying(20)");
 
                     b.Property<string>("DisplayName")
                         .HasMaxLength(100)
@@ -280,17 +284,70 @@ namespace TheGrid.Postgres.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("TheGrid.Models.Group", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<bool>("IsBuiltIn")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("NormalizedName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("OrganizationId")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.ToTable("Groups");
+                });
+
+            modelBuilder.Entity("TheGrid.Models.GroupPermission", b =>
+                {
+                    b.Property<string>("Permission")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<int>("GroupId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Permission", "GroupId");
+
+                    b.HasIndex("GroupId");
+
+                    b.ToTable("GroupPermissions");
+                });
+
             modelBuilder.Entity("TheGrid.Models.Organization", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("text");
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
 
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.HasKey("Id");
 
@@ -321,7 +378,7 @@ namespace TheGrid.Postgres.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
-                    b.Property<List<string>>("Tags")
+                    b.PrimitiveCollection<List<string>>("Tags")
                         .IsRequired()
                         .HasColumnType("text[]");
 
@@ -359,12 +416,15 @@ namespace TheGrid.Postgres.Migrations
                     b.Property<int>("QueryId")
                         .HasColumnType("integer");
 
-                    b.Property<string[]>("StandardOutput")
+                    b.PrimitiveCollection<string[]>("StandardOutput")
                         .IsRequired()
                         .HasColumnType("text[]");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
+
+                    b.Property<bool>("Truncated")
+                        .HasColumnType("boolean");
 
                     b.HasKey("Id");
 
@@ -395,13 +455,28 @@ namespace TheGrid.Postgres.Migrations
                     b.ToTable("QueryResultRows");
                 });
 
+            modelBuilder.Entity("TheGrid.Models.UserGroup", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("text");
+
+                    b.Property<int>("GroupId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("UserId", "GroupId");
+
+                    b.HasIndex("GroupId");
+
+                    b.ToTable("UserGroups");
+                });
+
             modelBuilder.Entity("TheGrid.Models.UserOrganization", b =>
                 {
                     b.Property<string>("UserId")
                         .HasColumnType("text");
 
                     b.Property<string>("OrganizationId")
-                        .HasColumnType("text");
+                        .HasColumnType("character varying(20)");
 
                     b.HasKey("UserId", "OrganizationId");
 
@@ -468,6 +543,9 @@ namespace TheGrid.Postgres.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<bool>("SupportsSchemaDiscovery")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("SupportsWriteAccessProbe")
                         .HasColumnType("boolean");
 
                     b.HasKey("Id");
@@ -579,6 +657,26 @@ namespace TheGrid.Postgres.Migrations
                     b.Navigation("CurrentOrganization");
                 });
 
+            modelBuilder.Entity("TheGrid.Models.Group", b =>
+                {
+                    b.HasOne("TheGrid.Models.Organization", "Organization")
+                        .WithMany()
+                        .HasForeignKey("OrganizationId");
+
+                    b.Navigation("Organization");
+                });
+
+            modelBuilder.Entity("TheGrid.Models.GroupPermission", b =>
+                {
+                    b.HasOne("TheGrid.Models.Group", "Group")
+                        .WithMany("Permissions")
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Group");
+                });
+
             modelBuilder.Entity("TheGrid.Models.Query", b =>
                 {
                     b.HasOne("TheGrid.Models.Connection", "Connection")
@@ -612,6 +710,25 @@ namespace TheGrid.Postgres.Migrations
                     b.Navigation("QueryExecution");
                 });
 
+            modelBuilder.Entity("TheGrid.Models.UserGroup", b =>
+                {
+                    b.HasOne("TheGrid.Models.Group", "Group")
+                        .WithMany()
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TheGrid.Models.GridUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Group");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("TheGrid.Models.UserOrganization", b =>
                 {
                     b.HasOne("TheGrid.Models.Organization", "Organization")
@@ -640,6 +757,11 @@ namespace TheGrid.Postgres.Migrations
                         .IsRequired();
 
                     b.Navigation("Query");
+                });
+
+            modelBuilder.Entity("TheGrid.Models.Group", b =>
+                {
+                    b.Navigation("Permissions");
                 });
 
             modelBuilder.Entity("TheGrid.Models.Organization", b =>

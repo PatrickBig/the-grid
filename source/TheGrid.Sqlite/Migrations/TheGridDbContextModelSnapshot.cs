@@ -15,7 +15,7 @@ namespace TheGrid.Sqlite.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.6");
+            modelBuilder.HasAnnotation("ProductVersion", "10.0.10");
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
@@ -186,6 +186,10 @@ namespace TheGrid.Sqlite.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("SecretProperties")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ConnectorId");
@@ -207,7 +211,7 @@ namespace TheGrid.Sqlite.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("DefaultOrganizationId")
+                    b.Property<string>("CurrentOrganizationId")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("DisplayName")
@@ -256,7 +260,7 @@ namespace TheGrid.Sqlite.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DefaultOrganizationId");
+                    b.HasIndex("CurrentOrganizationId");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -268,9 +272,59 @@ namespace TheGrid.Sqlite.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("TheGrid.Models.Group", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsBuiltIn")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NormalizedName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("OrganizationId")
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.ToTable("Groups");
+                });
+
+            modelBuilder.Entity("TheGrid.Models.GroupPermission", b =>
+                {
+                    b.Property<string>("Permission")
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("GroupId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Permission", "GroupId");
+
+                    b.HasIndex("GroupId");
+
+                    b.ToTable("GroupPermissions");
+                });
+
             modelBuilder.Entity("TheGrid.Models.Organization", b =>
                 {
                     b.Property<string>("Id")
+                        .HasMaxLength(20)
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("DateCreated")
@@ -278,6 +332,7 @@ namespace TheGrid.Sqlite.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
+                        .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -307,7 +362,7 @@ namespace TheGrid.Sqlite.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Tags")
+                    b.PrimitiveCollection<string>("Tags")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
@@ -343,11 +398,14 @@ namespace TheGrid.Sqlite.Migrations
                     b.Property<int>("QueryId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("StandardOutput")
+                    b.PrimitiveCollection<string>("StandardOutput")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Status")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("Truncated")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
@@ -375,6 +433,21 @@ namespace TheGrid.Sqlite.Migrations
                     b.HasIndex("QueryExecutionId");
 
                     b.ToTable("QueryResultRows");
+                });
+
+            modelBuilder.Entity("TheGrid.Models.UserGroup", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("GroupId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("UserId", "GroupId");
+
+                    b.HasIndex("GroupId");
+
+                    b.ToTable("UserGroups");
                 });
 
             modelBuilder.Entity("TheGrid.Models.UserOrganization", b =>
@@ -448,6 +521,9 @@ namespace TheGrid.Sqlite.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("SupportsSchemaDiscovery")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("SupportsWriteAccessProbe")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
@@ -552,11 +628,31 @@ namespace TheGrid.Sqlite.Migrations
 
             modelBuilder.Entity("TheGrid.Models.GridUser", b =>
                 {
-                    b.HasOne("TheGrid.Models.Organization", "DefaultOrganization")
+                    b.HasOne("TheGrid.Models.Organization", "CurrentOrganization")
                         .WithMany()
-                        .HasForeignKey("DefaultOrganizationId");
+                        .HasForeignKey("CurrentOrganizationId");
 
-                    b.Navigation("DefaultOrganization");
+                    b.Navigation("CurrentOrganization");
+                });
+
+            modelBuilder.Entity("TheGrid.Models.Group", b =>
+                {
+                    b.HasOne("TheGrid.Models.Organization", "Organization")
+                        .WithMany()
+                        .HasForeignKey("OrganizationId");
+
+                    b.Navigation("Organization");
+                });
+
+            modelBuilder.Entity("TheGrid.Models.GroupPermission", b =>
+                {
+                    b.HasOne("TheGrid.Models.Group", "Group")
+                        .WithMany("Permissions")
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Group");
                 });
 
             modelBuilder.Entity("TheGrid.Models.Query", b =>
@@ -592,6 +688,25 @@ namespace TheGrid.Sqlite.Migrations
                     b.Navigation("QueryExecution");
                 });
 
+            modelBuilder.Entity("TheGrid.Models.UserGroup", b =>
+                {
+                    b.HasOne("TheGrid.Models.Group", "Group")
+                        .WithMany()
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TheGrid.Models.GridUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Group");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("TheGrid.Models.UserOrganization", b =>
                 {
                     b.HasOne("TheGrid.Models.Organization", "Organization")
@@ -620,6 +735,11 @@ namespace TheGrid.Sqlite.Migrations
                         .IsRequired();
 
                     b.Navigation("Query");
+                });
+
+            modelBuilder.Entity("TheGrid.Models.Group", b =>
+                {
+                    b.Navigation("Permissions");
                 });
 
             modelBuilder.Entity("TheGrid.Models.Organization", b =>

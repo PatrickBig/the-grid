@@ -7,7 +7,7 @@
 
 
 <div class="super-center">
-    <RadzenCard class="rz-my-12 rz-mx-auto rz-p-4 rz-p-md-12" style="max-width: 600px;">
+    <RadzenCard class="rz-my-12 rz-mx-auto rz-p-4 rz-p-md-12" style="max-width: 800px;">
         <RadzenText TextStyle="TextStyle.H4">
             Log in
         </RadzenText>
@@ -28,7 +28,7 @@
         }
         <RadzenTemplateForm TItem="LoginRequest" Data="_input" Submit="OnLoginAsync">
             <RadzenStack>
-                <RadzenFormField Text="Username">
+                <RadzenFormField Text="Username" Component="username" Style="width: 25em;">
                     <ChildContent>
                         <RadzenTextBox Name="username" id="login-form-username" @bind-Value="_input.Email" AutoComplete=true />
                     </ChildContent>
@@ -36,7 +36,7 @@
                         <RadzenRequiredValidator Component="username" />
                     </Helper>
                 </RadzenFormField>
-                <RadzenFormField Text="Password">
+                <RadzenFormField Text="Password" Component="password" Style="width: 25em;">
                     <ChildContent>
                         <RadzenPassword Name="password" id="login-form-password" @bind-Value="_input.Password" />
                     </ChildContent>

@@ -6,6 +6,11 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
       - ASPNETCORE_HTTPS_PORTS=8081
+      # HttpsRedirectionMiddleware builds its redirect Location from this port rather than
+      # ASPNETCORE_HTTPS_PORTS (which only controls what Kestrel binds to inside the container).
+      # Without it, http://localhost:20080 redirects to https://localhost:8081, which isn't
+      # published on the host (only the 20443:8081 mapping is).
+      - HTTPS_PORT=20443
     ports:
       - "8080"
       - "8081"

@@ -6,7 +6,9 @@ using Radzen;
 using Radzen.Blazor;
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using TheGrid.Client.Extensions;
+using TheGrid.Client.HubClients;
 using TheGrid.Shared.Models;
 using TheGrid.Shared.Utilities;
 #nullable disable
@@ -24,8 +26,14 @@ namespace TheGrid.Client.Shared.Visualizations
             Converters =
             {
                 new QueryDataConverter(),
+
+                // The server serializes enums (e.g. PaginatedQueryResult.Status) as strings (see
+                // StartupHelpers.AddControllers -> AddJsonOptions), so this must be able to read them back.
+                new JsonStringEnumConverter(),
             },
         };
+
+        private readonly HashSet<(object Row, string ColumnKey)> _expandedJsonCells = new();
 
         private RadzenDataGrid<Dictionary<string, object>> _grid;
         private IEnumerable<Dictionary<string, object>> _data;
@@ -34,6 +42,8 @@ namespace TheGrid.Client.Shared.Visualizations
         private Dictionary<string, QueryResultColumn> _columns;
         private bool _columnOptionsBuilt = false;
         private bool _optionsNeedUpdate = false;
+        private QueryExecutionStatus? _executionStatus;
+        private string _executionErrorMessage;
 
         /// <summary>
         /// Table visualization options.
@@ -50,6 +60,9 @@ namespace TheGrid.Client.Shared.Visualizations
 
         [Inject]
         private ILogger<Table> Logger { get; set; } = default!;
+
+        [Inject]
+        private IQueryDesignerHubClient QueryRefreshNotificationClient { get; set; } = default!;
 
         /// <inheritdoc/>
         public async ValueTask DisposeAsync()
@@ -76,7 +89,33 @@ namespace TheGrid.Client.Shared.Visualizations
                 throw new InvalidOperationException("Unable to initialize table visualization without table options being available.");
             }
 
+            // The grid otherwise has no way of knowing a refresh it didn't itself trigger (e.g. a scheduled
+            // refresh, or one queued from another tab/page) has finished, and would keep showing stale data.
+            QueryRefreshNotificationClient.OnQueryResultsFinishedProcessing(async (queryRefreshJobId, queryId) =>
+            {
+                if (queryId == QueryId && _grid != null)
+                {
+                    await InvokeAsync(() => _grid.Reload());
+                }
+            });
+
             base.OnInitialized();
+        }
+
+        private static AlertStyle GetExecutionAlertStyle(QueryExecutionStatus? status)
+        {
+            return status switch
+            {
+                QueryExecutionStatus.Error or QueryExecutionStatus.TimedOut => AlertStyle.Danger,
+                QueryExecutionStatus.InProgress => AlertStyle.Info,
+                _ => AlertStyle.Warning,
+            };
+        }
+
+        private static string GetColumnKey(string property)
+        {
+            // Property is generated via Radzen.PropertyAccess.GetDynamicPropertyExpression, e.g. `(String)it["ColumnName"]`.
+            return property.Split('"')[1];
         }
 
         private static Type GetTypeForColumnType(QueryResultColumnType type)
@@ -90,7 +129,24 @@ namespace TheGrid.Client.Shared.Visualizations
                 QueryResultColumnType.DateTime => typeof(DateTime),
                 QueryResultColumnType.Time => typeof(TimeSpan),
                 QueryResultColumnType.Text => typeof(string),
+                QueryResultColumnType.Json => typeof(JsonElement),
                 _ => typeof(string),
+            };
+        }
+
+        /// <summary>
+        /// Gets a collapsed, single-line summary for a <see cref="QueryResultColumnType.Json"/>-typed cell value,
+        /// shown before the user expands it into a full tree view.
+        /// </summary>
+        /// <param name="element">The JSON value to summarize.</param>
+        /// <returns>A short collapsed-form summary, e.g. <c>{...}</c> or <c>[...]</c>.</returns>
+        private static string GetJsonCellSummary(JsonElement element)
+        {
+            return element.ValueKind switch
+            {
+                JsonValueKind.Object => element.EnumerateObject().Any() ? "{...}" : "{}",
+                JsonValueKind.Array => element.GetArrayLength() > 0 ? "[...]" : "[]",
+                _ => element.ToString(),
             };
         }
 
@@ -104,9 +160,38 @@ namespace TheGrid.Client.Shared.Visualizations
             return null;
         }
 
+        private string GetExecutionAlertMessage()
+        {
+            return _executionStatus switch
+            {
+                QueryExecutionStatus.None => "This query has not been executed yet.",
+                QueryExecutionStatus.InProgress => "This query is currently executing. Results will refresh automatically once complete.",
+                QueryExecutionStatus.TimedOut => "The last refresh attempt timed out. The results shown, if any, may be out of date.",
+                QueryExecutionStatus.Error => string.IsNullOrEmpty(_executionErrorMessage)
+                    ? "The last refresh attempt failed. The results shown, if any, may be out of date."
+                    : $"The last refresh attempt failed: {_executionErrorMessage}. The results shown, if any, may be out of date.",
+                _ => null,
+            };
+        }
+
+        private bool IsJsonCellExpanded(object row, string columnKey)
+        {
+            return _expandedJsonCells.Contains((row, columnKey));
+        }
+
+        private void ToggleJsonCell(object row, string columnKey)
+        {
+            var key = (row, columnKey);
+
+            if (!_expandedJsonCells.Remove(key))
+            {
+                _expandedJsonCells.Add(key);
+            }
+        }
+
         private Task OnColumnResize(DataGridColumnResizedEventArgs<Dictionary<string, object>> args)
         {
-            if (VisualizationOptions.TableVisualizationOptions?.ColumnOptions.TryGetValue(args.Column.Property, out var column) ?? false)
+            if (VisualizationOptions.TableVisualizationOptions?.ColumnOptions.TryGetValue(GetColumnKey(args.Column.Property), out var column) ?? false)
             {
                 column.Width = args.Width;
             }
@@ -119,14 +204,45 @@ namespace TheGrid.Client.Shared.Visualizations
         private async Task OnLoadDataAsync(LoadDataArgs e)
         {
             _isLoading = true;
-            var response = await HttpClient.GetFromJsonAsync<PaginatedQueryResult>(e.GetQueryUrl($"api/v1/QueryResults/{QueryId}"), _serializerOptions, CancellationToken);
+            _executionErrorMessage = null;
 
-            if (response != null)
+            try
             {
-                // Build the columns out for the first fetch
-                _columns = response.Columns;
-                _totalItems = response.TotalItems;
-                _data = response.Items;
+                var httpResponse = await HttpClient.GetAsync(e.GetQueryUrl($"api/v1/QueryResults/{QueryId}"), CancellationToken);
+
+                if (httpResponse.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    // The query has never been executed.
+                    _executionStatus = QueryExecutionStatus.None;
+                }
+                else if (httpResponse.IsSuccessStatusCode)
+                {
+                    var response = await httpResponse.Content.ReadFromJsonAsync<PaginatedQueryResult>(_serializerOptions, CancellationToken);
+
+                    if (response != null)
+                    {
+                        // Build the columns out for the first fetch
+                        _columns = response.Columns;
+                        _totalItems = response.TotalItems;
+                        _data = response.Items;
+                        _executionStatus = response.Status;
+                        _executionErrorMessage = response.ErrorMessage;
+                    }
+                }
+                else
+                {
+                    Logger.LogError("Failed to fetch query results for query ID {queryId}. Status code: {statusCode}", QueryId, httpResponse.StatusCode);
+
+                    _executionStatus = QueryExecutionStatus.Error;
+                    _executionErrorMessage = "There was an unexpected error fetching the query results. Check the server logs for details.";
+                }
+            }
+            catch (Exception ex) when (ex is HttpRequestException or JsonException)
+            {
+                Logger.LogError(ex, "Failed to fetch query results for query ID {queryId}.", QueryId);
+
+                _executionStatus = QueryExecutionStatus.Error;
+                _executionErrorMessage = "There was an unexpected error fetching the query results. Check the server logs for details.";
             }
 
             _isLoading = false;
@@ -143,7 +259,7 @@ namespace TheGrid.Client.Shared.Visualizations
                 for (int i = 0; i < columns.Count; i++)
                 {
                     var column = columns[i];
-                    VisualizationOptions.TableVisualizationOptions!.ColumnOptions[column.Property].DisplayOrder = column.GetOrderIndex() ?? (i + 1) * 1000;
+                    VisualizationOptions.TableVisualizationOptions!.ColumnOptions[GetColumnKey(column.Property)].DisplayOrder = column.GetOrderIndex() ?? (i + 1) * 1000;
                 }
 
                 // Update the options

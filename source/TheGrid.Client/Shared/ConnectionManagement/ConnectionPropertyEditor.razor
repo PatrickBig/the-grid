@@ -4,16 +4,17 @@
     <RadzenFormField Text="@ConnectionProperty.Name">
         @if (ConnectionProperty.Type == ConnectionPropertyType.SingleLineText)
         {
-            <RadzenTextBox Name="@HtmlUtility.GetSafeId(ConnectionProperty.Name)" Change="OnValueChangedAsync" AutoComplete=false />
+            <RadzenTextBox Name="@HtmlUtility.GetSafeId(ConnectionProperty.Key)" Value="@Value" Change="OnValueChangedAsync" AutoComplete=false />
         }
         else if (ConnectionProperty.Type == ConnectionPropertyType.ProtectedText)
         {
-            <RadzenPassword Name="@HtmlUtility.GetSafeId(ConnectionProperty.Name)" Change="OnValueChangedAsync" AutoComplete=false />
+            @* Intentionally never bound to Value: a stored secret must never be pre-filled or echoed back. *@
+            <RadzenPassword Name="@HtmlUtility.GetSafeId(ConnectionProperty.Key)" Change="OnValueChangedAsync" AutoComplete=false />
         }
 
         @if (ConnectionProperty.Required)
         {
-            <RadzenRequiredValidator Component="@HtmlUtility.GetSafeId(ConnectionProperty.Name)" Popup />
+            <RadzenRequiredValidator Component="@HtmlUtility.GetSafeId(ConnectionProperty.Key)" Popup />
         }
-    </RadzenFormField>    
+    </RadzenFormField>
 }

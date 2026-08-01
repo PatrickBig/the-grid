@@ -51,7 +51,7 @@ namespace TheGrid.Models
         /// Tags associated to the query.
         /// </summary>
         [Tags]
-        public List<string> Tags { get; set; } = new();
+        public List<string> Tags { get; set; } = [];
 
         /// <summary>
         /// Navigation property to the columns the query returns.

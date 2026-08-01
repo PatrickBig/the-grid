@@ -4,11 +4,13 @@
 
 using Hangfire;
 using Hangfire.Redis.StackExchange;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using StackExchange.Redis;
+using Stubble.Core;
+using Stubble.Core.Builders;
+using Stubble.Core.Interfaces;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text.Json.Serialization;
@@ -53,6 +55,10 @@ namespace TheGrid.Server
             });
 
             services.AddSingleton<IAuthorizationHandler, ConnectionAuthorizationHandler>();
+
+            services.AddSingleton(p => new StubbleBuilder().Build());
+            services.AddSingleton<IAsyncStubbleRenderer>(p => p.GetRequiredService<StubbleVisitorRenderer>());
+            services.AddSingleton<IStubbleRenderer>(p => p.GetRequiredService<StubbleVisitorRenderer>());
         }
 
         /// <summary>
@@ -73,11 +79,12 @@ namespace TheGrid.Server
 
             services.AddResponseCaching();
 
-            services.AddAuthorization();
+            services.AddHttpContextAccessor();
+            services.AddAuthorizationBuilder()
+                .AddPolicy(OrganizationHandler.PolicyName, policy => policy.Requirements.Add(new OrganizationRequirement()));
             services.AddIdentityApiEndpoints<GridUser>(o =>
             {
             })
-                .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<TheGridDbContext>()
                 .AddClaimsPrincipalFactory<ApplicationUserClaimsPrincipalFactory>()
                 .AddDefaultTokenProviders();
@@ -91,6 +98,8 @@ namespace TheGrid.Server
                 options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
                 options.JsonSerializerOptions.PropertyNamingPolicy = null;
             });
+
+            services.AddSingleton<IAuthorizationHandler, OrganizationHandler>();
 
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen(options =>
@@ -111,11 +120,6 @@ namespace TheGrid.Server
                 {
                     Name = "Authorization",
                     Scheme = "Bearer",
-                    Reference = new OpenApiReference
-                    {
-                        Type = ReferenceType.SecurityScheme,
-                        Id = "Bearer",
-                    },
                     In = ParameterLocation.Header,
                     Description = "ASP.NET Identity token required. Example: \"Bearer {token}\"",
                 });
@@ -126,9 +130,12 @@ namespace TheGrid.Server
         /// Adds services required when running the application in agent mode.
         /// </summary>
         /// <param name="services">Service collection.</param>
-        public static void AddAgentServices(IServiceCollection services)
+        /// <param name="systemOptions">System configuration, used to determine which job queues this instance listens to.</param>
+        public static void AddAgentServices(IServiceCollection services, SystemOptions systemOptions)
         {
-            services.AddHangfireServer();
+            var queues = systemOptions.AgentQueues.Length > 0 ? systemOptions.AgentQueues : [JobQueues.Default];
+
+            services.AddHangfireServer(options => options.Queues = queues);
         }
     }
 }

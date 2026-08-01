@@ -44,6 +44,11 @@ namespace TheGrid.Shared.Models
     public class ConnectionProperty
     {
         /// <summary>
+        /// Stable machine identifier used as the runtime dictionary key for this parameter.
+        /// </summary>
+        public string Key { get; set; } = string.Empty;
+
+        /// <summary>
         /// Name of the connector paramter.
         /// </summary>
         public string Name { get; set; } = string.Empty;
@@ -69,5 +74,10 @@ namespace TheGrid.Shared.Models
         /// If true the parameter requires input.
         /// </summary>
         public bool Required { get; set; }
+
+        /// <summary>
+        /// If true the parameter's value is treated as secret and encrypted at rest, regardless of <see cref="Type"/>.
+        /// </summary>
+        public bool IsSecret { get; set; }
     }
 }

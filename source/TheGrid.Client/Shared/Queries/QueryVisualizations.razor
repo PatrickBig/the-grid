@@ -10,7 +10,7 @@
                     for (int i = 0; i < _visualizations.Length; i++)
                     {
                         var vis = _visualizations[i];
-                        <RadzenTabsItem id="@("visualization-" + vis.Id)" Text="@vis.Name" Style="height: 100%;" Icon="@vis.GetEditorIcon()">
+                        <RadzenTabsItem data-visualization-id="@vis.Id" Text="@vis.Name" Style="height: 100%;" Icon="@vis.GetEditorIcon()">
                             @if (vis.VisualizationType == VisualizationType.Table)
                             {
                                 <TheGrid.Client.Shared.Visualizations.Table QueryId="QueryId" VisualizationOptions="vis" />
@@ -18,7 +18,7 @@
                         </RadzenTabsItem>
                     }
 
-                    <RadzenTabsItem id="new-visualization-button" Text="New visualization" Icon="add" />
+                    <RadzenTabsItem data-testid="new-visualization-button" Text="New visualization" Icon="add" />
                 }
             </Tabs>
         </RadzenTabs>

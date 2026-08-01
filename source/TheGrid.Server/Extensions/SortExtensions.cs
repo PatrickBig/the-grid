@@ -28,11 +28,11 @@ namespace TheGrid.Server.Extensions
 
             if (sort.Direction == SortDirection.Ascending)
             {
-                suffix = " ASC";
+                suffix = " asc";
             }
             else if (sort.Direction == SortDirection.Descending)
             {
-                suffix = " DESC";
+                suffix = " desc";
             }
 
             return sort.Field + suffix;

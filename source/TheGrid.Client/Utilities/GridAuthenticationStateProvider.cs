@@ -81,7 +81,7 @@ namespace TheGrid.Client.Utilities
 
             if (!response.IsSuccessStatusCode)
             {
-                // Handle errors.
+                // Handle Errors.
                 if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                 {
                     _logger.LogError("Invalid username or password.");
@@ -105,6 +105,8 @@ namespace TheGrid.Client.Utilities
             }
 
             _logger.LogInformation("Login successful, new token issued.");
+
+            loginResponse.ExpiresAtUtc = DateTime.UtcNow.AddSeconds(loginResponse.ExpiresIn);
 
             var userState = new SavedUserState
             {
@@ -171,9 +173,10 @@ namespace TheGrid.Client.Utilities
                 claims.Add(new Claim(ClaimTypes.Email, userState.Information.Email));
             }
 
-            foreach (var role in userState.Information.Roles)
+            // All other claims
+            foreach (var claim in userState.Information.Claims)
             {
-                claims.Add(new Claim(ClaimTypes.Role, role));
+                claims.Add(new Claim(claim.Type, claim.Value, ClaimValueTypes.String, claim.Issuer));
             }
 
             var identity = new ClaimsIdentity(claims, "ASP.NET Identity");

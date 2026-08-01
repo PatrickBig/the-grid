@@ -3,7 +3,10 @@
 // </copyright>
 
 using Npgsql;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using TheGrid.Connectors.Extensions;
+using TheGrid.Shared.Models;
 
 namespace TheGrid.Connectors
 {
@@ -11,18 +14,18 @@ namespace TheGrid.Connectors
     /// Executes PostgreSQL queries.
     /// </summary>
     [Connector("PostgreSQL", EditorLanguage = EditorLanguage.PgSql, IconFileName = "postgresql.png")]
-    [ConnectorParameter(CommonConnectionParameters.ConnectionString, ConnectionPropertyType.SingleLineText, Required = true, HelpText = "Standard [PostgreSQL connection string](https://www.connectionstrings.com/postgresql/).")]
-    [ConnectorParameter(CommonConnectionParameters.DatabaseName, ConnectionPropertyType.SingleLineText, Required = true)]
-    [ConnectorParameter(CommonConnectionParameters.Username, ConnectionPropertyType.SingleLineText, Required = true)]
-    [ConnectorParameter(CommonConnectionParameters.Password, ConnectionPropertyType.ProtectedText, Required = true)]
-    public class PostgreSqlConnector : ConnectorBase, ISchemaDiscovery, IConnectionTest
+    [ConnectorParameter(CommonConnectionParameters.ConnectionString, "Connection String", ConnectionPropertyType.SingleLineText, Required = true, HelpText = "Standard [PostgreSQL connection string](https://www.connectionstrings.com/postgresql/).")]
+    [ConnectorParameter(CommonConnectionParameters.DatabaseName, "Database Name", ConnectionPropertyType.SingleLineText, Required = true)]
+    [ConnectorParameter(CommonConnectionParameters.Username, "Username", ConnectionPropertyType.SingleLineText, Required = true)]
+    [ConnectorParameter(CommonConnectionParameters.Password, "Password", ConnectionPropertyType.ProtectedText, Required = true)]
+    public class PostgreSqlConnector : ConnectorBase, ISchemaDiscovery, IConnectionTest, IWriteAccessProbe
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="PostgreSqlConnector"/> class.
         /// </summary>
-        /// <param name="connectorParameters">Properties used to initiate the connection to the PostgreSQL database.</param>
-        public PostgreSqlConnector(Dictionary<string, string> connectorParameters)
-            : base(connectorParameters)
+        /// <param name="context">Shared infrastructure and connection properties used to initiate the connection to the PostgreSQL database.</param>
+        public PostgreSqlConnector(ConnectorContext context)
+            : base(context)
         {
         }
 
@@ -113,65 +116,99 @@ namespace TheGrid.Connectors
         }
 
         /// <inheritdoc/>
-        public override async Task<QueryResult> GetDataAsync(string query, Dictionary<string, object?>? queryParameters, CancellationToken cancellationToken = default)
+        public override async IAsyncEnumerable<ConnectorRow> GetDataAsync(string query, Dictionary<string, object?>? queryParameters, [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             await using var connection = GetConnection(ConnectorParameters);
 
             await connection.OpenAsync(cancellationToken);
 
-            var results = new QueryResult();
-            bool firstReadDone = false;
-
-            var rows = new List<Dictionary<string, object?>>();
+            Dictionary<string, QueryResultColumn>? columns = null;
 
             // Run the query
-            await using (var command = new NpgsqlCommand(query, connection))
+            await using var command = new NpgsqlCommand(query, connection);
+
+            if (queryParameters != null && queryParameters.Count != 0)
             {
-                if (queryParameters != null && queryParameters.Count != 0)
+                foreach (var parameter in queryParameters.Where(p => p.Value != null))
                 {
-                    foreach (var parameter in queryParameters.Where(p => p.Value != null))
-                    {
-                        command.Parameters.AddWithValue(parameter.Key, parameter.Value ?? DBNull.Value);
-                    }
+                    command.Parameters.AddWithValue(parameter.Key, parameter.Value ?? DBNull.Value);
                 }
-
-                await using var reader = await command.ExecuteReaderAsync(cancellationToken);
-
-                // Iterate over the results
-                while (await reader.ReadAsync(cancellationToken))
-                {
-                    if (!firstReadDone)
-                    {
-                        results.Columns = GetColumns(reader);
-                        firstReadDone = true;
-                    }
-
-                    var row = new Dictionary<string, object?>();
-
-                    for (int i = 0; i < reader.FieldCount; i++)
-                    {
-                        row.Add(reader.GetName(i), reader.GetValue(i));
-                    }
-
-                    rows.Add(row);
-                }
-
-                results.Rows = rows;
             }
 
-            return results;
+            await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+
+            // Iterate over the results
+            while (await reader.ReadAsync(cancellationToken))
+            {
+                columns ??= GetColumns(reader);
+
+                var row = new Dictionary<string, object?>();
+
+                for (int i = 0; i < reader.FieldCount; i++)
+                {
+                    row.Add(reader.GetName(i), reader.GetValue(i));
+                }
+
+                yield return new ConnectorRow(columns, row);
+            }
         }
 
         /// <inheritdoc/>
-        public async Task<bool> TestConnectionAsync(CancellationToken cancellationToken = default)
+        public async Task<ConnectionTestResult> TestConnectionAsync(CancellationToken cancellationToken = default)
         {
+            var stopwatch = Stopwatch.StartNew();
+
+            try
+            {
+                await using var connection = GetConnection(ConnectorParameters);
+
+                await connection.OpenAsync(cancellationToken);
+
+                await using var command = new NpgsqlCommand("select 1", connection);
+
+                await command.ExecuteScalarAsync(cancellationToken);
+
+                return new ConnectionTestResult(true, null, stopwatch.Elapsed);
+            }
+            catch (Exception ex)
+            {
+                return new ConnectionTestResult(false, ex.Message, stopwatch.Elapsed);
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<bool> HasWriteAccessAsync(CancellationToken cancellationToken = default)
+        {
+            // This should work for any version of PostgreSQL after 7.2
+            const string permissionQuery =
+                @"SELECT 
+                  table_name,
+                  has_table_privilege(quote_ident(table_name), 'INSERT') as has_insert_permission,
+                  has_table_privilege(quote_ident(table_name), 'UPDATE') as has_update_permission,
+                  has_table_privilege(quote_ident(table_name), 'DELETE') as has_delete_permission
+                FROM information_schema.tables
+                WHERE table_schema = current_schema";
+
             await using var connection = GetConnection(ConnectorParameters);
 
             await connection.OpenAsync(cancellationToken);
 
-            await using var command = new NpgsqlCommand("select 1", connection);
+            await using var command = new NpgsqlCommand(permissionQuery, connection);
 
-            return true;
+            await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+
+            // Iterate over the results
+            while (await reader.ReadAsync(cancellationToken))
+            {
+                if (reader.GetFieldValue<bool>(reader.GetOrdinal("has_insert_permission")) ||
+                    reader.GetFieldValue<bool>(reader.GetOrdinal("has_update_permission")) ||
+                    reader.GetFieldValue<bool>(reader.GetOrdinal("has_delete_permission")))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private static Dictionary<string, string?> GetColumnAttributes(NpgsqlDataReader reader)

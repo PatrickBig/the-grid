@@ -18,5 +18,10 @@ namespace TheGrid.Shared.Constants
         /// Claim type indicating the current organization of the user.
         /// </summary>
         public const string CurrentOrganization = "current.organization";
+
+        /// <summary>
+        /// Claim type indicating the permission of the user.
+        /// </summary>
+        public const string Permission = "permission";
     }
 }

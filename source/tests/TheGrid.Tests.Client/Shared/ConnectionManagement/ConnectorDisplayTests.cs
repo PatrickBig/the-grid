@@ -10,7 +10,7 @@ namespace TheGrid.Tests.Client.Shared.ConnectionManagement
     /// <summary>
     /// Tests for the <see cref="ConnectorDisplay"/> component.
     /// </summary>
-    public class ConnectorDisplayTests : TestContext
+    public class ConnectorDisplayTests : BunitContext
     {
         /// <summary>
         /// Tests that the connector icon uses the default value when the connector icon is null or empty.
@@ -23,7 +23,7 @@ namespace TheGrid.Tests.Client.Shared.ConnectionManagement
             string connectorName = "Test Connector";
 
             // Act
-            var cut = RenderComponent<ConnectorDisplay>(parameters => parameters
+            var cut = Render<ConnectorDisplay>(parameters => parameters
                 .Add(p => p.Name, connectorName)
                 .Add(p => p.ConnectorIcon, connectorIconPath));
 
@@ -46,7 +46,7 @@ namespace TheGrid.Tests.Client.Shared.ConnectionManagement
             string connectorName = "Test Connector";
 
             // Act
-            var cut = RenderComponent<ConnectorDisplay>(parameters => parameters
+            var cut = Render<ConnectorDisplay>(parameters => parameters
                 .Add(p => p.Name, connectorName)
                 .Add(p => p.ConnectorIcon, connectorIconPath));
 

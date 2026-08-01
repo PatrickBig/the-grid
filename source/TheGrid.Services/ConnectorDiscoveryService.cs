@@ -31,19 +31,22 @@ namespace TheGrid.Services
 
             logger.LogTrace("Located {connectorCount} connectors to make available to the system.", connectors.Count());
 
+            // Load existing connectors once and key them by Id so updates below mutate the
+            // already-tracked instance in place, rather than attaching a second, distinct instance
+            // under the same key (which EF Core's change tracker forbids).
+            var existingConnectors = await db.Connectors.ToDictionaryAsync(c => c.Id);
+
             // Disable all connectorTypes. Ideally this would be done using .ExecuteUpdateAsync however some DB providers do not yet support it.
-            foreach (var connector in await db.Connectors.ToListAsync())
+            foreach (var connector in existingConnectors.Values)
             {
                 connector.Disabled = true;
             }
 
-            await db.SaveChangesAsync();
-
             foreach (var connector in connectors)
             {
-                if (await db.Connectors.Where(r => r.Id == connector.Id).AnyAsync())
+                if (existingConnectors.TryGetValue(connector.Id, out var existingConnector))
                 {
-                    db.Connectors.Update(connector);
+                    connector.Adapt(existingConnector);
                 }
                 else
                 {
@@ -57,7 +60,9 @@ namespace TheGrid.Services
 
         private static IEnumerable<Type> GetConnectorTypes()
         {
-            var assembly = Assembly.GetAssembly(typeof(IConnector));
+            // Anchored on PostgreSqlConnector (not IConnector) since IConnector now lives in
+            // TheGrid.Connectors.Abstractions, which contains no concrete connectors.
+            var assembly = Assembly.GetAssembly(typeof(PostgreSqlConnector));
 
             if (assembly == null)
             {
@@ -110,6 +115,7 @@ namespace TheGrid.Services
 
                 details.SupportsConnectionTest = connectorType.ImplementsInterface<IConnectionTest>();
                 details.SupportsSchemaDiscovery = connectorType.ImplementsInterface<ISchemaDiscovery>();
+                details.SupportsWriteAccessProbe = connectorType.ImplementsInterface<IWriteAccessProbe>();
 
                 yield return details;
             }

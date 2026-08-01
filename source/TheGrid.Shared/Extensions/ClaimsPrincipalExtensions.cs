@@ -22,5 +22,27 @@ namespace TheGrid.Shared.Extensions
         {
             return user.HasClaim(c => c.Type == GridClaimTypes.Organization && c.Value.Equals(organization, StringComparison.InvariantCultureIgnoreCase));
         }
+
+        /// <summary>
+        /// Checks if a user has the specified permission.
+        /// </summary>
+        /// <param name="user">Claims principal of the user to check.</param>
+        /// <param name="organizationId">What organization to check.</param>
+        /// <param name="permission">Permissions to verify.</param>
+        /// <returns>Returns true if the user has the specified permission, otherwise false..</returns>
+        public static bool HasPermission(this ClaimsPrincipal user, string organizationId, ApplicationPermission permission)
+        {
+            return user.HasClaim(c => c.Type == GridClaimTypes.Permission && c.Value == permission.ToString() && c.Issuer == organizationId);
+        }
+
+        /// <summary>
+        /// Checks if a user is a system administrator.
+        /// </summary>
+        /// <param name="user">Claims principal of the user to check.</param>
+        /// <returns>Returns true if the user is a system administrator, otherwise false.</returns>
+        public static bool IsSystemAdministrator(this ClaimsPrincipal user)
+        {
+            return user.HasClaim(c => c.Type == GridClaimTypes.Permission && c.Value == ApplicationPermission.SystemAdministrator.ToString());
+        }
     }
 }

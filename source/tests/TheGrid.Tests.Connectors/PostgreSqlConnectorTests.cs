@@ -2,6 +2,8 @@
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
+using TheGrid.Shared.Models;
+using TheGrid.Tests.Connectors;
 using TheGrid.Tests.Connectors.Fixtures;
 using Xunit.Abstractions;
 
@@ -35,18 +37,18 @@ namespace TheGrid.Connectors.Integration.Tests
         public async Task RunQueryAsync_Has_Columns_Test()
         {
             // Arrange
-            var connector = new PostgreSqlConnector(GetConnectionConfiguration());
+            var connector = new PostgreSqlConnector(ConnectorContextTestHelper.Create(GetConnectionConfiguration()));
 
             // Act
-            var results = await connector.GetDataAsync("SELECT * FROM " + _fixture.TestTableName, null);
+            var rows = await ToListAsync(connector.GetDataAsync("SELECT * FROM " + _fixture.TestTableName, null));
 
             // Assert
-            Assert.NotNull(results);
-            Assert.NotNull(results.Columns);
-            Assert.NotEmpty(results.Columns);
+            Assert.NotEmpty(rows);
+            Assert.NotNull(rows[0].Columns);
+            Assert.NotEmpty(rows[0].Columns);
 
             _output.WriteLine("Found the following columns:");
-            foreach (var column in results.Columns)
+            foreach (var column in rows[0].Columns)
             {
                 _output.WriteLine(column.Key);
             }
@@ -65,11 +67,52 @@ namespace TheGrid.Connectors.Integration.Tests
             connectionParameters.Remove(CommonConnectionParameters.ConnectionString);
 
             // Act
-            var exception = Assert.Throws<ConnectorParameterException>(() => new PostgreSqlConnector(connectionParameters));
+            var exception = Assert.Throws<ConnectorParameterException>(() => new PostgreSqlConnector(ConnectorContextTestHelper.Create(connectionParameters)));
 
             // Assert
             Assert.NotEmpty(exception.Parameters);
             Assert.Contains(CommonConnectionParameters.ConnectionString, exception.Parameters);
+        }
+
+        /// <summary>
+        /// Tests that <see cref="PostgreSqlConnector"/> resolves its required parameters correctly when the
+        /// supplied dictionary is keyed by each parameter's <c>Key</c> (e.g. <see cref="CommonConnectionParameters.ConnectionString"/>).
+        /// </summary>
+        [Fact]
+        public void Constructor_KeyKeyedParameters_Succeeds_Test()
+        {
+            // Arrange & Act
+            var connector = new PostgreSqlConnector(ConnectorContextTestHelper.Create(GetConnectionConfiguration()));
+
+            // Assert
+            Assert.NotNull(connector);
+        }
+
+        /// <summary>
+        /// Tests that a dictionary keyed by the old display-name strings (e.g. <c>"Connection String"</c>) is no
+        /// longer recognized once parameter lookups switched to <c>Key</c>-based keys — this is the intended
+        /// breaking behavior of this change, asserted explicitly so it can't silently regress.
+        /// </summary>
+        [Fact]
+        public void Constructor_NameKeyedParameters_ThrowsConnectorParameterException_Test()
+        {
+            // Arrange
+            var nameKeyedParameters = new Dictionary<string, string>
+            {
+                { "Connection String", "Host=" + _fixture.Container.Hostname + ":" + _fixture.Container.GetMappedPublicPort(5432) },
+                { "Database Name", PostgreSqlFixture.DatabaseName },
+                { "Username", "postgres" },
+                { "Password", _fixture.Password },
+            };
+
+            // Act
+            var exception = Assert.Throws<ConnectorParameterException>(() => new PostgreSqlConnector(ConnectorContextTestHelper.Create(nameKeyedParameters)));
+
+            // Assert
+            Assert.Contains(CommonConnectionParameters.ConnectionString, exception.Parameters);
+            Assert.Contains(CommonConnectionParameters.DatabaseName, exception.Parameters);
+            Assert.Contains(CommonConnectionParameters.Username, exception.Parameters);
+            Assert.Contains(CommonConnectionParameters.Password, exception.Parameters);
         }
 
         /// <summary>
@@ -80,20 +123,18 @@ namespace TheGrid.Connectors.Integration.Tests
         public async Task RunQueryAsync_Has_Rows_Test()
         {
             // Arrange
-            var connector = new PostgreSqlConnector(GetConnectionConfiguration());
+            var connector = new PostgreSqlConnector(ConnectorContextTestHelper.Create(GetConnectionConfiguration()));
 
             // Act
-            var results = await connector.GetDataAsync("SELECT * FROM " + _fixture.TestTableName, null);
+            var rows = await ToListAsync(connector.GetDataAsync("SELECT * FROM " + _fixture.TestTableName, null));
 
             // Assert
-            Assert.NotNull(results);
-            Assert.NotNull(results.Rows);
-            Assert.NotEmpty(results.Rows);
+            Assert.NotEmpty(rows);
 
             _output.WriteLine("Found the following rows:");
-            foreach (var row in results.Rows)
+            foreach (var row in rows)
             {
-                _output.WriteLine(string.Join(", ", row.Values.Select(v => v == null ? "(null)" : v.ToString())));
+                _output.WriteLine(string.Join(", ", row.Data.Values.Select(v => v == null ? "(null)" : v.ToString())));
             }
         }
 
@@ -105,7 +146,7 @@ namespace TheGrid.Connectors.Integration.Tests
         public async Task RunQueryAsync_Params_Test()
         {
             // Arrange
-            var connector = new PostgreSqlConnector(GetConnectionConfiguration());
+            var connector = new PostgreSqlConnector(ConnectorContextTestHelper.Create(GetConnectionConfiguration()));
             var parameters = new Dictionary<string, object?>
             {
                 {
@@ -115,17 +156,15 @@ namespace TheGrid.Connectors.Integration.Tests
             };
 
             // Act
-            var results = await connector.GetDataAsync("SELECT * FROM " + _fixture.TestTableName + " where bool_field = @param", parameters);
+            var rows = await ToListAsync(connector.GetDataAsync("SELECT * FROM " + _fixture.TestTableName + " where bool_field = @param", parameters));
 
             // Assert
-            Assert.NotNull(results);
-            Assert.NotNull(results.Rows);
-            Assert.NotEmpty(results.Rows);
+            Assert.NotEmpty(rows);
 
             _output.WriteLine("Found the following rows:");
-            foreach (var row in results.Rows)
+            foreach (var row in rows)
             {
-                _output.WriteLine(string.Join(", ", row.Values.Select(v => v == null || (v is DBNull) ? "(null)" : v.ToString())));
+                _output.WriteLine(string.Join(", ", row.Data.Values.Select(v => v == null || (v is DBNull) ? "(null)" : v.ToString())));
             }
         }
 
@@ -137,7 +176,7 @@ namespace TheGrid.Connectors.Integration.Tests
         public async Task DiscoverSchema_Test()
         {
             // Arrange
-            var connector = new PostgreSqlConnector(GetConnectionConfiguration());
+            var connector = new PostgreSqlConnector(ConnectorContextTestHelper.Create(GetConnectionConfiguration()));
 
             // Act
             var schema = await connector.GetSchemaAsync();
@@ -178,16 +217,18 @@ namespace TheGrid.Connectors.Integration.Tests
         public async Task TestConnection_Test()
         {
             // Arrange
-            var connector = new PostgreSqlConnector(GetConnectionConfiguration());
+            var connector = new PostgreSqlConnector(ConnectorContextTestHelper.Create(GetConnectionConfiguration()));
 
             // Act
             var result = await connector.TestConnectionAsync();
 
-            Assert.True(result);
+            // Assert
+            Assert.True(result.Success);
+            Assert.True(result.Elapsed >= TimeSpan.Zero);
         }
 
         /// <summary>
-        /// Tests that an exception is thrown when the connection test fails.
+        /// Tests that a failed connection test reports failure as data rather than throwing.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
@@ -195,10 +236,26 @@ namespace TheGrid.Connectors.Integration.Tests
         {
             // Arrange
             var connectionInformation = GetConnectionConfiguration("bad host");
-            var connector = new PostgreSqlConnector(connectionInformation);
+            var connector = new PostgreSqlConnector(ConnectorContextTestHelper.Create(connectionInformation));
 
-            // Act & assert
-            await Assert.ThrowsAnyAsync<Exception>(async () => await connector.TestConnectionAsync());
+            // Act
+            var result = await connector.TestConnectionAsync();
+
+            // Assert
+            Assert.False(result.Success);
+            Assert.NotNull(result.Message);
+        }
+
+        private static async Task<List<ConnectorRow>> ToListAsync(IAsyncEnumerable<ConnectorRow> rows)
+        {
+            var list = new List<ConnectorRow>();
+
+            await foreach (var row in rows)
+            {
+                list.Add(row);
+            }
+
+            return list;
         }
 
         private Dictionary<string, string> GetConnectionConfiguration(string host)
@@ -214,11 +271,11 @@ namespace TheGrid.Connectors.Integration.Tests
                         PostgreSqlFixture.DatabaseName
                     },
                     {
-                        "Username",
+                        CommonConnectionParameters.Username,
                         "postgres"
                     },
                     {
-                        "Password",
+                        CommonConnectionParameters.Password,
                         _fixture.Password
                     },
                 };

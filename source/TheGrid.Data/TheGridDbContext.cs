@@ -2,10 +2,12 @@
 // Copyright (c) BiglerNet. All rights reserved.
 // </copyright>
 
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using TheGrid.Models;
 using TheGrid.Models.Visualizations;
+using TheGrid.Shared.Constants;
 using TheGrid.Shared.Models;
 
 namespace TheGrid.Data
@@ -64,6 +66,21 @@ namespace TheGrid.Data
         /// </summary>
         public virtual DbSet<Models.UserOrganization> UserOrganizations { get; set; }
 
+        /// <summary>
+        /// Access groups to define the roles of users.
+        /// </summary>
+        public virtual DbSet<Group> Groups { get; set; }
+
+        /// <summary>
+        /// Permission levels for each <see cref="Group"/>.
+        /// </summary>
+        public virtual DbSet<GroupPermission> GroupPermissions { get; set; }
+
+        /// <summary>
+        /// User and group mapping.
+        /// </summary>
+        public virtual DbSet<UserGroup> UserGroups { get; set; }
+
         /// <inheritdoc/>
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -88,6 +105,10 @@ namespace TheGrid.Data
                 .Property(c => c.ConnectionProperties)
                 .HasConversion<JsonColumnConverter<Dictionary<string, string?>>>();
 
+            builder.Entity<Connection>()
+                .Property(c => c.SecretProperties)
+                .HasConversion<JsonColumnConverter<Dictionary<string, string?>>>();
+
             // Setup the many-to-many for users and organizations
             builder.Entity<Models.UserOrganization>()
                 .HasKey(ou => new { ou.UserId, ou.OrganizationId });
@@ -100,6 +121,21 @@ namespace TheGrid.Data
             // Set up default organization for users who have one set.
             builder.Entity<GridUser>()
                 .HasOne(u => u.CurrentOrganization);
+
+            // Map the group permission enum to strings instead of ints to make the database more human readable
+            builder.Entity<GroupPermission>()
+                .Property(g => g.Permission)
+                .HasConversion(v => v.ToString(), v => Enum.Parse<ApplicationPermission>(v))
+                .HasMaxLength(50);
+
+            // Handle group and user relationships
+            builder.Entity<UserGroup>()
+                .HasKey(ug => new { ug.UserId, ug.GroupId });
+
+            builder.Entity<Group>()
+                .HasMany(g => g.Users)
+                .WithMany(u => u.Groups)
+                .UsingEntity<UserGroup>();
 
             base.OnModelCreating(builder);
         }
