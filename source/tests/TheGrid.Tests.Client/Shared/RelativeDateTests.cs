@@ -12,7 +12,7 @@ namespace TheGrid.Tests.Client.Shared
     /// <summary>
     /// Tests the <see cref="RelativeDate"/> component.
     /// </summary>
-    public class RelativeDateTests : TestContext
+    public class RelativeDateTests : BunitContext
     {
         private readonly ITestOutputHelper _outputHelper;
 
@@ -36,7 +36,7 @@ namespace TheGrid.Tests.Client.Shared
             var date = DateTime.Now.AddSeconds(-30);
 
             // Act
-            var cut = RenderComponent<RelativeDate>(parameters => parameters
+            var cut = Render<RelativeDate>(parameters => parameters
                 .Add(p => p.Value, date));
 
             var renderedValue = cut.Find("span").TextContent;
@@ -57,7 +57,7 @@ namespace TheGrid.Tests.Client.Shared
             DateTime? date = null;
 
             // Act
-            var cut = RenderComponent<RelativeDate>(parameters => parameters
+            var cut = Render<RelativeDate>(parameters => parameters
                 .Add(p => p.Value, date));
 
             var renderedValue = cut.Find("span").TextContent;

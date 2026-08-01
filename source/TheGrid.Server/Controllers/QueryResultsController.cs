@@ -45,39 +45,60 @@ namespace TheGrid.Server.Controllers
         /// <returns>The results of the query execution.</returns>
         [HttpGet("{queryId}")]
         [ProducesResponseType(typeof(PaginatedQueryResult), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> GetResults(
             [FromRoute] int queryId,
             [FromQuery] int skip = 0,
             [FromQuery][Range(1, 1500)] int take = 100,
             CancellationToken cancellationToken = default)
         {
-            // Get the latest query execution
-            var latestQuery = await _db.QueryExecutions
+            // Get the most recent execution attempt, regardless of outcome, so its status/error can be
+            // surfaced even when it did not complete successfully.
+            var latestExecution = await _db.QueryExecutions
+                .Where(q => q.QueryId == queryId)
+                .OrderByDescending(q => q.DateQueued)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (latestExecution == null)
+            {
+                return NotFound();
+            }
+
+            // Get the most recent *successful* execution to source result data from. This may be older than
+            // latestExecution when a subsequent refresh attempt failed; we still show the last known-good
+            // results in that case, alongside the failure status below.
+            var latestCompletedQuery = await _db.QueryExecutions
                 .Include(q => q.Query)
                 .ThenInclude(q => q!.Columns)
                 .Where(q => q.QueryId == queryId && q.Status == QueryExecutionStatus.Complete)
                 .OrderByDescending(q => q.DateCompleted)
-                .FirstAsync(cancellationToken);
-
-            var queryBase = _db.QueryResultRows
-                .AsNoTracking()
-                .Where(q => q.QueryExecutionId == latestQuery.Id);
-
-            var resultQuery = queryBase
-                .Skip(skip)
-                .Take(take);
-
-            var columns = latestQuery.Query!.Columns?.ToDictionary(c => c.Name, c => new QueryResultColumn
-            {
-                Type = c.Type.Adapt<QueryResultColumnType>(),
-            });
+                .FirstOrDefaultAsync(cancellationToken);
 
             var response = new PaginatedQueryResult
             {
-                Items = await resultQuery.Select(r => r.Data).ToListAsync(cancellationToken),
-                Columns = columns ?? new(),
-                TotalItems = await queryBase.CountAsync(cancellationToken),
+                Status = latestExecution.Status,
+                ErrorMessage = latestExecution.Status == QueryExecutionStatus.Error ? latestExecution.ErrorOutput : null,
             };
+
+            if (latestCompletedQuery != null)
+            {
+                var queryBase = _db.QueryResultRows
+                    .AsNoTracking()
+                    .Where(q => q.QueryExecutionId == latestCompletedQuery.Id);
+
+                var resultQuery = queryBase
+                    .Skip(skip)
+                    .Take(take);
+
+                var columns = latestCompletedQuery.Query!.Columns?.ToDictionary(c => c.Name, c => new QueryResultColumn
+                {
+                    Type = c.Type.Adapt<QueryResultColumnType>(),
+                });
+
+                response.Items = await resultQuery.Select(r => r.Data).ToListAsync(cancellationToken);
+                response.Columns = columns ?? new();
+                response.TotalItems = await queryBase.CountAsync(cancellationToken);
+            }
 
             return Ok(response);
         }

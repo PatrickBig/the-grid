@@ -12,7 +12,7 @@ namespace TheGrid.Tests.Client.Shared
     /// <summary>
     /// Tests for the <see cref="TagsDisplay"/> component.
     /// </summary>
-    public class TagsDisplayTests : TestContext
+    public class TagsDisplayTests : BunitContext
     {
         private readonly ITestOutputHelper _outputHelper;
 
@@ -42,7 +42,7 @@ namespace TheGrid.Tests.Client.Shared
             }
 
             // Act
-            var cut = RenderComponent<TagsDisplay>(parameters => parameters
+            var cut = Render<TagsDisplay>(parameters => parameters
                 .Add(p => p.Tags, tags));
 
             // Assert
@@ -67,7 +67,7 @@ namespace TheGrid.Tests.Client.Shared
             }
 
             // Act
-            var cut = RenderComponent<TagsDisplay>(parameters => parameters
+            var cut = Render<TagsDisplay>(parameters => parameters
                 .Add(p => p.Tags, tags)
                 .Add(p => p.MaxTagsToDisplay, tagLimit));
 
@@ -94,7 +94,7 @@ namespace TheGrid.Tests.Client.Shared
             }
 
             // Act
-            var cut = RenderComponent<TagsDisplay>(parameters => parameters
+            var cut = Render<TagsDisplay>(parameters => parameters
                 .Add(p => p.Tags, tags)
                 .Add(p => p.MaxTagsToDisplay, tagLimit));
 

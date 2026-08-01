@@ -27,7 +27,10 @@
                 {
                     foreach (var parameter in _selectedConnector.Parameters.OrderBy(p => p.RenderOrder))
                     {
-                        <ConnectionPropertyEditor ConnectionProperty="parameter" ValueChanged="ParameterValueChanged" />
+                        <ConnectionPropertyEditor
+                            ConnectionProperty="parameter"
+                            Value="@_input.ConnectionProperties.GetValueOrDefault(parameter.Key)"
+                            ValueChanged="ParameterValueChanged" />
                     }
                 }
             </RadzenStack>

@@ -106,6 +106,8 @@ namespace TheGrid.Client.Utilities
 
             _logger.LogInformation("Login successful, new token issued.");
 
+            loginResponse.ExpiresAtUtc = DateTime.UtcNow.AddSeconds(loginResponse.ExpiresIn);
+
             var userState = new SavedUserState
             {
                 LoginResponse = loginResponse,

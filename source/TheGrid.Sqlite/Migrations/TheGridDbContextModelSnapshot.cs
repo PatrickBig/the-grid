@@ -15,7 +15,7 @@ namespace TheGrid.Sqlite.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.6");
+            modelBuilder.HasAnnotation("ProductVersion", "10.0.10");
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
@@ -362,7 +362,7 @@ namespace TheGrid.Sqlite.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Tags")
+                    b.PrimitiveCollection<string>("Tags")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
@@ -398,7 +398,7 @@ namespace TheGrid.Sqlite.Migrations
                     b.Property<int>("QueryId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("StandardOutput")
+                    b.PrimitiveCollection<string>("StandardOutput")
                         .IsRequired()
                         .HasColumnType("TEXT");
 

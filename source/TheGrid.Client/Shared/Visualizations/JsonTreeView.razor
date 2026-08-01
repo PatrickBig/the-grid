@@ -1,0 +1,29 @@
+@using System.Text.Json
+@if (Value.ValueKind == JsonValueKind.Object)
+{
+    <ul class="json-tree-node">
+        @foreach (var property in Value.EnumerateObject())
+        {
+            <li>
+                <span class="json-tree-key">@property.Name</span>
+                <JsonTreeView Value="property.Value" />
+            </li>
+        }
+    </ul>
+}
+else if (Value.ValueKind == JsonValueKind.Array)
+{
+    <ul class="json-tree-node">
+        @foreach (var item in GetIndexedArrayItems(Value))
+        {
+            <li>
+                <span class="json-tree-key">[@item.Index]</span>
+                <JsonTreeView Value="item.Value" />
+            </li>
+        }
+    </ul>
+}
+else
+{
+    <span class="json-tree-value">@GetScalarText(Value)</span>
+}

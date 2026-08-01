@@ -1,4 +1,4 @@
-﻿@inherits TestContext
+﻿@inherits BunitContext
 
 @code {
     private const int _validQueryId = 1;
@@ -6,6 +6,9 @@
 
     public QueryVisualizationsTests(ITestOutputHelper testOutputHelper)
     {
+        // RadzenDataGrid/RadzenFormField perform JS interop calls (Radzen.createDataGrid, Radzen.createFormField) on first render that aren't relevant to these tests.
+        JSInterop.Mode = JSRuntimeMode.Loose;
+
         Services.AddRadzenComponents();
 
         var mockedQueryDesignerHubClient = Substitute.For<IQueryDesignerHubClient>();
@@ -69,17 +72,17 @@
     public void QueryVisualizations_View_Success_Test()
     {
         // Arrange
-        var cut = RenderComponent<QueryVisualizations>(parameters =>
+        var cut = Render<QueryVisualizations>(parameters =>
         {
             parameters.Add(p => p.QueryId, _validQueryId);
             parameters.Add(p => p.Columns, QueryColumnFixture.GetColumns());
         });
 
         // Act
-        cut.WaitForElement("#visualization-" + _validQueryId, TimeSpan.FromSeconds(5));
+        cut.WaitForElement("[data-visualization-id='" + _validQueryId + "']", TimeSpan.FromSeconds(5));
 
         // Assert
-        Assert.NotNull(cut.Find("#new-visualization-button"));
+        Assert.NotNull(cut.Find("[data-testid='new-visualization-button']"));
     }
 
     /// <summary>
@@ -89,7 +92,6 @@
     public void QueryVisualizations_Show_Options_Test()
     {
         // Arrange
-        JSInterop.Mode = JSRuntimeMode.Loose;
         RenderTree.Add<CascadingValue<Dictionary<string, Column>>>(p => p.Add(x => x.Value, QueryColumnFixture.GetColumns()));
 
         var cut = Render(@<text>
@@ -99,7 +101,7 @@
     );
 
         // Act
-        cut.WaitForElement("#visualization-" + _validQueryId, TimeSpan.FromSeconds(5));
+        cut.WaitForElement("[data-visualization-id='" + _validQueryId + "']", TimeSpan.FromSeconds(5));
 
         var optionsButton = cut.Find("#visualization-options-button");
 

@@ -12,6 +12,8 @@ namespace TheGrid.Client.HubClients
     /// </summary>
     public abstract class SignalRClientBase : ISignalRClient, IAsyncDisposable
     {
+        private Task? _startTask;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="SignalRClientBase"/> class.
         /// </summary>
@@ -26,11 +28,6 @@ namespace TheGrid.Client.HubClients
         /// <inheritdoc/>
         public bool IsConnected =>
             HubConnection.State == HubConnectionState.Connected;
-
-        /// <summary>
-        /// Returns true if the connection has already been started.
-        /// </summary>
-        protected bool Started { get; private set; }
 
         /// <summary>
         /// The hub connection used by the SignalR client.
@@ -49,13 +46,22 @@ namespace TheGrid.Client.HubClients
         }
 
         /// <inheritdoc/>
-        public async Task Start()
+        public Task Start()
         {
-            if (!Started)
-            {
-                await HubConnection.StartAsync();
-                Started = true;
-            }
+            // Cache the in-flight/completed start task so concurrent callers (e.g. multiple components
+            // subscribing to events during the same render) share one connection attempt instead of each
+            // racing to call HubConnection.StartAsync(), which throws if called while already connecting.
+            return _startTask ??= HubConnection.StartAsync();
+        }
+
+        /// <summary>
+        /// Starts the connection if it hasn't been started yet, without waiting for it to finish connecting.
+        /// Intended for event subscription methods: handlers registered on <see cref="HubConnection"/> are
+        /// queued regardless of connection state, so callers don't need to await the connection themselves.
+        /// </summary>
+        protected void EnsureStarted()
+        {
+            _ = Start();
         }
     }
 }

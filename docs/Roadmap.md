@@ -148,6 +148,14 @@ vs "Advanced"), `DependsOn`/`VisibleWhen` (show port only when not using a full 
 `DefaultValue`, `Placeholder`, and a `Validation` sub-object (regex / min / max / allowed values).
 `ProtectedText` should imply `IsSecret = true`.
 
+**Status.** `Key` + `IsSecret` shipped (P1-1); `Group`/`DefaultValue`/`Placeholder`/`DependsOn`/
+`VisibleWhen`/`Validation` were deliberately scoped out at the time — no consumer existed. That's no
+longer true: the SQL Server connector's Azure AD Service Principal auth mode needs
+`TenantId`/`ClientId`/`ClientSecret` shown/required only when `AuthenticationMode = ServicePrincipal`,
+which is exactly the `VisibleWhen`/`DependsOn` case described above. Still deferred for now — see the
+`VisibleWhen`/`DependsOn` item in `docs/roadmap/ChangeSpecs.md` (Phase 2+) for the interim workaround
+and when to pick it up.
+
 ### 3.3 Problem: connectors aren't actually pluggable
 
 Discovery only scans the single assembly containing `IConnector`. "Extensible into many data

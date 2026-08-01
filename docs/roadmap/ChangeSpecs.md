@@ -244,8 +244,27 @@ in separate assemblies register; consider `AssemblyLoadContext` isolation for dr
 ---
 
 ## Phase 2+ — validate & build (specs to be expanded later)
-- **P2:** add MySQL/SQL Server (2nd SQL engine), a REST/HTTP source (exercises `IHttpClientFactory`),
-  and a file/columnar source — proves the SDK. Then P1-6 plugin loading.
+- **P2:** add MongoDB (NoSQL, proves query-shape/schema-discovery/row-shape SDK assumptions — proposed as
+  `openspec/changes/add-mongodb-connector`) and SQL Server (2nd RDBMS; also adds Azure AD auth modes —
+  Service Principal and Default Credential Chain — alongside SQL auth, since it needs to work across
+  AKS/EKS/on-prem/local without assuming a specific cloud's managed-identity mechanism) — proves the SDK.
+  A REST/HTTP source (exercises `IHttpClientFactory`) and a file/columnar source were also considered but
+  deferred: REST needs a generalized auth-protocol story (API keys, OAuth, etc.) that's hard to get right
+  as a first cut. Then P1-6 plugin loading.
+- **P2-x Conditional connector parameter metadata (`VisibleWhen`/`DependsOn`).** Originally proposed in
+  Roadmap §3.2 and scoped out of P1-1 as "no current consumer." Now has one: the SQL Server connector's
+  `TenantId`/`ClientId`/`ClientSecret` parameters are only relevant when `AuthenticationMode =
+  ServicePrincipal`. Until this lands, connectors with mode-dependent parameters must NOT mark those
+  params `Required` at the attribute level — validate the mode-specific requirement themselves in code
+  (throw `ConnectorParameterException` directly) — and the connection-creation UI shows all declared
+  parameters flatly regardless of which mode is selected. Pick this up once a second connector also wants
+  conditional visibility, or when the flat-UI rough edge becomes annoying enough to fix on its own.
+  **Files.** `ConnectorParameterAttribute.cs`, `ConnectorBase.ValidateParameters`, `ConnectionProperty`
+  (Shared model), `ConnectionPropertyEditor.razor` (dynamic form rendering).
+- On-prem Windows/Kerberos auth for SQL Server (shared AD service-account identity per Connection, via a
+  stored keytab + init/sidecar `kinit` pattern in K8s) is a separate, larger infrastructure item —
+  intentionally not scoped here; revisit as its own explore+propose when there's a real deployment to
+  design against.
 - **P3:** query parameters (`IParameterizedQuery`, safe binding — never string-concat SQL), result
   caching, CSV/Excel export, then **Dashboards** (new `Dashboard` aggregate + widget layout + builder UI).
 - **P4:** alerts, audit log, API tokens, scoped share links, retention/cleanup jobs.

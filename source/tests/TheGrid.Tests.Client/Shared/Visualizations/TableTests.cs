@@ -4,11 +4,14 @@
 
 using AngleSharp.Dom;
 using Bunit;
+using Microsoft.Extensions.DependencyInjection;
+using NSubstitute;
 using Radzen;
 using Radzen.Blazor;
 using RichardSzalay.MockHttp;
 using System.Globalization;
 using System.Net;
+using TheGrid.Client.HubClients;
 using TheGrid.Client.Shared.Visualizations;
 using TheGrid.Shared.Models;
 using Xunit.Abstractions;
@@ -18,7 +21,7 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
     /// <summary>
     /// Tests for the <see cref="Table"/> visualization component.
     /// </summary>
-    public class TableTests : TestContext
+    public class TableTests : BunitContext
     {
         private const string _expectedDateFormat = "yyyy-MM-dd";
         private readonly Random _random = new();
@@ -29,7 +32,11 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
         /// </summary>
         public TableTests()
         {
+            // RadzenDataGrid performs a JS interop call (Radzen.createDataGrid) on first render that isn't relevant to these tests.
+            JSInterop.Mode = JSRuntimeMode.Loose;
+
             Services.AddRadzenComponents();
+            Services.AddSingleton(Substitute.For<IQueryDesignerHubClient>());
 
             var mock = Services.AddMockHttpClient();
 
@@ -41,6 +48,7 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
                 Columns = GetQueryResultColumns(),
                 Items = GetRows(15),
                 TotalItems = 15,
+                Status = QueryExecutionStatus.Complete,
             };
 
             mock.When("/api/v1/QueryResults/*")
@@ -53,8 +61,9 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
         /// <summary>
         /// Tests the ability to render the table visualization.
         /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
-        public void Visualization_View_Success_Test()
+        public async Task Visualization_View_Success_Test()
         {
             // Arrange
             var options = new VisualizationResponse
@@ -71,7 +80,7 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
             };
 
             // Act
-            var cut = RenderComponent<Table>(parameters => parameters
+            var cut = Render<Table>(parameters => parameters
                 .Add(p => p.VisualizationOptions, options)
                 .Add(p => p.Columns, QueryColumnFixture.GetColumns()));
 
@@ -97,7 +106,7 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
             Assert.NotNull(dateColumn);
 
             // Cleanup the components to trigger an options update.
-            DisposeComponents();
+            await DisposeComponentsAsync();
         }
 
         /// <summary>
@@ -121,7 +130,7 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
             };
 
             // Act
-            var exception = Assert.Throws<InvalidOperationException>(() => RenderComponent<Table>(parameters => parameters
+            var exception = Assert.Throws<InvalidOperationException>(() => Render<Table>(parameters => parameters
                 .Add(p => p.VisualizationOptions, options)));
 
             // Assert
@@ -139,12 +148,61 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
             var columns = QueryColumnFixture.GetColumns();
 
             // Act
-            var exception = Assert.Throws<InvalidOperationException>(() => RenderComponent<Table>(parameters => parameters
+            var exception = Assert.Throws<InvalidOperationException>(() => Render<Table>(parameters => parameters
                 .Add(p => p.Columns, columns)));
 
             // Assert
             Assert.NotNull(exception);
             Assert.Contains(" without table options being available", exception.Message);
+        }
+
+        /// <summary>
+        /// Tests that a <see cref="QueryResultColumnType.Json"/>-typed cell renders collapsed by default and
+        /// expands into a tree view on click, then collapses again on a second click.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task Visualization_JsonCell_CollapsedByDefault_ExpandsAndCollapsesOnClick_Test()
+        {
+            // Arrange
+            var options = new VisualizationResponse
+            {
+                Id = 1,
+                Name = "Test Table",
+                QueryId = 1,
+                VisualizationType = VisualizationType.Table,
+                TableVisualizationOptions = new()
+                {
+                    PageSize = 25,
+                    ColumnOptions = GetTableColumnOptions(),
+                },
+            };
+
+            var cut = Render<Table>(parameters => parameters
+                .Add(p => p.VisualizationOptions, options)
+                .Add(p => p.Columns, QueryColumnFixture.GetColumns()));
+
+            cut.WaitForElement(".rz-data-row");
+
+            // Assert: collapsed by default, no tree view rendered yet.
+            var toggle = cut.Find(".json-cell-toggle");
+            Assert.Empty(cut.FindAll(".json-cell-tree"));
+            Assert.Contains("{...}", toggle.TextContent);
+
+            // Act: click to expand.
+            toggle.Click();
+
+            // Assert: the tree view is now rendered with the nested key visible.
+            cut.WaitForElement(".json-cell-tree");
+            Assert.Contains("nested-key", cut.Markup);
+
+            // Act: click again to collapse.
+            cut.Find(".json-cell-toggle").Click();
+
+            // Assert: back to collapsed.
+            Assert.Empty(cut.FindAll(".json-cell-tree"));
+
+            await DisposeComponentsAsync();
         }
 
         /// <summary>
@@ -169,7 +227,7 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
                 },
             };
 
-            var cut = RenderComponent<Table>(parameters => parameters
+            var cut = Render<Table>(parameters => parameters
                 .Add(p => p.VisualizationOptions, options)
                 .Add(p => p.Columns, QueryColumnFixture.GetColumns())
                 .Add(p => p.ReadOnly, false));
@@ -197,7 +255,7 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
             var updatedWidth = int.Parse(firstColumn.Instance.Width.Replace("px", string.Empty));
             Assert.Equal(expectedWidth, updatedWidth);
 
-            DisposeComponents();
+            await DisposeComponentsAsync();
         }
 
         /// <summary>
@@ -221,7 +279,7 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
                 },
             };
 
-            var cut = RenderComponent<Table>(parameters => parameters
+            var cut = Render<Table>(parameters => parameters
                 .Add(p => p.VisualizationOptions, options)
                 .Add(p => p.Columns, QueryColumnFixture.GetColumns())
                 .Add(p => p.ReadOnly, false));
@@ -298,6 +356,12 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
                         Width = 100,
                     }
                 },
+                {
+                    QueryColumnFixture.JsonColumnName, new TableColumnOptions
+                    {
+                        Width = 100,
+                    }
+                },
             };
 
             return columns;
@@ -349,6 +413,12 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
                         Type = QueryResultColumnType.Text,
                     }
                 },
+                {
+                    QueryColumnFixture.JsonColumnName, new QueryResultColumn
+                    {
+                        Type = QueryResultColumnType.Json,
+                    }
+                },
             };
 
             return columns;
@@ -381,6 +451,12 @@ namespace TheGrid.Tests.Client.Shared.Visualizations
                     { QueryColumnFixture.DateTimeColumnName, DateTime.Now.AddDays(_random.Next(-500, 500)) },
                     { QueryColumnFixture.TimeColumnName, TimeSpan.FromSeconds(_random.Next()) },
                     { QueryColumnFixture.TextColumnName, "some text content " + _random.Next() },
+                    {
+                        QueryColumnFixture.JsonColumnName, new Dictionary<string, object?>
+                        {
+                            { "nested-key", "nested-value " + _random.Next() },
+                        }
+                    },
                 };
         }
     }

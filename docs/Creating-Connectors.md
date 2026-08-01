@@ -13,6 +13,14 @@ All connectors must meet the following minimum criteria:
 
 Connectors are discovered automatically by `ConnectorDiscoveryService` — no manual registration step is needed. **Current limitation:** discovery only reflects over the single assembly that defines `IConnector` (`TheGrid.Connectors` itself, via `Assembly.GetAssembly(typeof(IConnector))`) — a connector class must live in that project to be found. A connector defined in a separate assembly is invisible to the platform today.
 
+> **Staleness note (pre-existing, not introduced by the MongoDB connector work):** the walkthrough below still shows the *pre-P1* connector shape in a few places and hasn't been fully updated for the current SDK. Concretely:
+>
+> * Connector constructors now take a single `ConnectorContext context` parameter (`TheGrid.Connectors.ConnectorContext`, a record bundling `Parameters`, `LoggerFactory`, and `HttpClientFactory`) instead of a bare `Dictionary<string, string> connectorParameters` — e.g. `public PostgreSqlConnector(ConnectorContext context) : base(context)`. Connectors are constructed via `IConnectorFactory` (`TheGrid.Services.ConnectorFactory`), not raw reflection.
+> * `IPermissionTest`/`HasWritePermissionAsync` (still described under "Additional capability interfaces" below) were renamed to `TheGrid.Connectors.IWriteAccessProbe`/`HasWriteAccessAsync`.
+> * `IConnectionTest.TestConnectionAsync` now returns `Task<ConnectionTestResult>` (`Success`, `Message`, `Elapsed`) instead of `Task<bool>`, so a failed test can report *why* it failed rather than just that it did.
+>
+> The `MongoDbConnector` example added below uses the current shapes; treat it (and `PostgreSqlConnector.cs`/`MongoDbConnector.cs` themselves) as authoritative over the older Postgres-derived prose above where they disagree. Fully modernizing this document's Postgres walkthrough is tracked as a follow-up, not done here.
+
 ### Define the connector
 
 Rather than inventing a fictional example class, this guide walks through the real `PostgreSqlConnector` (`source/TheGrid.Connectors/PostgreSqlConnector.cs`), which ships with The Grid today. Quoting a real, compiling connector means this guide can't silently drift out of sync the way a hand-written example can — if the excerpts below stop matching the file, the file is the one that's authoritative.
@@ -391,3 +399,75 @@ public async Task<bool> HasWritePermissionAsync(CancellationToken cancellationTo
 ```
 
 Both interfaces are entirely optional — a minimal connector only needs `ConnectorBase` + `GetDataAsync`. Implement whichever capability interfaces make sense for your data source. `ConnectorDiscoveryService` reflects over each connector type at discovery time (`type.ImplementsInterface<ISchemaDiscovery>()`, `type.ImplementsInterface<IConnectionTest>()`) and records the result as `SupportsSchemaDiscovery`/`SupportsConnectionTest` flags on the connector's metadata — there is currently no equivalent discovery-time flag for `IPermissionTest`.
+
+## A second example: MongoDbConnector (a non-relational, current-SDK connector)
+
+Every example above is quoted from `PostgreSqlConnector`, which — being a strongly-schematized relational database queried with a SQL string — doesn't exercise everything the connector SDK supports. `MongoDbConnector` (`source/TheGrid.Connectors/MongoDbConnector.cs`) is a useful second reference specifically because it's a document store with no fixed schema: it shows what `Query.Command` looks like when it isn't a query-language string, how schema discovery works without a catalog to query, and how to correctly represent nested/non-flat data within `ConnectorRow`'s flat shape. It also uses the *current* constructor/interface shapes (see the staleness note above), so treat it as the more up-to-date pattern to copy from.
+
+### Class declaration and parameters
+
+```csharp
+[Connector("MongoDB", IconFileName = "mongodb.png")]
+[ConnectorParameter(CommonConnectionParameters.ConnectionString, "Connection String", ConnectionPropertyType.SingleLineText, Required = true, HelpText = "Standard MongoDB connection string, e.g. mongodb://user:password@host:27017.")]
+[ConnectorParameter(CommonConnectionParameters.Database, "Database", ConnectionPropertyType.SingleLineText, HelpText = "Default database used when a query's command JSON does not specify a 'db' key.")]
+[ConnectorParameter(MongoDbConnector.SchemaSampleSizeParameterKey, "Schema Sample Size", ConnectionPropertyType.Numeric, HelpText = "Number of documents sampled per collection ($sample) when discovering schema. Defaults to 100.")]
+public class MongoDbConnector(ConnectorContext context) : ConnectorBase(context), ISchemaDiscovery, IConnectionTest
+```
+
+Two things worth calling out versus the Postgres example:
+
+* The constructor uses the primary-constructor form (`public class MongoDbConnector(ConnectorContext context) : ConnectorBase(context)`), the pattern this codebase now uses for new manager/connector classes generally.
+* `Database` has no `Required = true` — unlike Postgres, a MongoDB *connection* is naturally cluster/deployment-scoped rather than single-database, so the connector accepts an optional default database and lets each query's command JSON override it with a `db` key (see below). `IWriteAccessProbe` is deliberately not implemented — Mongo's role-based permission model doesn't map onto a single cheap "can I write here" query the way Postgres's `has_table_privilege` does.
+
+### Query.Command as JSON instead of a query-language string
+
+For a SQL connector, `query` (the first parameter to `GetDataAsync`) is naturally a SQL string. MongoDB has no equivalent single query language string that covers both `find()` and `aggregate()`, so `MongoDbConnector` defines `Query.Command` as a JSON object instead, parsed with `MongoDB.Bson.BsonDocument.Parse` (which understands MongoDB Extended JSON — `$oid`, `$date`, etc. — for free, so the connector never hand-rolls that parsing):
+
+```json
+{
+  "collection": "orders",
+  "query": { "status": "shipped" },
+  "sort": { "orderedAt": -1 },
+  "limit": 100
+}
+```
+
+The presence of an `aggregate` key (an array of pipeline stage objects) selects `.Aggregate()` instead of `.Find()`; `count: true` returns a single count row instead of streaming documents; an optional `db` key overrides the connector's default `Database` parameter for that query only. See `openspec/changes/add-mongodb-connector/design.md` (or, once archived, `openspec/specs/mongodb-connector/spec.md`) for the full contract this connector implements. The takeaway for a connector author: `Query.Command`'s *meaning* is entirely up to your connector — a query-language string is the common case, not a requirement of the SDK.
+
+### Schema discovery without a catalog
+
+Postgres's `GetSchemaAsync` queries `information_schema`. MongoDB has no schema catalog to query — a collection's documents can each have a different shape — so `MongoDbConnector.GetSchemaAsync` instead draws a random sample per collection via the `{ $sample: { size: N } }` aggregation stage (`N` from the tunable `SchemaSampleSize` parameter, the same "numeric `[ConnectorParameter]`" pattern `TestConnector` uses for `numberOfRows`) and infers each field's type/presence across that sample:
+
+```csharp
+// For each top-level field observed across the sampled documents:
+//   TypeName            = the BSON type name if consistent across samples, else "Mixed"
+//   Attributes["ObservedTypes"] = set only when TypeName == "Mixed", e.g. "Int32, String"
+//   Attributes["Presence"]      = always set, e.g. "42/60" — fraction of sampled documents containing the field
+// Nested objects/arrays get TypeName "Object"/"Array" with no recursive field enumeration.
+```
+
+Each collection becomes one `DatabaseObject` with `ObjectTypeName = "Collection"` (one of the suggested values already documented on that model). This is a reasonable pattern to copy for any other schemaless/loosely-schematized data source: sample, don't assume a catalog exists.
+
+### Representing nested documents within ConnectorRow's flat shape
+
+`ConnectorRow.Data` is a flat `IReadOnlyDictionary<string, object?>` — one level of key/value pairs. A MongoDB document can nest arbitrarily. Rather than flattening a nested subdocument/array into synthetic `field.subfield`-style columns (which `MongoDbConnector` deliberately does not do), the connector keeps the nested value as-is and tags that column's type as `QueryResultColumnType.Json`:
+
+```csharp
+private static object? ConvertBsonValue(BsonValue value)
+{
+    if (value.IsBsonNull)
+    {
+        return null;
+    }
+
+    return value.BsonType switch
+    {
+        BsonType.Document or BsonType.Array => ToJsonElement(value),
+        BsonType.String => value.AsString,
+        // ... other scalar BSON types map to their natural CLR equivalent; see MongoDbConnector.cs
+        _ => value.ToString(),
+    };
+}
+```
+
+`ToJsonElement` converts the `BsonDocument`/`BsonArray` to a `System.Text.Json.JsonElement` (via `BsonValue.ToJson()` + `JsonDocument.Parse(...).RootElement.Clone()`), since that's the CLR type `TypeExtensions.GetQueryResultColumnTypeForType` already maps to `QueryResultColumnType.Json`. The client-side `Table` visualization renders `Json`-typed cells collapsed by default (`{...}`/`[...]`) with click-to-expand into a tree view — see `TheGrid.Client/Shared/Visualizations/Table.razor` and `JsonTreeView.razor`. The general lesson for connector authors: if your data source has nested/non-flat values, `QueryResultColumnType.Json` plus a CLR `JsonElement` value is the supported way to surface that without inventing a new `ConnectorRow` shape.

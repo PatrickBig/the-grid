@@ -6,7 +6,7 @@ using Hangfire;
 using Hangfire.Redis.StackExchange;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using StackExchange.Redis;
 using Stubble.Core;
 using Stubble.Core.Builders;
@@ -120,11 +120,6 @@ namespace TheGrid.Server
                 {
                     Name = "Authorization",
                     Scheme = "Bearer",
-                    Reference = new OpenApiReference
-                    {
-                        Type = ReferenceType.SecurityScheme,
-                        Id = "Bearer",
-                    },
                     In = ParameterLocation.Header,
                     Description = "ASP.NET Identity token required. Example: \"Bearer {token}\"",
                 });

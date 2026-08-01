@@ -11,14 +11,14 @@ using TheGrid.Data;
 namespace TheGrid.Sqlite.Migrations
 {
     [DbContext(typeof(TheGridDbContext))]
-    [Migration("20260724012611_Initial")]
+    [Migration("20260728013718_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.6");
+            modelBuilder.HasAnnotation("ProductVersion", "10.0.10");
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
@@ -365,7 +365,7 @@ namespace TheGrid.Sqlite.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Tags")
+                    b.PrimitiveCollection<string>("Tags")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
@@ -401,11 +401,14 @@ namespace TheGrid.Sqlite.Migrations
                     b.Property<int>("QueryId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("StandardOutput")
+                    b.PrimitiveCollection<string>("StandardOutput")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Status")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("Truncated")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
@@ -521,6 +524,9 @@ namespace TheGrid.Sqlite.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("SupportsSchemaDiscovery")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("SupportsWriteAccessProbe")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");

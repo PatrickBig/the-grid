@@ -1,5 +1,12 @@
-﻿@inherits VisualizationComponent
+﻿@using System.Text.Json
+@inherits VisualizationComponent
 
+@if (_executionStatus != null && _executionStatus != QueryExecutionStatus.Complete)
+{
+    <RadzenAlert AlertStyle="@GetExecutionAlertStyle(_executionStatus)" Variant="Variant.Flat" AllowClose="false" class="rz-mb-2">
+        @GetExecutionAlertMessage()
+    </RadzenAlert>
+}
 <RadzenDataGrid @ref="_grid"
                 Data="_data"
                 TItem="Dictionary<string, object>"
@@ -27,11 +34,33 @@
                     <RadzenDataGridColumn TItem="Dictionary<string, object>"
                                           Title="@(kv.Value.DisplayName ?? kv.Key)"
                                           Type="@GetTypeForColumnType(valueType)"
-                                          Property="@kv.Key"
+                                          Property="@Radzen.PropertyAccess.GetDynamicPropertyExpression(kv.Key, GetTypeForColumnType(valueType))"
                                           OrderIndex="@kv.Value.DisplayOrder"
                                           Width="@GetWidth(kv.Value)">
                         <Template>
-                            @if (valueType == QueryResultColumnType.Text || kv.Value.DisplayFormat == null)
+                            @if (valueType == QueryResultColumnType.Json)
+                            {
+                                var jsonValue = context[kv.Key];
+
+                                if (jsonValue is JsonElement jsonElement && jsonElement.ValueKind is JsonValueKind.Object or JsonValueKind.Array)
+                                {
+                                    var isExpanded = IsJsonCellExpanded(context, kv.Key);
+
+                                    <div class="json-cell">
+                                        <button type="button" class="json-cell-toggle" @onclick="() => ToggleJsonCell(context, kv.Key)">
+                                            <span class="json-cell-caret">@(isExpanded ? "▾" : "▸")</span>
+                                            <span class="json-cell-summary">@GetJsonCellSummary(jsonElement)</span>
+                                        </button>
+                                        @if (isExpanded)
+                                        {
+                                            <div class="json-cell-tree">
+                                                <JsonTreeView Value="jsonElement" />
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            }
+                            else if (valueType == QueryResultColumnType.Text || kv.Value.DisplayFormat == null)
                             {
                                 @context[kv.Key]
                             }

@@ -48,11 +48,13 @@ namespace TheGrid.Server.Setup
                 using var scope = serviceProvider.CreateScope();
                 var dbContext = scope.ServiceProvider.GetRequiredService<TheGridDbContext>();
                 var groupManager = scope.ServiceProvider.GetRequiredService<IGroupManager>();
+                var organizationManager = scope.ServiceProvider.GetRequiredService<IOrganizationManager>();
                 var userManager = scope.ServiceProvider.GetRequiredService<UserManager<GridUser>>();
 
                 await ApplyDatabaseMigrationsAsync(dbContext);
                 await SetupDefaultGroupsAsync(groupManager);
-                await SetupUsersAsync(groupManager, userManager);
+                var adminUser = await SetupUsersAsync(groupManager, userManager);
+                await SetupDefaultOrganizationAsync(dbContext, organizationManager, groupManager, adminUser);
             }
             catch (Exception ex)
             {
@@ -71,7 +73,7 @@ namespace TheGrid.Server.Setup
             await dbContext.Database.MigrateAsync();
         }
 
-        private async Task SetupUsersAsync(IGroupManager groupManager, UserManager<GridUser> userManager)
+        private async Task<GridUser?> SetupUsersAsync(IGroupManager groupManager, UserManager<GridUser> userManager)
         {
             logger.LogInformation("Seeding default user");
 
@@ -103,12 +105,52 @@ namespace TheGrid.Server.Setup
                     await groupManager.AddUserToGroupAsync(systemAdminGroup.Id, adminUser.Id);
 
                     logger.LogInformation("System administrator was added to the default system admin group.");
+
+                    return adminUser;
                 }
-                else
-                {
-                    logger.LogError("Unable to create System Administrator. Error = {Error}", string.Join(", ", result.Errors));
-                }
+
+                logger.LogError("Unable to create System Administrator. Error = {Error}", string.Join(", ", result.Errors));
+                return null;
             }
+
+            return user;
+        }
+
+        private async Task SetupDefaultOrganizationAsync(TheGridDbContext dbContext, IOrganizationManager organizationManager, IGroupManager groupManager, GridUser? adminUser)
+        {
+            var slug = Environment.GetEnvironmentVariable("DEFAULT_ORGANIZATION_SLUG");
+
+            if (string.IsNullOrWhiteSpace(slug))
+            {
+                // Seeding a default organization is optional; skip it if no slug was configured.
+                return;
+            }
+
+            if (adminUser == null)
+            {
+                logger.LogWarning("Skipping default organization setup because the system administrator could not be resolved.");
+                return;
+            }
+
+            logger.LogInformation("Seeding default organization");
+
+            if (!await dbContext.Organizations.AnyAsync(o => o.Id == slug))
+            {
+                var name = Environment.GetEnvironmentVariable("DEFAULT_ORGANIZATION_NAME") ?? slug;
+
+                logger.LogInformation("Default organization did not exist. Creating '{OrganizationName}' ({OrganizationSlug}).", name, slug);
+
+                await organizationManager.CreateOrganizationAsync(slug, name);
+
+                var defaultGroup = await groupManager.GetGroupByNameAsync(BuiltInGroups.DefaultRole, slug) ?? throw new InvalidOperationException("Default organization's group was not found after creation.");
+
+                await groupManager.AddUserToGroupAsync(defaultGroup.Id, adminUser.Id);
+
+                logger.LogInformation("System administrator was added to the default organization's group.");
+            }
+
+            // Idempotent regardless of whether the organization already existed.
+            await organizationManager.AddUserToOrganizationAsync(slug, adminUser.Id);
         }
 
         private async Task SetupDefaultGroupsAsync(IGroupManager groupManager)

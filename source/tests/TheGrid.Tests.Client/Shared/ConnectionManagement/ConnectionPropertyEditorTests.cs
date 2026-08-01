@@ -12,9 +12,18 @@ namespace TheGrid.Tests.Client.Shared.ConnectionManagement
     /// <summary>
     /// Tests for the <see cref="ConnectionPropertyEditor"/> component.
     /// </summary>
-    public class ConnectionPropertyEditorTests : TestContext
+    public class ConnectionPropertyEditorTests : BunitContext
     {
         private readonly Random _random = new();
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ConnectionPropertyEditorTests"/> class.
+        /// </summary>
+        public ConnectionPropertyEditorTests()
+        {
+            // RadzenFormField performs a JS interop call (Radzen.createFormField) on first render that isn't relevant to these tests.
+            JSInterop.Mode = JSRuntimeMode.Loose;
+        }
 
         /// <summary>
         /// Tests that the connection property editor renders as expected.
@@ -38,7 +47,7 @@ namespace TheGrid.Tests.Client.Shared.ConnectionManagement
             string? propertyKey = null;
             string? textValue = null;
 
-            var cut = RenderComponent<ConnectionPropertyEditor>(properties =>
+            var cut = Render<ConnectionPropertyEditor>(properties =>
             {
                 properties.Add(p => p.ConnectionProperty, connectionProperty);
                 properties.Add(p => p.ValueChanged, x =>
@@ -78,7 +87,7 @@ namespace TheGrid.Tests.Client.Shared.ConnectionManagement
             string? propertyKey = null;
             string? textValue = null;
 
-            var cut = RenderComponent<ConnectionPropertyEditor>(properties =>
+            var cut = Render<ConnectionPropertyEditor>(properties =>
             {
                 properties.Add(p => p.ConnectionProperty, connectionProperty);
                 properties.Add(p => p.ValueChanged, x =>
@@ -112,7 +121,7 @@ namespace TheGrid.Tests.Client.Shared.ConnectionManagement
 
             var existingValue = "existing value " + _random.Next(1, 1000);
 
-            var cut = RenderComponent<ConnectionPropertyEditor>(properties =>
+            var cut = Render<ConnectionPropertyEditor>(properties =>
             {
                 properties.Add(p => p.ConnectionProperty, connectionProperty);
                 properties.Add(p => p.Value, existingValue);
@@ -140,7 +149,7 @@ namespace TheGrid.Tests.Client.Shared.ConnectionManagement
                 Type = ConnectionPropertyType.ProtectedText,
             };
 
-            var cut = RenderComponent<ConnectionPropertyEditor>(properties =>
+            var cut = Render<ConnectionPropertyEditor>(properties =>
             {
                 properties.Add(p => p.ConnectionProperty, connectionProperty);
                 properties.Add(p => p.Value, "this must never be rendered");

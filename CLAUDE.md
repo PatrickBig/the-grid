@@ -53,7 +53,7 @@ or directly:
 ```
 docker-compose -f source/docker-compose.yml -f source/docker-compose.override.yml up
 ```
-The `thegrid.setup` service runs the server with the `/setup` argument to apply migrations and seed the default admin user/group (`DEFAULT_ADMIN_PASSWORD` env var, default `TheGrid123!` in `docker-compose.yml`). `thegrid.setup`/`thegrid.server` both wait on Postgres's healthcheck (`depends_on: condition: service_healthy`) before starting — needed because a fresh/wiped volume takes longer to initialize than a warm one. `RunMode` (`Server`, `Agent`, `Mixed`) in `SystemOptions` controls which services a given process instance runs — see `TheGrid.Server/Program.cs` and `StartupHelpers.cs`.
+The `thegrid.setup` service runs the server with the `/setup` argument to apply migrations and seed the default admin user/group (`DEFAULT_ADMIN_PASSWORD` env var, default `TheGrid123!` in `docker-compose.yml`). It also seeds a default organization and adds the admin to it when `DEFAULT_ORGANIZATION_SLUG` is set (`docker-compose.yml` sets it to `default`, with `DEFAULT_ORGANIZATION_NAME` for the display name) — without it the seeded admin has no organization to select after login. `thegrid.setup`/`thegrid.server` both wait on Postgres's healthcheck (`depends_on: condition: service_healthy`) before starting — needed because a fresh/wiped volume takes longer to initialize than a warm one. `RunMode` (`Server`, `Agent`, `Mixed`) in `SystemOptions` controls which services a given process instance runs — see `TheGrid.Server/Program.cs` and `StartupHelpers.cs`.
 
 CI (`.github/workflows/sonar-scan.yml`) builds and tests the whole solution and uploads coverage/SonarCloud analysis on pushes to `main` and PRs touching `source/**`.
 
@@ -67,7 +67,7 @@ Solution structure (each is its own project under `source/`):
 - **TheGrid.Models** — EF Core entity classes (`GridUser`, `Organization`, `Group`, `GroupPermission`, `Connection`, `Query`, `QueryExecution`, etc.) and configuration POCOs bound from `appsettings.json` (`Configuration/SystemOptions.cs`, `EmailOptions.cs`).
 - **TheGrid.Data** — `TheGridDbContext` (EF Core) and `TheGridContextFactory` (design-time factory used by `dotnet ef`, selects Npgsql vs Sqlite based on `SystemOptions.DatabaseProvider`).
 - **TheGrid.Postgres** / **TheGrid.Sqlite** — Provider-specific EF Core migrations assemblies only. Each contains a `Migrations/` folder and an `Assembly.cs` marker; no other logic belongs here.
-- **TheGrid.Connectors** — Pluggable query runner implementations (`PostgreSqlConnector`, `TestConnector`), discovered via `ConnectorDiscoveryService` (in Services) by reflecting over classes inheriting `ConnectorBase` tagged with `[QueryRunner]`. See `docs/Creating-Connectors.md` for the full guide to adding a new connector (base class, `RunQueryAsync`, `QueryRunnerParameterAttribute`s for connection parameters, optional `ISchemaDiscovery`/`IConnectionTest`/`IPermissionTest`).
+- **TheGrid.Connectors** — Pluggable query runner implementations (`PostgreSqlConnector`, `MongoDbConnector`, `TestConnector`), discovered via `ConnectorDiscoveryService` (in Services) by reflecting over classes inheriting `ConnectorBase` tagged with `[Connector]`. See `docs/Creating-Connectors.md` for the full guide to adding a new connector (base class, `GetDataAsync`, `ConnectorParameterAttribute`s for connection parameters, optional `ISchemaDiscovery`/`IConnectionTest`/`IWriteAccessProbe`).
 - **TheGrid.Shared** — Code shared between server and Blazor client: DTOs/request-response models (`Models/`), permission/claims constants (`Constants/ApplicationPermission.cs`, `GridClaimTypes.cs`, `BuiltInGroups.cs`), and `ClaimsPrincipalExtensions` (e.g. `IsSystemAdministrator()`, `IsMemberOfOrganization()`).
 
 ### Authorization model
@@ -99,3 +99,7 @@ A `Query` targets a `Connection` (which references a connector by name). `QueryE
 - Tests use xunit + NSubstitute (`TheGrid.Tests.*` projects mirror the corresponding source project name) and `Microsoft.EntityFrameworkCore.InMemory` or the Sqlite provider (`TheGrid.TestHelpers/SqliteProvider.cs`) for DB-backed tests rather than a live Postgres instance.
 - `tests/fixtures/*.sql` holds seed data used by connector/integration-style tests.
 - `CodeCoverage.runsettings` (referenced from `Directory.build.props`) configures coverage collection for `dotnet test`.
+
+## Documentation
+
+- Whenever a connector is added, or an existing one's query/schema-discovery behavior changes materially (a new `Query.Command` shape, a new connector parameter, a new capability), create or update its **user-facing** usage doc under `docs/connectors/<ConnectorName>.md` in the same change. Audience is someone writing queries against that connector (query language/JSON contract, available parameters, worked examples) — not someone building a connector (that's `docs/Creating-Connectors.md`) and not the design rationale behind a specific change (that belongs in the change's own OpenSpec `design.md`, not in user-facing docs). This content is written to eventually be surfaced as in-app help; keep it accurate and example-driven rather than narrating implementation history.

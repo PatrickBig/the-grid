@@ -18,7 +18,7 @@ namespace TheGrid.Postgres.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.6")
+                .HasAnnotation("ProductVersion", "10.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -378,7 +378,7 @@ namespace TheGrid.Postgres.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
-                    b.Property<List<string>>("Tags")
+                    b.PrimitiveCollection<List<string>>("Tags")
                         .IsRequired()
                         .HasColumnType("text[]");
 
@@ -416,7 +416,7 @@ namespace TheGrid.Postgres.Migrations
                     b.Property<int>("QueryId")
                         .HasColumnType("integer");
 
-                    b.Property<string[]>("StandardOutput")
+                    b.PrimitiveCollection<string[]>("StandardOutput")
                         .IsRequired()
                         .HasColumnType("text[]");
 
